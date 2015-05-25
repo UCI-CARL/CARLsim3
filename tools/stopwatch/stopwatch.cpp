@@ -20,7 +20,7 @@ public:
 		clear();
 
 		if (startTimer) {
-			start();
+			start("");
 		}
 	}
 
@@ -32,6 +32,7 @@ public:
 		_startTimeMs.clear();
 		_stopTimeMs.clear();
 		_accumTimeMs.clear();
+		_tags.clear();
 	}
 
 	void start(std::string tag) {
@@ -41,6 +42,10 @@ public:
 
 		// start/continue timer
 		_isTimerOn = true;
+		if (tag.length() > 60) {
+			tag = tag.substr(0,60);
+		}
+		_tags.push_back(tag);
 		_startTimeMs.push_back( getCurrentTime() );
 	}
 
@@ -84,7 +89,7 @@ public:
 
 	void split(std::string tag) {
 		stop(false);
-		start();
+		start(tag);
 	}
 
 	uint64_t elapsedTime() const {
