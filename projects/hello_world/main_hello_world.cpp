@@ -42,6 +42,8 @@
 #include <carlsim.h>
 
 int main() {
+	Stopwatch watch;
+
 	// create a network on GPU
 	int ithGPU = 0;
 	int randSeed = 42;
@@ -72,8 +74,13 @@ int main() {
 
 	// run for a total of 10 seconds
 	// at the end of each runNetwork call, SpikeMonitor stats will be printed
-	for (int i=0; i<10; i++)
+	for (int i=0; i<10; i++) {
+		watch.split();
 		sim.runNetwork(1,0);
+	}
+
+
+	watch.stop();
 
 	return 0;
 }

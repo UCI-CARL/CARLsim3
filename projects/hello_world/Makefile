@@ -21,6 +21,7 @@ CARLSIM_FLAGS += -I$(CARLSIM_LIB_DIR)/include/kernel \
 				 -I$(CARLSIM_LIB_DIR)/include/spike_generators \
 				 -I$(CARLSIM_LIB_DIR)/include/visual_stimulus \
 				 -I$(CARLSIM_LIB_DIR)/include/simple_weight_tuner \
+				 -I$(CARLSIM_LIB_DIR)/include/stopwatch \
 				 -I$(CARLSIM_LIB_DIR)/include/group_monitor
 CARLSIM_LIBS  += -L$(CARLSIM_LIB_DIR)/lib -lCARLsim
 
@@ -32,7 +33,7 @@ local_objs :=
 
 output_files += $(local_prog) $(local_objs)
 
-.PHONY: clean distclean
+.PHONY: clean distclean devtest
 # compile from CARLsim lib
 $(local_prog): $(local_src) $(local_objs)
 	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(CARLSIM_LFLAGS) $(CARLSIM_LIBS) $(local_objs) $< -o $@
@@ -43,4 +44,5 @@ clean:
 distclean:
 	$(RM) $(output_files) results/*
 
-devtest: @echo $(CARLSIM_FLAGS)
+devtest:
+	@echo $(CARLSIM_FLAGS)

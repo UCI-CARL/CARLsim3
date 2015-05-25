@@ -60,51 +60,49 @@
 
 // Cross-platform definition (Linux, Windows)
 #if defined(WIN32) || defined(WIN64)
-#include <Windows.h>
+	#include <Windows.h>
 
-#include <algorithm>
-#define fmin (std::min)
-#define fmax (std::max)
+	#include <algorithm>
+	#define fmin (std::min)
+	#define fmax (std::max)
 
-#include <float.h>
-#include <time.h>
+	#include <float.h>
+	#include <time.h>
 
-#ifndef isnan
-#define isnan(x) _isnan(x)
-#endif
+	#ifndef isnan
+	#define isnan(x) _isnan(x)
+	#endif
 
-#ifndef isinf
-#define isinf(x) (!_finite(x))
-#endif
+	#ifndef isinf
+	#define isinf(x) (!_finite(x))
+	#endif
 
-#ifndef srand48
-#define srand48(x) srand(x)
-#endif
+	#ifndef srand48
+	#define srand48(x) srand(x)
+	#endif
 
-#ifndef drand48
-#define drand48() (double(rand())/RAND_MAX)
-#endif
+	#ifndef drand48
+	#define drand48() (double(rand())/RAND_MAX)
+	#endif
 
-#ifdef _MSC_VER
-#define INFINITY (DBL_MAX+DBL_MAX)
-#define NAN (INFINITY-INFINITY)
-#endif
-
+	#ifdef _MSC_VER
+	#define INFINITY (DBL_MAX+DBL_MAX)
+	#define NAN (INFINITY-INFINITY)
+	#endif
 #else
-#include <interactive_spikegen.h>
-#include <pre_post_group_spikegen.h>
-#include <periodic_spikegen.h>
-#include <spikegen_from_file.h>
-#include <spikegen_from_vector.h>
-#include <simple_weight_tuner.h>
-#include <visual_stimulus.h>
+	#include <interactive_spikegen.h>
+	#include <pre_post_group_spikegen.h>
+	#include <periodic_spikegen.h>
+	#include <spikegen_from_file.h>
+	#include <spikegen_from_vector.h>
+	#include <simple_weight_tuner.h>
+	#include <visual_stimulus.h>
+ 	#include <stopwatch.h>
 
-#include <pthread.h>
+	#include <pthread.h>
 #endif
 
 // \TODO: complete documentation
-
-
 
 
 class CpuSNN; // forward-declaration of implementation

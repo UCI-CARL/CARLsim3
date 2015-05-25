@@ -97,6 +97,7 @@ CARLsim::CARLsim(const std::string& netName, simMode_t simMode, loggerMode_t log
 	hasSetConductances_			= false;
 	carlsimState_				= CONFIG_STATE;
 
+
 	snn_ = NULL;
 
 	CARLsimInit(); // move everything else out of constructor
