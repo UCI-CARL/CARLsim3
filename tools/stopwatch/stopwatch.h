@@ -50,15 +50,11 @@ public:
 	 */
 	void stop(bool printMessage = true);
 
-	void split(std::string tag = "");
+	void lap(std::string tag = "");
 
-	/*!
-	 * \brief returns elapsed time in ms (since start) but keeps the clock running
-	 *
-	 * Add details
-	 */
-	uint64_t elapsedTime() const;
+	uint64_t getLapTime(const std::string& tag) const;
 
+	uint64_t getLapTime(int index) const;
 
 private:
 	class Impl;

@@ -1,6 +1,7 @@
 #include "stopwatch.h"
 
 #include <stdio.h>
+#include <algorithm>		// std::find
 
 // ****************************************************************************************************************** //
 // STOPWATCH UTILITY PRIVATE IMPLEMENTATION
@@ -20,7 +21,7 @@ public:
 		clear();
 
 		if (startTimer) {
-			start("");
+			start("start");
 		}
 	}
 
@@ -42,9 +43,9 @@ public:
 
 		// start/continue timer
 		_isTimerOn = true;
-		if (tag.length() > 60) {
-			tag = tag.substr(0,60);
-		}
+		// if (tag.length() > 60) {
+		// 	tag = tag.substr(0,60);
+		// }
 		_tags.push_back(tag);
 		_startTimeMs.push_back( getCurrentTime() );
 	}
@@ -65,11 +66,10 @@ public:
 				totalMs += *j;
 			}
 
-			printf("--------------------------------------------------------------\n");
-			printf("| Stopwatch                                                  |\n");
-			printf("|------------------------------------------------------------|\n");
-
-			printf("| Start\t\tStop\t\tLap\t\tTotal        |\n");
+			printf("\n------------------------------------------------------------------------\n");
+			printf("| Stopwatch                                                            |\n");
+			printf("|----------------------------------------------------------------------|\n");
+			printf("|          Tag         Start          Stop           Lap         Total |\n");
 			uint64_t totalMsSoFar = 0;
 			for (int i=0; i<_accumTimeMs.size(); i++) {
 				totalMsSoFar += _accumTimeMs[i];
@@ -77,27 +77,40 @@ public:
 				uint64_t stopMs = _stopTimeMs[i] - _startTimeMs[0];
 				uint64_t accumMs = _accumTimeMs[i];
 
-				printf("| %02lu:%02lu:%02lu.%03lu\t%02lu:%02lu:%02lu.%03lu\t%02lu:%02lu:%02lu.%03lu\t%02lu:%02lu:%02lu.%03lu |\n", 
+				printf("| %12.12s  %02lu:%02lu:%02lu.%03lu  %02lu:%02lu:%02lu.%03lu  %02lu:%02lu:%02lu.%03lu "
+					" %02lu:%02lu:%02lu.%03lu |\n",
+					_tags[i].c_str(),
 					startMs/3600000, (startMs/1000/60)%60, (startMs/1000)%60, startMs%1000,
 					stopMs/3600000, (stopMs/1000/60)%60, (stopMs/1000)%60, stopMs%1000,
 					accumMs/3600000, (accumMs/1000/60)%60, (accumMs/1000)%60, accumMs%1000,
 					totalMsSoFar/3600000, (totalMsSoFar/1000/60)%60, (totalMsSoFar/1000)%60, totalMsSoFar%1000);
 			}
-			printf("--------------------------------------------------------------\n");
+			printf("------------------------------------------------------------------------\n");
 		}
 	}
 
-	void split(std::string tag) {
+	void lap(std::string tag) {
 		stop(false);
 		start(tag);
 	}
 
-	uint64_t elapsedTime() const {
-		if (!_isTimerOn) {
-			// error
+	uint64_t getLapTime(const std::string& tag) const {
+		// std::vector<uint64_t>::const_iterator found = std::find(_accumTimeMs.begin(), _accumTimeMs.end(), tag);
+		// if (found != _accumTimeMs.end()) {
+		// 	return *found;
+		// } else {
+		// 	// warning
+		// 	return 0;
+		// }
+	}
+
+	uint64_t getLapTime(int index) {
+		if (index < _accumTimeMs.size()) {
+			return _accumTimeMs[index];
+		} else {
+			// warning
+			return 0;
 		}
-		return 0;
-//		return (getCurrentTime() - _startTimeMs);
 	}
 
 private:
@@ -162,5 +175,7 @@ Stopwatch::~Stopwatch() { delete _impl; }
 
 void Stopwatch::start(std::string tag) { _impl->start(tag); }
 void Stopwatch::stop(bool printMessage) { _impl->stop(printMessage); }
-void Stopwatch::split(std::string tag) { _impl->split(tag); }
-uint64_t Stopwatch::elapsedTime() const { return _impl->elapsedTime(); }
+void Stopwatch::lap(std::string tag) { _impl->lap(tag); }
+
+uint64_t Stopwatch::getLapTime(const std::string& tag) const { return _impl->getLapTime(tag); }
+uint64_t Stopwatch::getLapTime(int index) const { return _impl->getLapTime(index); }
