@@ -106,8 +106,8 @@ short int CpuSNN::connect(int grpId1, int grpId2, const std::string& _type, floa
 //      | SET_INITWTS_RAMPDOWN(useRampDownWts);
 	uint32_t connProp = SET_CONN_PRESENT(1) | SET_FIXED_PLASTIC(synWtType);
 
-	Grid3D szPre = getGroupGrid3D(grpId1);
-	Grid3D szPost = getGroupGrid3D(grpId2);
+//	Grid3D szPre = getGroupGrid3D(grpId1);
+//	Grid3D szPost = getGroupGrid3D(grpId2);
 
 	grpConnectInfo_t* newInfo = (grpConnectInfo_t*) calloc(1, sizeof(grpConnectInfo_t));
 	newInfo->grpSrc   		  = grpId1;
@@ -1037,7 +1037,7 @@ ConnectionMonitor* CpuSNN::setConnectionMonitor(int grpIdPre, int grpIdPost, FIL
 void CpuSNN::setExternalCurrent(int grpId, const std::vector<float>& current) {
 	assert(grpId>=0); assert(grpId<numGrp);
 	assert(!isPoissonGroup(grpId));
-	assert(current.size() == getGroupNumNeurons(grpId));
+	assert(current.size() == (unsigned int)getGroupNumNeurons(grpId));
 
 	// // update flag for faster handling at run-time
 	// if (count_if(current.begin(), current.end(), isGreaterThanZero)) {
@@ -1185,8 +1185,8 @@ void CpuSNN::setWeight(short int connId, int neurIdPre, int neurIdPost, float we
 	int pos_ij = cumulativePre[neurIdPostReal];
 	for (int j=0; j<Npre[neurIdPostReal]; pos_ij++, j++) {
 		post_info_t* preId = &preSynapticIds[pos_ij];
-		int pre_nid = GET_CONN_NEURON_ID((*preId));
-		if (GET_CONN_NEURON_ID((*preId))==neurIdPreReal) {
+//		int pre_nid = GET_CONN_NEURON_ID((*preId));
+		if (GET_CONN_NEURON_ID((*preId))==(unsigned int)neurIdPreReal) {
 			assert(cumConnIdPre[pos_ij]==connId); // make sure we've got the right connection ID
 
 			wt[pos_ij] = isExcitatoryGroup(connInfo->grpSrc) ? weight : -1.0*weight;
@@ -1275,7 +1275,7 @@ void CpuSNN::saveSimulation(FILE* fid, bool saveSynapseInfo) {
 
 	// \FIXME: replace with faster version
 	if (saveSynapseInfo) {
-		for (unsigned int i=0;i<numN;i++) {
+		for (int i=0;i<numN;i++) {
 			unsigned int offset = cumulativePost[i];
 
 			unsigned int count = 0;
@@ -1298,7 +1298,7 @@ void CpuSNN::saveSimulation(FILE* fid, bool saveSynapseInfo) {
 					// get neuron id
 					//int p_i = (post_info&POST_SYN_NEURON_MASK);
 					unsigned int p_i = GET_CONN_NEURON_ID(post_info);
-					assert(p_i<numN);
+					assert(p_i<(unsigned int)numN);
 
 					// get syn id
 					unsigned int s_i = GET_CONN_SYN_ID(post_info);
@@ -1331,7 +1331,7 @@ void CpuSNN::writePopWeights(std::string fname, int grpIdPre, int grpIdPost) {
 	float* weights;
 	int matrixSize;
 	FILE* fid;
-	int numPre, numPost;
+//	int numPre, numPost;
 	fid = fopen(fname.c_str(), "wb");
 	assert(fid != NULL);
 
@@ -1344,8 +1344,8 @@ void CpuSNN::writePopWeights(std::string fname, int grpIdPre, int grpIdPost) {
 	int pre_nid, pos_ij;
 
 	//population sizes
-	numPre = grp_Info[grpIdPre].SizeN;
-	numPost = grp_Info[grpIdPost].SizeN;
+//	numPre = grp_Info[grpIdPre].SizeN;
+//	numPost = grp_Info[grpIdPost].SizeN;
 
 	//first iteration gets the number of synaptic weights to place in our
 	//weight matrix.
@@ -1576,10 +1576,10 @@ uint8_t* CpuSNN::getDelays(int gIDpre, int gIDpost, int& Npre, int& Npost, uint8
 
 				if (p_i >= grp_Info[gIDpost].StartN && p_i <= grp_Info[gIDpost].EndN) {
 					// get syn id
-					int s_i = GET_CONN_SYN_ID(post_info);
+//					int s_i = GET_CONN_SYN_ID(post_info);
 
 					// get the cumulative position for quick access...
-					unsigned int pos_i = cumulativePre[p_i] + s_i;
+//					unsigned int pos_i = cumulativePre[p_i] + s_i;
 
 					delays[i+Npre*(p_i-grp_Info[gIDpost].StartN)] = t+1;
 				}
@@ -1691,7 +1691,7 @@ Point3D CpuSNN::getNeuronLocation3D(int grpId, int relNeurId) {
 
 // returns the number of synaptic connections associated with this connection.
 int CpuSNN::getNumSynapticConnections(short int connectionId) {
-  grpConnectInfo_t* connInfo;
+//  grpConnectInfo_t* connInfo;
   grpConnectInfo_t* connIterator = connectBegin;
   while(connIterator){
     if(connIterator->connId == connectionId){
@@ -1704,6 +1704,7 @@ int CpuSNN::getNumSynapticConnections(short int connectionId) {
   //we didn't find the connection.
   KERNEL_ERROR("Connection ID was not found.  Quitting.");
   exitSimulation(1);
+  return -1;
 }
 
 // return spike buffer, which contains #spikes per neuron in the group
@@ -2128,12 +2129,12 @@ void CpuSNN::buildNetworkInit() {
 		postSynCnt += (grp_Info[g].SizeN * grp_Info[g].numPostSynapses);
 		preSynCnt  += (grp_Info[g].SizeN * grp_Info[g].numPreSynapses);
 	}
-	assert(postSynCnt/numN <= numPostSynapses_); // divide by numN to prevent INT overflow
+	assert(postSynCnt/numN <= (unsigned int)numPostSynapses_); // divide by numN to prevent INT overflow
 	postSynapticIds		= new post_info_t[postSynCnt+100];
 	tmp_SynapticDelay	= new uint8_t[postSynCnt+100];	//!< Temporary array to store the delays of each connection
 	postDelayInfo		= new delay_info_t[numN*(maxDelay_+1)];	//!< Possible delay values are 0....maxDelay_ (inclusive of maxDelay_)
 	cpuSnnSz.networkInfoSize += ((sizeof(post_info_t)+sizeof(uint8_t))*postSynCnt+100)+(sizeof(delay_info_t)*numN*(maxDelay_+1));
-	assert(preSynCnt/numN <= numPreSynapses_); // divide by numN to prevent INT overflow
+	assert(preSynCnt/numN <= (unsigned int)numPreSynapses_); // divide by numN to prevent INT overflow
 
 	wt  			= new float[preSynCnt+100];
 	maxSynWt     	= new float[preSynCnt+100];
@@ -2218,7 +2219,7 @@ void CpuSNN::buildGroup(int grpId) {
 	resetNeuromodulator(grpId);
 
 	allocatedN = allocatedN + grp_Info[grpId].SizeN;
-	assert(allocatedN <= numN);
+	assert(allocatedN <= (unsigned int)numN);
 
 	for(int i=grp_Info[grpId].StartN; i <= grp_Info[grpId].EndN; i++) {
 		resetNeuron(i, grpId);
@@ -2416,7 +2417,7 @@ void CpuSNN::buildPoissonGroup(int grpId) {
 				grpId, grp_Info2[grpId].Name.c_str(), grp_Info[grpId].StartN, grp_Info[grpId].EndN);
 
 	allocatedN = allocatedN + grp_Info[grpId].SizeN;
-	assert(allocatedN <= numN);
+	assert(allocatedN <= (unsigned int)numN);
 
 	for(int i=grp_Info[grpId].StartN; i <= grp_Info[grpId].EndN; i++) {
 		resetPoissonNeuron(i, grpId);
@@ -2815,7 +2816,8 @@ void CpuSNN::doD2CurrentUpdate() {
 		int i  = firingTableD2[k];
 
 		// find the time of firing from the timeTable using index k
-		while (!((k >= timeTableD2[t_pos+maxDelay_])&&(k < timeTableD2[t_pos+maxDelay_+1]))) {
+		while (!(((unsigned int)k >= timeTableD2[t_pos+maxDelay_]) 
+			&& ((unsigned int)k < timeTableD2[t_pos+maxDelay_+1]))) {
 			t_pos = t_pos - 1;
 			assert((t_pos+maxDelay_-1)>=0);
 		}
@@ -3008,6 +3010,7 @@ int CpuSNN::findGrpId(int nid) {
 	}
 	KERNEL_ERROR("findGrp(): cannot find the group for neuron %d", nid);
 	exitSimulation(1);
+	return -1;
 }
 
 void CpuSNN::findMaxNumSynapses(int* numPostSynapses, int* numPreSynapses) {
@@ -3031,7 +3034,7 @@ void CpuSNN::generatePostSpike(unsigned int pre_i, unsigned int idx_d, unsigned 
 
 	// get post-neuron id
 	unsigned int post_i = GET_CONN_NEURON_ID(post_info);
-	assert(post_i<numN);
+	assert(post_i<(unsigned int)numN);
 
 	// get syn id
 	int s_i = GET_CONN_SYN_ID(post_info);
@@ -3039,7 +3042,7 @@ void CpuSNN::generatePostSpike(unsigned int pre_i, unsigned int idx_d, unsigned 
 
 	// get the cumulative position for quick access
 	unsigned int pos_i = cumulativePre[post_i] + s_i;
-	assert(post_i < numNReg); // \FIXME is this assert supposed to be for pos_i?
+	assert(post_i < (unsigned int)numNReg); // \FIXME is this assert supposed to be for pos_i?
 
 	// get group id of pre- / post-neuron
 	short int post_grpId = grpIds[post_i];
@@ -3201,7 +3204,8 @@ void CpuSNN::generateSpikesFromFuncPtr(int grpId) {
 			//    - but careful: we would drop spikes at t=0, because we cannot initialize nextTime to -1...
 			// - it is within the scheduling time slice (nextSchedTime < endOfTimeWindow)
 			// - it is not in the past (nextSchedTime >= currTime)
-			if ((nextSchedTime==0 || nextSchedTime>nextTime) && nextSchedTime<endOfTimeWindow && nextSchedTime>=currTime) {
+			if ((nextSchedTime==0 || nextSchedTime>nextTime) && (nextSchedTime<endOfTimeWindow)
+				&& (nextSchedTime>=currTime)) {
 //				fprintf(stderr,"%u: spike scheduled for %d at %u\n",currTime, i-grp_Info[grpId].StartN,nextSchedTime);
 				// scheduled spike...
 				// \TODO CPU mode does not check whether the same AER event has been scheduled before (bug #212)
@@ -3550,7 +3554,7 @@ double CpuSNN::getRFDist3D(const RadiusRF& radius, const Point3D& pre, const Poi
 	// x = pre.x-post.x, y = pre.y-post.y, z = pre.z-post.z
 	// x < 0 means:  connect if y and z satisfy some constraints, but ignore x
 	// x == 0 means: connect if y and z satisfy some constraints, and enforce pre.x == post.x
-	if (radius.radX==0 && pre.x!=post.x || radius.radY==0 && pre.y!=post.y || radius.radZ==0 && pre.z!=post.z) {
+	if ((radius.radX==0 && pre.x!=post.x) || (radius.radY==0 && pre.y!=post.y) || (radius.radZ==0 && pre.z!=post.z)) {
 		rfDist = -1.0;
 	} else {
 		// 3D ellipsoid: x^2/a^2 + y^2/b^2 + z^2/c^2 <= 1.0
@@ -3706,7 +3710,7 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 	// read number of pre-synapses
 	result = fread(&tmpInt, sizeof(int), 1, loadSimFID);
 	readErr |= (result!=1);
-	if (preSynCnt != tmpInt) {
+	if (preSynCnt != (unsigned int)tmpInt) {
 		KERNEL_ERROR("loadSimulation: preSynCnt in file (%d) and simulation (%d) don't match.",
 			tmpInt, preSynCnt);
 		exitSimulation(-1);
@@ -3715,7 +3719,7 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 	// read number of post-synapses
 	result = fread(&tmpInt, sizeof(int), 1, loadSimFID);
 	readErr |= (result!=1);
-	if (postSynCnt != tmpInt) {
+	if (postSynCnt != (unsigned int)tmpInt) {
 		KERNEL_ERROR("loadSimulation: postSynCnt in file (%d) and simulation (%d) don't match.",
 			tmpInt, postSynCnt);
 		exitSimulation(-1);
@@ -3789,7 +3793,7 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 
 	// ------- read synapse information ----------------
 
-	for (unsigned int i=0; i<numN; i++) {
+	for (int i=0; i<numN; i++) {
 		int nrSynapses = 0;
 
 		// read number of synapses
@@ -3807,7 +3811,7 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 			// read nIDpre
 			result = fread(&nIDpre, sizeof(int), 1, loadSimFID);
 			readErr |= (result!=1);
-			if (nIDpre != i) {
+			if (nIDpre != (unsigned int)i) {
 				KERNEL_ERROR("loadSimulation: nIDpre in file (%u) and simulation (%u) don't match.", nIDpre, i);
 				exitSimulation(-1);
 			}
@@ -3815,7 +3819,7 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 			// read nIDpost
 			result = fread(&nIDpost, sizeof(int), 1, loadSimFID);
 			readErr |= (result!=1);
-			if (nIDpost >= numN) {
+			if (nIDpost >= (unsigned int)numN) {
 				KERNEL_ERROR("loadSimulation: nIDpre in file (%u) is larger than in simulation (%u).", nIDpost, numN);
 				exitSimulation(-1);
 			}
@@ -3825,8 +3829,8 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 			readErr |= (result!=1);
 
 			short int gIDpre = grpIds[nIDpre];
-			if (IS_INHIBITORY_TYPE(grp_Info[gIDpre].Type) && (weight>0)
-					|| !IS_INHIBITORY_TYPE(grp_Info[gIDpre].Type) && (weight<0)) {
+			if ((IS_INHIBITORY_TYPE(grp_Info[gIDpre].Type) && (weight>0))
+					|| (!IS_INHIBITORY_TYPE(grp_Info[gIDpre].Type) && (weight<0))) {
 				KERNEL_ERROR("loadSimulation: Sign of weight value (%s) does not match neuron type (%s)",
 					((weight>=0.0f)?"plus":"minus"), 
 					(IS_INHIBITORY_TYPE(grp_Info[gIDpre].Type)?"inhibitory":"excitatory"));
@@ -3836,8 +3840,8 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 			// read max weight
 			result = fread(&maxWeight, sizeof(float), 1, loadSimFID);
 			readErr |= (result!=1);
-			if (IS_INHIBITORY_TYPE(grp_Info[gIDpre].Type) && (maxWeight>=0)
-					|| !IS_INHIBITORY_TYPE(grp_Info[gIDpre].Type) && (maxWeight<=0)) {
+			if ((IS_INHIBITORY_TYPE(grp_Info[gIDpre].Type) && (maxWeight>=0))
+					|| (!IS_INHIBITORY_TYPE(grp_Info[gIDpre].Type) && (maxWeight<=0))) {
 				KERNEL_ERROR("loadSimulation: Sign of maxWeight value (%s) does not match neuron type (%s)",
 					((maxWeight>=0.0f)?"plus":"minus"), 
 					(IS_INHIBITORY_TYPE(grp_Info[gIDpre].Type)?"inhibitory":"excitatory"));
@@ -4083,7 +4087,7 @@ void CpuSNN::resetNeuromodulator(int grpId) {
 }
 
 void CpuSNN::resetNeuron(unsigned int neurId, int grpId) {
-	assert(neurId < numNReg);
+	assert(neurId < (unsigned int)numNReg);
     if (grp_Info2[grpId].Izh_a == -1) {
 		KERNEL_ERROR("setNeuronParameters must be called for group %s (%d)",grp_Info2[grpId].Name.c_str(),grpId);
 		exitSimulation(1);
@@ -4135,14 +4139,14 @@ void CpuSNN::resetPointers(bool deallocate) {
 
 	// delete all SpikeMonitor objects
 	// don't kill SpikeMonitorCore objects, they will get killed automatically
-	for (int i=0; i<numSpikeMonitor; i++) {
+	for (unsigned int i=0; i<numSpikeMonitor; i++) {
 		if (spikeMonList[i]!=NULL && deallocate) delete spikeMonList[i];
 		spikeMonList[i]=NULL;
 	}
 
 	// delete all GroupMonitor objects
 	// don't kill GroupMonitorCore objects, they will get killed automatically
-	for (int i=0; i<numGroupMonitor; i++) {
+	for (unsigned int i=0; i<numGroupMonitor; i++) {
 		if (groupMonList[i]!=NULL && deallocate) delete groupMonList[i];
 		groupMonList[i]=NULL;
 	}
@@ -4285,7 +4289,7 @@ void CpuSNN::resetPointers(bool deallocate) {
 
 
 void CpuSNN::resetPoissonNeuron(unsigned int nid, int grpId) {
-	assert(nid < numN);
+	assert(nid < (unsigned int)numN);
 	lastSpikeTime[nid]  = MAX_SIMULATION_TIME;
 	if (grp_Info[grpId].WithHomeostasis)
 		avgFiring[nid]      = 0.0;
@@ -4293,8 +4297,8 @@ void CpuSNN::resetPoissonNeuron(unsigned int nid, int grpId) {
 	if(grp_Info[grpId].WithSTP) {
 		for (int j=0; j<=maxDelay_; j++) { // is of size maxDelay_+1
 			int ind = STP_BUF_POS(nid,j);
-			stpu[nid] = 0.0f;
-			stpx[nid] = 1.0f;
+			stpu[ind] = 0.0f;
+			stpx[ind] = 1.0f;
 		}
 	}
 }
@@ -4450,7 +4454,7 @@ inline void CpuSNN::setConnection(int srcGrp,  int destGrp,  unsigned int src, u
 
 	assert(Npost[src] >= 0);
 	assert(Npre[dest] >= 0);
-	assert((src * numPostSynapses_ + p) / numN < numPostSynapses_); // divide by numN to prevent INT overflow
+	assert((src*numPostSynapses_+p)/numN < (unsigned int)numPostSynapses_); // divide by numN to prevent INT overflow
 
 	unsigned int post_pos = cumulativePost[src] + Npost[src];
 	unsigned int pre_pos  = cumulativePre[dest] + Npre[dest];
@@ -4622,7 +4626,7 @@ void CpuSNN::updateConnectionMonitor(short int connId) {
 	for (int monId=0; monId<numConnectionMonitor; monId++) {
 		if (connId==ALL || connMonCoreList[monId]->getConnectId()==connId) {
 			int timeInterval = connMonCoreList[monId]->getUpdateTimeIntervalSec();
-			if (timeInterval==1 || timeInterval>1 && (getSimTime()%timeInterval)==0) {
+			if (timeInterval==1 || (timeInterval>1 && (getSimTime()%timeInterval)==0)) {
 				// this ConnectionMonitor wants periodic recording
 				connMonCoreList[monId]->writeConnectFileSnapshot(simTime,
 					getWeightMatrix2D(connMonCoreList[monId]->getConnectId()));
@@ -4765,7 +4769,7 @@ void CpuSNN::updateGroupMonitor(int grpId) {
 void CpuSNN::updateSpikesFromGrp(int grpId) {
 	assert(grp_Info[grpId].isSpikeGenerator==true);
 
-	bool done;
+//	bool done;
 	//static FILE* _fp = fopen("spikes.txt", "w");
 	unsigned int currTime = simTime;
 
@@ -4807,7 +4811,7 @@ void CpuSNN::updateSpikeGenerators() {
 }
 
 void CpuSNN::updateSpikeGeneratorsInit() {
-	int cnt=0;
+	unsigned int cnt=0;
 	for(int g=0; (g < numGrp); g++) {
 		if (grp_Info[g].isSpikeGenerator) {
 			// This is done only during initialization
@@ -4867,7 +4871,8 @@ int CpuSNN::updateSpikeTables() {
 			maxSpikesD2 += (grp_Info[g].SizeN * grp_Info[g].MaxFiringRate);
 	}
 
-	if ((maxSpikesD1 + maxSpikesD2) < (numNExcReg + numNInhReg + numNPois) * UNKNOWN_NEURON_MAX_FIRING_RATE) {
+	if ((maxSpikesD1 + maxSpikesD2) < (unsigned int) (numNExcReg + numNInhReg + numNPois)
+		 * UNKNOWN_NEURON_MAX_FIRING_RATE) {
 		KERNEL_ERROR("Insufficient amount of buffer allocated...");
 		exitSimulation(1);
 	}
@@ -4884,7 +4889,7 @@ int CpuSNN::updateSpikeTables() {
 void CpuSNN::updateFiringTable() {
 	// Read the neuron ids that fired in the last maxDelay_ seconds
 	// and put it to the beginning of the firing table...
-	for(int p=timeTableD2[999],k=0;p<timeTableD2[999+maxDelay_+1];p++,k++) {
+	for(unsigned int p=timeTableD2[999],k=0;p<timeTableD2[999+maxDelay_+1];p++,k++) {
 		firingTableD2[k]=firingTableD2[p];
 	}
 
@@ -5005,7 +5010,7 @@ void CpuSNN::updateSpikeMonitor(int grpId) {
 			unsigned int* timeTablePtr = (k==0)?timeTableD2:timeTableD1;
 			unsigned int* fireTablePtr = (k==0)?firingTableD2:firingTableD1;
 			for(int t=numMsMin; t<numMsMax; t++) {
-				for(int i=timeTablePtr[t+maxDelay_]; i<timeTablePtr[t+maxDelay_+1];i++) {
+				for(unsigned int i=timeTablePtr[t+maxDelay_]; i<timeTablePtr[t+maxDelay_+1];i++) {
 					// retrieve the neuron id
 					int nid   = fireTablePtr[i];
 					if (simMode_ == GPU_MODE)

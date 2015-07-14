@@ -64,7 +64,13 @@ Release 3.0
 Build 3.0.2
 ---------------------
 
-2015-07-04:    Kristofor D. Carlson <kdcarlso@uci.edu>
+2015-07-14     Michael Beyeler <mbeyeler@uci.edu>
+  * Fixed ln -T compilation issues for Mac OS X.
+  * Fixed most compiler warnings for CARLsim kernel.
+  * Fixed std::pow issue for C++11 in snn_gpu.cu.
+  * Fixed outcome of test Interface.setNeuronParametersDeath.
+
+2015-07-04     Kristofor D. Carlson <kdcarlso@uci.edu>
   * Changed USER_MK_PATH default path value (. instead of ./). Users
 	  should not have a slash at the end of their USER_MK_PATH variable.
 	- Removed assertions that forced Izh parameters to be positive.

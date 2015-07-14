@@ -39,9 +39,9 @@ install: $(carlsim_lib)
 	@test -d $(CARLSIM_LIB_DIR)/include/visual_stimulus || mkdir \
 		$(CARLSIM_LIB_DIR)/include/visual_stimulus
 	@install -m 0755 $(carlsim_lib).$(lib_ver) $(CARLSIM_LIB_DIR)/lib
-	@ln -Tfs $(CARLSIM_LIB_DIR)/lib/$(lib_name).$(lib_ver) \
+	@ln -fs $(CARLSIM_LIB_DIR)/lib/$(lib_name).$(lib_ver) \
 		$(CARLSIM_LIB_DIR)/lib/$(lib_name).$(num_ver)
-	@ln -Tfs $(CARLSIM_LIB_DIR)/lib/$(lib_name).$(num_ver) \
+	@ln -fs $(CARLSIM_LIB_DIR)/lib/$(lib_name).$(num_ver) \
 		$(CARLSIM_LIB_DIR)/lib/$(lib_name)
 	@install -m 0644 $(kernel_dir)/include/cuda_version_control.h \
 		$(kernel_dir)/include/snn_definitions.h \

@@ -2757,7 +2757,7 @@ void CpuSNN::allocateSNN_GPU() {
 
 	// display some memory management info
 	size_t avail, total, previous;
-	float toGB = std::pow(1024.0f,3);
+	float toGB = std::pow(1024.0f,3.0f);
 	cudaMemGetInfo(&avail,&total);
 	KERNEL_INFO("GPU Memory Management: (Total %2.3f GB)",(float)(total/toGB));
 	KERNEL_INFO("Data\t\t\tSize\t\tTotal Used\tTotal Available");

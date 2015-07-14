@@ -88,7 +88,7 @@ ifeq (${strip ${CUDA_MAJOR_NUM}},1)
 endif
 
 # add CUDA version to compile flags
-CARLSIM_FLAGS += -D__CUDA$(CARLSIM_CUDAVER)__
+CARLSIM_FLAGS += -D__CUDA$(CARLSIM_CUDAVER)__ --compiler-options -Wunused-variable
 
 # load appropriate CUDA flags
 ifneq (,$(filter $(CARLSIM_CUDAVER),3 4))
@@ -113,7 +113,7 @@ endif
 
 # set debug flag
 ifeq ($(strip $(CARLSIM_DEBUG)),1)
-
+	CARLSIM_FLAGS += --compiler-options -Wall
 endif
 
 # location of .h files
