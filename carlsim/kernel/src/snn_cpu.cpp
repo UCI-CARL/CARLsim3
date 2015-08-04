@@ -3710,8 +3710,8 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 	// read number of pre-synapses
 	result = fread(&tmpInt, sizeof(int), 1, loadSimFID);
 	readErr |= (result!=1);
-	if (preSynCnt != (unsigned int)tmpInt) {
-		KERNEL_ERROR("loadSimulation: preSynCnt in file (%d) and simulation (%d) don't match.",
+	if (preSynCnt < (unsigned int)tmpInt) {
+		KERNEL_ERROR("loadSimulation: preSynCnt in file (%d) should not be larger than preSynCnt in the config state (%d).",
 			tmpInt, preSynCnt);
 		exitSimulation(-1);
 	}
@@ -3719,8 +3719,8 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 	// read number of post-synapses
 	result = fread(&tmpInt, sizeof(int), 1, loadSimFID);
 	readErr |= (result!=1);
-	if (postSynCnt != (unsigned int)tmpInt) {
-		KERNEL_ERROR("loadSimulation: postSynCnt in file (%d) and simulation (%d) don't match.",
+	if (postSynCnt < (unsigned int)tmpInt) {
+		KERNEL_ERROR("loadSimulation: postSynCnt in file (%d) and not be larger than preSysnCnt in the config state (%d).",
 			tmpInt, postSynCnt);
 		exitSimulation(-1);
 	}
