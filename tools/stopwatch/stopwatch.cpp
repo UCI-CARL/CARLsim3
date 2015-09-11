@@ -117,7 +117,7 @@ private:
 	// +++++ PRIVATE METHODS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
 	uint64_t getCurrentTime() const {
-	#ifdef _WIN32
+	#if defined(WIN32) || defined(WIN64)
 		/* Windows */
 		FILETIME ft;
 		LARGE_INTEGER li;
