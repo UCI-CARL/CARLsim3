@@ -41,6 +41,10 @@
 // include CARLsim user interface
 #include <carlsim.h>
 
+#if defined(WIN32) || defined(WIN64)
+#include <stopwatch.h>
+#endif
+
 int main() {
 	// keep track of execution time
 	Stopwatch watch;

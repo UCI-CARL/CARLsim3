@@ -1,7 +1,7 @@
 #ifndef STOPWATCH_H
 #define STOPWATCH_H
 
-#ifdef WIN32
+#if defined(WIN32) || defined(WIN64)
 	#include <Windows.h>
 #else
 	#include <sys/time.h>
