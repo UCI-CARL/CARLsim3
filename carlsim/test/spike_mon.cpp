@@ -27,8 +27,14 @@ TEST(setSpikeMon, grpId){
 	CARLsim* sim;
 	const int GRP_SIZE = 10;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode=0; mode<=1; mode++){
+	for(int mode=0; mode<numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		sim = new CARLsim("setSpikeMon.grpId",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
@@ -56,8 +62,14 @@ TEST(setSpikeMon, fname){
 	CARLsim* sim;
 	const int GRP_SIZE = 10;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode=0; mode<=1; mode++){
+	for(int mode=0; mode<numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		sim = new CARLsim("setSpikeMon.fname",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
@@ -222,8 +234,14 @@ TEST(SpikeMon, clear) {
     const int inputTargetFR = 10.0f;
 	int runTimeMs = 2000;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode=0; mode<=1; mode++){
+	for(int mode=0; mode<numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		sim = new CARLsim("SpikeMon.clear",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
@@ -292,8 +310,14 @@ TEST(SpikeMon, spikeTimes) {
 
 	const int GRP_SIZE = rand()%5 + 1; // some random group size
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode=0; mode<=1; mode++){
+	for(int mode=0; mode<numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		CARLsim* sim = new CARLsim("SpikeMon.spikeTimes",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 		float COND_tAMPA=5.0, COND_tNMDA=150.0, COND_tGABAa=6.0, COND_tGABAb=150.0;
@@ -373,8 +397,14 @@ TEST(SpikeMon, getGroupFiringRate){
 
 	const int GRP_SIZE = 1;//rand()%5 + 1;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode=0; mode<=1; mode++){
+	for(int mode=0; mode<numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		sim = new CARLsim("SpikeMon.getGroupFiringRate",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
@@ -559,8 +589,14 @@ TEST(SpikeMon, setLogFile) {
 
 	const int GRP_SIZE = 15; // some group size
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode=0; mode<=1; mode++){
+	for(int mode=0; mode<numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		CARLsim* sim = new CARLsim("SpikeMon.setLogFile",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 		int g1 = sim->createGroup("g1", GRP_SIZE, EXCITATORY_NEURON);

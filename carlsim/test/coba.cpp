@@ -26,7 +26,13 @@ TEST(COBA, synRiseTime) {
 	float time_abs_error = 2.0; // 2 ms
 	float wt_abs_error = 0.1; // error for wt
 
-	for (int mode=0; mode<=1; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode=0; mode<numModes; mode++) {
 		int tdAMPA  = 5;
 		int trNMDA  = 20;
 		int tdNMDA  = 150; // make sure it's larger than trNMDA
@@ -130,7 +136,13 @@ TEST(COBA, condSingleNeuronCPUvsGPU) {
 	float rate = 30.0f;
 	bool spikeAtZero = true;
 
-	for (int mode=0; mode<=1; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode=0; mode<numModes; mode++) {
 		sim = new CARLsim("COBA.condCPUvsGPU",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 		grps[0]=sim->createGroup("excAMPA", Grid3D(nOutput), EXCITATORY_NEURON);
 		grps[1]=sim->createGroup("excNMDA", Grid3D(nOutput), EXCITATORY_NEURON);
@@ -232,7 +244,11 @@ TEST(COBA, firingRateCPUvsGPU) {
 	int runTimeMs = 526;
 //	fprintf(stderr,"runTime=%d, delay=%d, wt=%f, input=%f\n",runTimeMs,delay,wt,inputRate);
 
+#ifdef __CPU_ONLY__
+for (int isGPUmode=0; isGPUmode<=0; isGPUmode++) {
+#else
 for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+#endif
 		CARLsim sim("COBA.firingRateCPUvsGPU",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
 		int g1=sim.createGroup("output", 1, EXCITATORY_NEURON);
 		sim.setNeuronParameters(g1, 0.02f, 0.2f, -65.0f, 8.0f); // RS

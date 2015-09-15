@@ -35,7 +35,7 @@ output_files += $(local_prog) $(local_objs)
 .PHONY: clean distclean
 # compile from CARLsim lib
 $(local_prog): $(local_src) $(local_objs)
-	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(local_objs) -o $@ $< $(CARLSIM_LFLAGS) $(CARLSIM_LIBS)
+	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(local_objs) $< -o $@ $(CARLSIM_LFLAGS) $(CARLSIM_LIBS)
 
 clean:
 	$(RM) $(output_files)

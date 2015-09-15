@@ -73,7 +73,7 @@ int main() {
 
 	// run for a total of 10 seconds
 	// at the end of each runNetwork call, SpikeMonitor stats will be printed
-	for (int i=0; i<1000; i++)
+	for (int i=0; i<10; i++)
 		sim.runNetwork(1,0);
 
 	return 0;

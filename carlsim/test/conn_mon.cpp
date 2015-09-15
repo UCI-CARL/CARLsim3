@@ -38,8 +38,14 @@ TEST(setConnMon, interfaceDeath) {
 	CARLsim* sim;
 	const int GRP_SIZE = 10;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode=0; mode<=1; mode++){
+	for(int mode=0; mode<numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		sim = new CARLsim("ConnMon.setConnectionMonitorDeath",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
@@ -88,8 +94,14 @@ TEST(setConnMon, fname) {
 	// use threadsafe version because we have deathtests
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode=0; mode<=1; mode++){
+	for(int mode=0; mode<numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		sim = new CARLsim("setConnMon.fname",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
@@ -122,8 +134,14 @@ TEST(ConnMon, getters) {
 	grpSize[1] = 20;
 	float wtScale = 0.01f;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode=0; mode<=1; mode++){
+	for(int mode=0; mode<numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		sim = new CARLsim("ConnMon.setConnectionMonitorDeath",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
@@ -197,8 +215,14 @@ TEST(ConnMon, takeSnapshot) {
 	const int GRP_SIZE = 10;
 	float wtScale = 0.01f;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode=0; mode<=1; mode++){
+	for(int mode=0; mode<numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		sim = new CARLsim("ConnMon.setConnectionMonitorDeath",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
@@ -253,8 +277,14 @@ TEST(ConnMon, weightFile) {
 	const int GRP_SIZE = 10;
 	float wtScale = 0.01f;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for (int mode=0; mode<=1; mode++) {
+	for (int mode=0; mode<numModes; mode++) {
 		// loop over time interval options
 		long fileLength[3] = {0,0,0};
 		for (int interval=-1; interval<=3; interval+=2) {
@@ -327,8 +357,14 @@ TEST(ConnMon, weightChange) {
 	const int GRP_SIZE = 10;
 	float wtScale = 0.01f;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for (int mode=0; mode<=1; mode++) {
+	for (int mode=0; mode<numModes; mode++) {
 		sim = new CARLsim("ConnMon.setConnectionMonitorDeath",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
 		int g0 = sim->createGroup("g0", GRP_SIZE, EXCITATORY_NEURON);

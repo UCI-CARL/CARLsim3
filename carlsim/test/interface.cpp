@@ -394,6 +394,7 @@ TEST(Interface, setNeuronParametersDeath) {
 TEST(Interface, CARLsimConstructorDeathGPU) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
+#ifndef __CPU_ONLY__
 	CARLsim *sim1=NULL, *sim2=NULL, *sim3=NULL;
 	EXPECT_DEATH({sim1 = new CARLsim("Interface.CARLsimConstructorDeathGPU", GPU_MODE, SILENT, -1);},"");
 	EXPECT_DEATH({sim2 = new CARLsim("Interface.CARLsimConstructorDeathGPU", GPU_MODE, SILENT, 42);},"");
@@ -402,11 +403,13 @@ TEST(Interface, CARLsimConstructorDeathGPU) {
 	if (sim1 != NULL) delete sim1;
 	if (sim2 != NULL) delete sim2;
 	if (sim3 != NULL) delete sim3;
+#endif
 }
 
 TEST(Interface, AllocateGPUConflict) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
+#ifndef __CPU_ONLY__
 	CARLsim *sim1=NULL, *sim2=NULL;
 
 	sim1 = new CARLsim("Interface.AllocateGPUConflict_A", GPU_MODE, SILENT, 0);
@@ -417,6 +420,7 @@ TEST(Interface, AllocateGPUConflict) {
 
 	if (sim1 != NULL) delete sim1;
 	if (sim2 != NULL) delete sim2;
+#endif
 }
 
 //! trigger all UserErrors

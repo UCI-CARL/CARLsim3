@@ -43,8 +43,8 @@ gtest_deps := $(GTEST_LIB_DIR)/libgtest.a $(GTEST_LIB_DIR)/libgtest_main.a \
 
 # compile from CARLsim lib
 $(local_prog): $(local_src) $(local_objs) $(gtest_deps)
-	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(CARLSIM_LFLAGS) $(local_objs) \
-	$(GTEST_CPPFLAGS) $(CARLSIM_LIBS) -Llib -lgtest_custom_main $* -o $@
+	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(local_objs) \
+	$(GTEST_CPPFLAGS) $* -o $@ $(CARLSIM_LFLAGS) $(CARLSIM_LIBS) -pthread -Llib -lgtest_custom_main
 
 %.o: %.cpp
 	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(GTEST_CPPFLAGS) -c $< -o $@

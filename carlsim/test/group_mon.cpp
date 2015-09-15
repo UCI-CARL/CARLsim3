@@ -22,8 +22,14 @@ TEST(setGroupMon, grpId){
 	CARLsim* sim;
 	const int GRP_SIZE = 10;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode = 0; mode < 2; mode++){
+	for(int mode=0; mode<numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		sim = new CARLsim("setGroupMon.grpId", mode?GPU_MODE:CPU_MODE, SILENT, 0, 42);
 		
@@ -51,8 +57,14 @@ TEST(setGroupMon, fname){
 	CARLsim* sim;
 	const int GRP_SIZE = 10;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode = 0; mode < 2; mode++){
+	for(int mode = 0; mode < numModes; mode++){
 		// first iteration, test CPU mode, second test GPU mode
 		sim = new CARLsim("setGroupMon.fname", mode?GPU_MODE:CPU_MODE, SILENT, 0, 42);
 		
@@ -162,8 +174,14 @@ TEST(GroupMon, persistentMode) {
 TEST(GroupMon, peakTimeAndValue) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// loop over both CPU and GPU mode.
-	for(int mode = 0; mode < 2; mode++) {
+	for(int mode = 0; mode < numModes; mode++) {
 		// first iteration, test CPU mode, second test GPU mode
 		CARLsim* sim = new CARLsim("GroupMon.peakTimeAndValue", mode?GPU_MODE:CPU_MODE, SILENT, 0, 42);
 		//CARLsim* sim = new CARLsim("GroupMon.peakTimeAndValue", CPU_MODE, SILENT, 0, 42);
