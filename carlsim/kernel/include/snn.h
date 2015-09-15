@@ -630,6 +630,9 @@ private:
 	void generateSpikesFromFuncPtr(int grpId);
 	void generateSpikesFromRate(int grpId);
 
+	//! stops the CPU/GPU timer and retrieves actual execution time for printSimSummary
+	float getActualExecutionTimeMs();
+
 	int getPoissNeuronPos(int nid);
 	float getWeights(int connProp, float initWt, float maxWt, unsigned int nid, int grpId);
 
@@ -816,6 +819,9 @@ private:
 	void dumpSpikeBuffToFile_GPU(int gid);
 	void findFiring_GPU(int gridSize=64, int blkSize=128);
 
+	//! stops the GPU timer and retrieves actual execution time for printSimSummary
+	float getActualExecutionTimeMs_GPU();
+
 	/*!
 	 * \brief return the number of spikes per neuron for a certain group in GPU mode
 	 *
@@ -998,10 +1004,12 @@ private:
 	unsigned int	nPoissonSpikes;
 
 		//cuda keep track of performance...
-#if __CUDA3__
+#ifndef __CPU_ONLY__
+	#if __CUDA3__
 		unsigned int    timer;
-#else
+	#else
 		StopWatchInterface* timer;
+	#endif
 #endif
 		float		cumExecutionTime;
 		float		lastExecutionTime;
@@ -1096,7 +1104,9 @@ private:
 	float stdpScaleFactor_;
 	float wtChangeDecay_; //!< the wtChange decay
 
+#ifndef __CPU_ONLY__
 	RNG_rand48* gpuPoissonRand;
+#endif
 };
 
 #endif

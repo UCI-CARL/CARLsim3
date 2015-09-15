@@ -45,6 +45,8 @@
 
 #include <cuda_version_control.h>
 
+#include <stdio.h>
+#include <math.h> // fabs
 
 //! CARLsim common definitions
 #define ALL -1 //!< used for the set* methods to specify all groups and/or configIds

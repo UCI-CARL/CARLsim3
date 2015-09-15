@@ -41,11 +41,12 @@
 // include CARLsim user interface
 #include <carlsim.h>
 
+
 int main() {
 	// create a network on GPU
 	int ithGPU = 0;
 	int randSeed = 42;
-	CARLsim sim("hello world",GPU_MODE,USER,ithGPU,randSeed);
+	CARLsim sim("hello world", CPU_MODE, USER, ithGPU, randSeed);
 
 	// configure the network
 	// set up a COBA two-layer network with gaussian connectivity
@@ -72,7 +73,7 @@ int main() {
 
 	// run for a total of 10 seconds
 	// at the end of each runNetwork call, SpikeMonitor stats will be printed
-	for (int i=0; i<10; i++)
+	for (int i=0; i<1000; i++)
 		sim.runNetwork(1,0);
 
 	return 0;

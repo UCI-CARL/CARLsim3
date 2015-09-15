@@ -145,6 +145,11 @@ void CARLsim::CARLsimInit() {
 	UserErrors::assertTrue(simMode_!=UNKNOWN_SIM,UserErrors::CANNOT_BE_UNKNOWN,"CARLsim()","Simulation mode");
 	UserErrors::assertTrue(loggerMode_!=UNKNOWN_LOGGER,UserErrors::CANNOT_BE_UNKNOWN,"CARLsim()","Logger mode");
 
+#ifdef __CPU_ONLY__
+	UserErrors::assertTrue(simMode_!=GPU_MODE, UserErrors::CANNOT_BE_SET_TO, "CARLsim()", "Simulation mode", 
+		"GPU_MODE if compiled in CPU-only mode");
+#endif
+
 	// Allocate GPU
 	if (simMode_ == GPU_MODE) {
 		if (ithGPU_ >= MAX_NUM_CUDA_DEVICES || ithGPU_ < 0) {

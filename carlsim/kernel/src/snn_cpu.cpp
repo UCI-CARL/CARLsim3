@@ -43,7 +43,7 @@
 #include <math.h> // fabs
 #include <string.h> // string, memset
 #include <stdlib.h> // abs, drand48
-#include <algorithm> // min
+#include <algorithm> // min, max
 #include <limits.h> // UINT_MAX
 
 #include <connection_monitor.h>
@@ -122,9 +122,9 @@ short int CpuSNN::connect(int grpId1, int grpId2, const std::string& _type, floa
 	newInfo->maxWt	  		  = maxWt;
 	newInfo->maxDelay 		  = maxDelay;
 	newInfo->minDelay 		  = minDelay;
-//		newInfo->radX             = (radX<0) ? MAX(szPre.x,szPost.x) : radX; // <0 means full connectivity, so the
-//		newInfo->radY             = (radY<0) ? MAX(szPre.y,szPost.y) : radY; // effective group size is Grid3D.x. Grab
-//		newInfo->radZ             = (radZ<0) ? MAX(szPre.z,szPost.z) : radZ; // the larger of pre / post to connect all
+//		newInfo->radX             = (radX<0) ? std::max(szPre.x,szPost.x) : radX; // <0 means full connectivity, so the
+//		newInfo->radY             = (radY<0) ? std::max(szPre.y,szPost.y) : radY; // effective group size is Grid3D.x. Grab
+//		newInfo->radZ             = (radZ<0) ? std::max(szPre.z,szPost.z) : radZ; // the larger of pre / post to connect all
 	newInfo->radX             = radX;
 	newInfo->radY             = radY;
 	newInfo->radZ             = radZ;
@@ -693,7 +693,7 @@ int CpuSNN::runNetwork(int _nsec, int _nmsec, bool printRunSummary, bool copySta
 
 	// set the Poisson generation time slice to be at the run duration up to PROPOGATED_BUFFER_SIZE ms.
 	// \TODO: should it be PROPAGATED_BUFFER_SIZE-1 or PROPAGATED_BUFFER_SIZE ?
-	setGrpTimeSlice(ALL, MAX(1,std::min(runDurationMs,PROPAGATED_BUFFER_SIZE-1)));
+	setGrpTimeSlice(ALL, std::max(1,std::min(runDurationMs,PROPAGATED_BUFFER_SIZE-1)));
 
 #ifndef __CPU_ONLY__
 	CUDA_RESET_TIMER(timer);
@@ -703,10 +703,13 @@ int CpuSNN::runNetwork(int _nsec, int _nmsec, bool printRunSummary, bool copySta
 	// if nsec=0, simTimeMs=10, we need to run the simulator for 10 timeStep;
 	// if nsec=1, simTimeMs=10, we need to run the simulator for 1*1000+10, time Step;
 	for(int i=0; i<runDurationMs; i++) {
-		if(simMode_ == CPU_MODE)
+		if(simMode_ == CPU_MODE) {
 			doSnnSim();
-		else
+#ifndef __CPU_ONLY__
+		} else {
 			doGPUSim();
+#endif
+		}
 
 		// update weight every updateInterval ms if plastic synapses present
 		if (!sim_with_fixedwts && wtANDwtChangeUpdateInterval_ == ++wtANDwtChangeUpdateIntervalCnt_) {
@@ -736,10 +739,13 @@ int CpuSNN::runNetwork(int _nsec, int _nmsec, bool printRunSummary, bool copySta
 				updateConnectionMonitor();
 			}
 
-			if(simMode_ == CPU_MODE)
+			if(simMode_ == CPU_MODE) {
 				updateFiringTable();
-			else
+#ifndef __CPU_ONLY__
+			} else {
 				updateFiringTable_GPU();
+#endif
+			}
 		}
 
 #ifndef __CPU_ONLY__
@@ -2810,6 +2816,45 @@ void CpuSNN::connectUserDefined (grpConnectInfo_t* info) {
 	grp_Info2[grpDest].sumPreConn += info->numberOfConnections;
 }
 
+void CpuSNN::printSimSummary() {
+	// stop the timers and update spikeCount* class members
+	float executionTimeMs = getActualExecutionTimeMs();
+
+	KERNEL_INFO("\n");
+	KERNEL_INFO("********************      %s Simulation Summary      ***************************",
+		simMode_ == GPU_MODE ? "GPU" : "CPU");
+
+	KERNEL_INFO("Network Parameters: \tnumNeurons = %d (numNExcReg:numNInhReg = %2.1f:%2.1f)", 
+		numN, 100.0*numNExcReg/numN, 100.0*numNInhReg/numN);
+	KERNEL_INFO("\t\t\tnumSynapses = %d", postSynCnt);
+	KERNEL_INFO("\t\t\tmaxDelay = %d", maxDelay_);
+	KERNEL_INFO("Simulation Mode:\t%s",sim_with_conductances?"COBA":"CUBA");
+	KERNEL_INFO("Random Seed:\t\t%d", randSeed_);
+	KERNEL_INFO("Timing:\t\t\tModel Simulation Time = %lld sec", (unsigned long long)simTimeSec);
+	KERNEL_INFO("\t\t\tActual Execution Time = %4.2f sec", executionTimeMs/1000.0);
+	KERNEL_INFO("Average Firing Rate:\t2+ms delay = %3.3f Hz", spikeCountD2Host/(1.0*simTimeSec*numNExcReg));
+	KERNEL_INFO("\t\t\t1ms delay = %3.3f Hz", spikeCountD1Host/(1.0*simTimeSec*numNInhReg));
+	KERNEL_INFO("\t\t\tOverall = %3.3f Hz", spikeCountAllHost/(1.0*simTimeSec*numN));
+	KERNEL_INFO("Overall Firing Count:\t2+ms delay = %d", spikeCountD2Host);
+	KERNEL_INFO("\t\t\t1ms delay = %d", spikeCountD1Host);
+	KERNEL_INFO("\t\t\tTotal = %d", spikeCountAllHost);
+	KERNEL_INFO("*********************************************************************************\n");
+}
+
+// stop CPU/GPU timer and retrieve actual execution time for printSimSummary
+float CpuSNN::getActualExecutionTimeMs() {
+	float etime;
+	if (simMode_ == CPU_MODE) {
+		stopCPUTiming();
+		etime = cpuExecutionTime;
+#ifndef __CPU_ONLY__
+	} else {
+		etime = getActualExecutionTimeMs_GPU();
+#endif
+	}
+
+	return etime;
+}
 
 // delete all objects (CPU and GPU side)
 void CpuSNN::deleteObjects() {

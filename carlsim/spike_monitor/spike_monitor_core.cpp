@@ -4,7 +4,7 @@
 #include <snn_definitions.h>	// KERNEL_ERROR, KERNEL_INFO, ...
 
 #include <algorithm>			// std::sort
-
+#include <string.h> 			// string, strcpy
 
 
 // we aren't using namespace std so pay attention!

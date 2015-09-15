@@ -3,7 +3,7 @@
 
 carlsim_major_num := 3
 carlsim_minor_num := 0
-carlsim_build_num := 0
+carlsim_build_num := 3
 
 default_targets :=
 common_sources :=
