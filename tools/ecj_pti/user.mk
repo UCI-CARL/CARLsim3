@@ -25,6 +25,8 @@ CARLSIM_FASTMATH ?= 0
 CARLSIM_CUOPTLEVEL ?= 0
 CARLSIM_DEBUG ?= 0
 
+CPU_ONLY ?= 1
+
 
 #------------------------------------------------------------------------------
 # OPTIONAL FEATURES:
@@ -81,24 +83,30 @@ ifeq ($(DARWIN),DARWIN)
 	CARLSIM_FLAGS +=-Xlinker -lstdc++ -lc++
 endif
 
-# add compute capability to compile flags
-CARLSIM_FLAGS += -arch sm_$(CUDA_MAJOR_NUM)$(CUDA_MINOR_NUM)
-ifeq (${strip ${CUDA_MAJOR_NUM}},1)
-	CARLSIM_FLAGS += -D__NO_ATOMIC_ADD__
-endif
 
-# add CUDA version to compile flags
-CARLSIM_FLAGS += -D__CUDA$(CARLSIM_CUDAVER)__
-
-# load appropriate CUDA flags
-ifneq (,$(filter $(CARLSIM_CUDAVER),3 4))
-	CARLSIM_INCLUDES = -I${NVIDIA_SDK}/C/common/inc/
-	CARLSIM_LFLAGS = -L${NVIDIA_SDK}/C/lib
-	CARLSIM_LIBS = -lcutil_x86_64
+ifeq ($(strip $(CPU_ONLY)),1)
+	CARLSIM_FLAGS += -D__CPU_ONLY__
+	NVCC = $(CXX)
 else
-	CARLSIM_INCLUDES = -I$(CUDA_INSTALL_PATH)/samples/common/inc/
-	CARLSIM_LFLAGS =
-	CARLSIM_LIBS =
+	# add compute capability to compile flags
+	CARLSIM_FLAGS += -arch sm_$(CUDA_MAJOR_NUM)$(CUDA_MINOR_NUM)
+	ifeq (${strip ${CUDA_MAJOR_NUM}},1)
+		CARLSIM_FLAGS += -D__NO_ATOMIC_ADD__
+	endif
+
+	# add CUDA version to compile flags
+	CARLSIM_FLAGS += -D__CUDA$(CARLSIM_CUDAVER)__
+
+	# load appropriate CUDA flags
+	ifneq (,$(filter $(CARLSIM_CUDAVER),3 4))
+		CARLSIM_INCLUDES = -I${NVIDIA_SDK}/C/common/inc/
+		CARLSIM_LFLAGS = -L${NVIDIA_SDK}/C/lib
+		CARLSIM_LIBS = -lcutil_x86_64
+	else
+		CARLSIM_INCLUDES = -I$(CUDA_INSTALL_PATH)/samples/common/inc/
+		CARLSIM_LFLAGS =
+		CARLSIM_LIBS =
+	endif
 endif
 
 # use fast math

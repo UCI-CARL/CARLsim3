@@ -40,11 +40,11 @@
 #include <snn.h>
 #include <sstream>
 
-#include <math.h> // fabs
-#include <string.h> // string, memset
-#include <stdlib.h> // abs, drand48
-#include <algorithm> // min, max
-#include <limits.h> // UINT_MAX
+#include <math.h> 		// fabs
+#include <string.h> 	// std::string, memset
+#include <stdlib.h> 	// abs, drand48
+#include <algorithm> 	// std::min, std::max
+#include <limits.h> 	// UINT_MAX
 
 #include <connection_monitor.h>
 #include <connection_monitor_core.h>

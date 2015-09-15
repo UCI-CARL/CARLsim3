@@ -25,7 +25,7 @@ all: $(local_targets)
 
 # list all rules, one per target
 basic_concepts: main_basic_concepts.cpp
-	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(CARLSIM_LFLAGS) $< -o $@ $(CARLSIM_LIBS)
+	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $< -o $@ $(CARLSIM_LFLAGS) $(CARLSIM_LIBS)
 
 clean:
 	$(RM) $(local_targets)
