@@ -76,7 +76,9 @@
 
 #include <propagated_spike_buffer.h>
 #include <poisson_rate.h>
-#include <gpu_random.h>
+#ifndef __CPU_ONLY__
+	#include <gpu_random.h>
+#endif
 
 class SpikeMonitor;
 class SpikeMonitorCore;
@@ -736,17 +738,22 @@ private:
 	void swapConnections(int nid, int oldPos, int newPos);
 
 	void updateAfterMaxTime();
+	void updateFiringTable();
 	void updateSpikesFromGrp(int grpId);
 	void updateSpikeGenerators();
 	void updateSpikeGeneratorsInit();
-
 	int  updateSpikeTables();
+
 	//void updateStateAndFiringTable();
 	bool updateTime(); //!< updates simTime, returns true when a new second is started
+
+	void updateWeights();
+
 
 	// +++++ GPU MODE +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	// TODO: consider moving to snn_gpu.h
 	
+#ifndef __CPU_ONLY__
 	//! initializes params needed in snn_gpu.cu (gets called in CpuSNN constructor)
 	void CpuSNNinit_GPU();
 
@@ -841,14 +848,12 @@ private:
 	void spikeGeneratorUpdate_GPU();
 	void startGPUTiming();
 	void stopGPUTiming();
-	void updateFiringTable();
 	void updateFiringTable_GPU();
 	void updateNetwork_GPU(bool resetFiringInfo); //!< Allows parameters to be reset in the middle of the simulation
-	void updateWeights();
 	void updateWeights_GPU();
 	//void updateStateAndFiringTable_GPU();
 	void updateTimingTable_GPU();
-
+#endif
 
 	// +++++ PRIVATE PROPERTIES +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	FILE* loadSimFID;

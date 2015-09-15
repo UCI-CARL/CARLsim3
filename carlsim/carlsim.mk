@@ -10,10 +10,15 @@ kernel_inc := $(addprefix $(kernel_dir)/include/, snn.h gpu.h \
 	error_code.h cuda_version_control.h)
 kernel_cpp := $(addprefix $(kernel_dir)/src/, snn_cpu.cpp \
 	propagated_spike_buffer.cpp print_snn_info.cpp)
-kernel_cu := $(addprefix $(kernel_dir)/src/, gpu_random.cu snn_gpu.cu)
+ifeq ($(strip $(CPU_ONLY)),1)
+	kernel_cu :=
+	kernel_cu_objs :=
+else
+	kernel_cu := $(addprefix $(kernel_dir)/src/, gpu_random.cu snn_gpu.cu)
+	kernel_cu_objs := $(patsubst %.cu, %.o, $(kernel_cu))
+endif
 kernel_src := $(kernel_cpp) $(kernel_cu)
 kernel_cpp_objs := $(patsubst %.cpp, %.o, $(kernel_cpp))
-kernel_cu_objs := $(patsubst %.cu, %.o, $(kernel_cu))
 kernel_objs := $(kernel_cpp_objs) $(kernel_cu_objs)
 
 # interface variables
