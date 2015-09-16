@@ -275,7 +275,7 @@ void SpikeMonitorCore::startRecording() {
 	needToCalculateFiringRates_ = true;
 	needToSortFiringRates_ = true;
 	recordSet_ = true;
-	long int currentTime = snn_->getSimTimeSec()*1000+snn_->getSimTimeMs();
+	int64_t currentTime = snn_->getSimTimeSec()*1000+snn_->getSimTimeMs();
 
 	if (persistentData_) {
 		// persistent mode on: accumulate all times
@@ -407,8 +407,8 @@ void SpikeMonitorCore::writeSpikeFileHeader() {
 // Iterate through 2D spike vector and approximate size in memory.
 // This is not exact, we are not counting the buffer overhead, only
 // the size each subvector is memory.
-long int SpikeMonitorCore::getBufferSize(){
-    long int bufferSize=0; // in bytes
+int64_t SpikeMonitorCore::getBufferSize(){
+    int64_t bufferSize=0; // in bytes
     for(int i=0; i<spkVector_.size();i++){
         bufferSize+=spkVector_[i].size()*sizeof(int);
     }
@@ -433,7 +433,7 @@ bool SpikeMonitorCore::isBufferBig(){
 }
 
 // returns the total accumulated time.
-long int SpikeMonitorCore::getAccumTime(){
+int64_t SpikeMonitorCore::getAccumTime(){
     return accumTime_;
 }
 

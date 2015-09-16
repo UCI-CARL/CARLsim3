@@ -3693,7 +3693,7 @@ unsigned int CpuSNN::poissonSpike(unsigned int currTime, float frate, int refrac
 int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 	// TSC: so that we can restore the file position later...
 	// MB: not sure why though...
-	long file_position = ftell(loadSimFID);
+	int64_t file_position = ftell(loadSimFID);
 	
 	int tmpInt;
 	float tmpFloat;
@@ -4989,13 +4989,13 @@ void CpuSNN::updateSpikeMonitor(int grpId) {
 
 		// find last update time for this group
 		SpikeMonitorCore* spkMonObj = spikeMonCoreList[monitorId];
-		long int lastUpdate = spkMonObj->getLastUpdated();
+		int64_t lastUpdate = spkMonObj->getLastUpdated();
 
 		// don't continue if time interval is zero (nothing to update)
-		if ( ((long int)getSimTime()) - lastUpdate <=0)
+		if ( ((int64_t)getSimTime()) - lastUpdate <=0)
 			return;
 
-		if ( ((long int)getSimTime()) - lastUpdate > 1000)
+		if ( ((int64_t)getSimTime()) - lastUpdate > 1000)
 			KERNEL_ERROR("updateSpikeMonitor(grpId=%d) must be called at least once every second",grpId);
 
         // AER buffer max size warning here.
@@ -5005,7 +5005,7 @@ void CpuSNN::updateSpikeMonitor(int grpId) {
                 && this->getGroupNumNeurons(grpId) > LARGE_SPIKE_MON_GRP_SIZE \
                 && spkMonObj->isBufferBig()){
             // change this warning message to correct message
-            KERNEL_WARN("updateSpikeMonitor(grpId=%d) is becoming very large. (>%lu MB)",grpId,(long int) MAX_SPIKE_MON_BUFFER_SIZE/1024 );// make this better
+            KERNEL_WARN("updateSpikeMonitor(grpId=%d) is becoming very large. (>%lu MB)",grpId,(int64_t) MAX_SPIKE_MON_BUFFER_SIZE/1024 );// make this better
             KERNEL_WARN("Reduce the cumulative recording time (currently %lu minutes) or the group size (currently %d) to avoid this.",spkMonObj->getAccumTime()/(1000*60),this->getGroupNumNeurons(grpId));
        }
 		if (simMode_ == GPU_MODE) {
@@ -5030,7 +5030,7 @@ void CpuSNN::updateSpikeMonitor(int grpId) {
 			currentTimeSec--;
 
 		// save current time as last update time
-		spkMonObj->setLastUpdated( (long int)getSimTime() );
+		spkMonObj->setLastUpdated( (int64_t)getSimTime() );
 
 		// prepare fast access
 		FILE* spkFileId = spikeMonCoreList[monitorId]->getSpikeFileId();

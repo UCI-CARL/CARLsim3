@@ -87,15 +87,15 @@ double ConnectionMonitor::getPercentWeightsWithValue(double value) {
 	return getNumWeightsWithValue(value)*100.0/getNumSynapses();
 }
 
-long int ConnectionMonitor::getTimeMsCurrentSnapshot() {
+int64_t ConnectionMonitor::getTimeMsCurrentSnapshot() {
 	return connMonCorePtr_->getTimeMsCurrentSnapshot();
 }
 
-long int ConnectionMonitor::getTimeMsLastSnapshot() {
+int64_t ConnectionMonitor::getTimeMsLastSnapshot() {
 	return connMonCorePtr_->getTimeMsLastSnapshot();
 }
 
-long int ConnectionMonitor::getTimeMsSinceLastSnapshot() {
+int64_t ConnectionMonitor::getTimeMsSinceLastSnapshot() {
 	return connMonCorePtr_->getTimeMsSinceLastSnapshot();
 }
 

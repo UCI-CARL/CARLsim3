@@ -46,6 +46,7 @@
 
 #include <carlsim_datastructures.h> // spikeMonMode_t
 #include <vector>					// std::vector
+#include <stdint.h>
 
 class CpuSNN; 			// forward declaration of CpuSNN class
 class SpikeMonitorCore; // forward declaration of implementation
@@ -373,7 +374,7 @@ class SpikeMonitor {
 	 * there might have been periods in between where recording was off.
 	 * \returns the total recording time (ms)
 	 */
-	long int getRecordingTotalTime();
+	int64_t getRecordingTotalTime();
 
 	/*!
 	 * \brief Returns the simulation time (ms) of the last call to startRecording()
@@ -382,7 +383,7 @@ class SpikeMonitor {
 	 * If PersistentMode is off, this number is equivalent to getRecordingStartTime().
 	 * \returns the simulation time (ms) of the last call to startRecording()
 	 */
-	long int getRecordingLastStartTime();
+	int64_t getRecordingLastStartTime();
 
 	/*!
 	 * \brief Returns the simulation time (ms) of the first call to startRecording()
@@ -391,7 +392,7 @@ class SpikeMonitor {
 	 * If PersistentMode is off, this number is equivalent to getRecordingLastStartTime().
 	 * \returns the simulation time (ms) of the first call to startRecording()
 	 */
-	long int getRecordingStartTime();
+	int64_t getRecordingStartTime();
 
 	/*!
 	 * \brief Returns the simulation time (ms) of the last call to stopRecording()
@@ -399,7 +400,7 @@ class SpikeMonitor {
 	 * This function returns the simulation time (timestamp) of the last call to stopRecording().
 	 * \returns the simulation time (ms) of the last call to stopRecording()
 	 */
-	long int getRecordingStopTime();
+	int64_t getRecordingStopTime();
 
 	/*!
 	 * \brief Returns a flag that indicates whether PersistentMode is on (true) or off (false)

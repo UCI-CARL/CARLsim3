@@ -81,7 +81,7 @@ TEST(SpikeGen, PeriodicSpikeGenerator) {
 
 	// explicitly read the spike file to make sure
 	int *inputArray0 = NULL, *inputArray1 = NULL;
-	long inputSize0, inputSize1;
+	int64_t inputSize0, inputSize1;
 	readAndReturnSpikeFile("spkInputGrp0.dat",inputArray0,inputSize0);
 	readAndReturnSpikeFile("spkInputGrp1.dat",inputArray1,inputSize1);
 
@@ -334,7 +334,7 @@ TEST(SpikeGen, SpikeGeneratorFromVector) {
 
 	// explicitly read the spike file to make sure
 	int *inputArray0 = NULL;
-	long inputSize0;
+	int64_t inputSize0;
 	readAndReturnSpikeFile("spkInputGrp0.dat",inputArray0,inputSize0);
 	bool isSize0Correct = inputSize0/2 == spkTimes.size();
 	EXPECT_TRUE(isSize0Correct);

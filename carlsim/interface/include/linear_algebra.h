@@ -43,8 +43,9 @@
 #define _LINEAR_ALGEBRA_H_
 
 #include <ostream>			// print struct info
+#include <stdint.h>
 
-unsigned long int get_time_ms64();
+uint64_t get_time_ms64();
 
 /*!
  * \brief a point in 3D space

@@ -1012,7 +1012,7 @@ private:
 	SpikeMonitor*     spikeMonList[MAX_GRP_PER_SNN];
 
 	// \FIXME \DEPRECATED this one moved to group-based
-	long int    simTimeLastUpdSpkMon_; //!< last time we ran updateSpikeMonitor
+	int64_t    simTimeLastUpdSpkMon_; //!< last time we ran updateSpikeMonitor
 
 
 

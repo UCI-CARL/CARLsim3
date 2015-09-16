@@ -256,7 +256,7 @@ TEST(ConnMon, weightFile) {
 	// loop over both CPU and GPU mode.
 	for (int mode=0; mode<=1; mode++) {
 		// loop over time interval options
-		long fileLength[3] = {0,0,0};
+		int64_t fileLength[3] = {0,0,0};
 		for (int interval=-1; interval<=3; interval+=2) {
 			sim = new CARLsim("ConnMon.setConnectionMonitorDeath",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
@@ -304,7 +304,7 @@ TEST(ConnMon, weightFile) {
 		// (which might change over the course of time)
 		// so choose a portable approach: estimate header size for both interval modes, and make
 		// sure they're the same
-		// file should have header+(number of snapshots)*((number of weights)+(timestamp as long int))*(bytes per word)
+		// file should have header+(number of snapshots)*((number of weights)+(timestamp as int64_t))*(bytes per word)
 
 		// if interval==-1: no snapshots in the file
 		int headerSize = fileLength[0] - 0*(GRP_SIZE*GRP_SIZE+2)*4;

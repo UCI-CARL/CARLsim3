@@ -43,6 +43,7 @@
 #define _CONN_MON_CORE_H_
 
 #include <stdio.h>					// FILE
+#include <stdint.h>					// int64_t
 #include <vector>					// std::vector
 #include <carlsim_definitions.h>	// ALL
 
@@ -54,7 +55,7 @@ class CpuSNN; // forward declaration of CpuSNN class
  *
  * Naming convention for methods:
  * - getNum*:		a number metric, returns an int
- * - getTime*:      a time metric, returns long int
+ * - getTime*:      a time metric, returns int64_t
  * - getPercent*:	a percentage metric, returns a double
  * - get*:			all the others
  */
@@ -113,13 +114,13 @@ public:
 	int getNumWeightsWithValue(double value);
 
 	//! returns the timestamp of the current snapshot (not necessarily CARLsim::getSimTime)
-	long int getTimeMsCurrentSnapshot() { return wtTime_; }
+	int64_t getTimeMsCurrentSnapshot() { return wtTime_; }
 
 	//! returns the timestamp of the last snapshot
-	long int getTimeMsLastSnapshot() { return wtTimeLast_; }
+	int64_t getTimeMsLastSnapshot() { return wtTimeLast_; }
 
 	//! returns the time passed between current and last snapshot
-	long int getTimeMsSinceLastSnapshot() { return (wtTime_ - wtTimeLast_); }
+	int64_t getTimeMsSinceLastSnapshot() { return (wtTime_ - wtTimeLast_); }
 
 	int getUpdateTimeIntervalSec() { return connFileTimeIntervalSec_; }
 
@@ -188,9 +189,9 @@ private:
 
 	std::vector< std::vector<float> > wtMat_;      //!< current snapshot of weight matrix
 	std::vector< std::vector<float> > wtMatLast_;  //!< last snapshot of weight matrix
-	long int wtTime_;
-	long int wtTimeLast_;
-	long int wtTimeWrite_;
+	int64_t wtTime_;
+	int64_t wtTimeLast_;
+	int64_t wtTimeWrite_;
 
 	bool needToInit_;				//!< whether we have to initialize first
 	bool needToWriteFileHeader_;    //!< whether we have to write header section of conn file
