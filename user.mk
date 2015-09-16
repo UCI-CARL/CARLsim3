@@ -4,14 +4,14 @@
 # Note: all paths should be absolute (start with /)
 #------------------------------------------------------------------------------
 # desired installation path of libcarlsim and headers
-CARLSIM_LIB_DIR ?= /opt/CARL/CARLsim-3.1-dev
+CARLSIM_LIB_DIR ?= /opt/CARL/CARLsim
 
 # cuda capability major version number for GPU device
-CUDA_MAJOR_NUM ?= 3
+CUDA_MAJOR_NUM ?= 2
 # cuda capability minor version number for GPU device
-CUDA_MINOR_NUM ?= 5
+CUDA_MINOR_NUM ?= 0
 # cuda toolkit version (major number only)
-CARLSIM_CUDAVER ?= 7
+CARLSIM_CUDAVER ?= 5
 
 # CUDA Installation location. If your CUDA installation is not /usr/local/cuda,
 # please set CUDA_INSTALL_PATH to point to the correct location or set it as
@@ -44,8 +44,8 @@ EO_PTI_DIR ?= /opt/CARL/carlsim_eo_pti
 #------------------------------------------------------------------------------
 # absolute path and name of evolutionary computation in java installation jar
 # file for ECJ-PTI CARLsim support.
-ECJ_DIR ?= /opt/ecj/jar/ecj.23.jar
-ECJ_PTI_DIR ?= /home/escott/local/CARL/carlsim_ecj_pti
+ECJ_DIR ?= /opt/ecj/jar/ecj.22.jar
+ECJ_PTI_DIR ?= /opt/CARL/carlsim_ecj_pti
 
 #------------------------------------------------------------------------------
 # CARLsim Developer Features: Running tests and compiling from sources
@@ -70,7 +70,7 @@ DARWIN  	:=$(strip $(findstring DARWIN, $(OS_UPPER)))
 # variable defintions
 CXX = g++
 CC  = g++
-NVCC = $(CUDA_INSTALL_PATH)/bin/nvcc
+NVCC = nvcc
 CPPFLAGS = $(DEBUG_FLAG) $(OPT_FLAG) -Wall -std=c++0x
 
 MV := mv -f
@@ -88,7 +88,7 @@ ifeq (${strip ${CUDA_MAJOR_NUM}},1)
 endif
 
 # add CUDA version to compile flags
-CARLSIM_FLAGS += -D__CUDA$(CARLSIM_CUDAVER)__
+CARLSIM_FLAGS += -D__CUDA$(CARLSIM_CUDAVER)__ --compiler-options -Wunused-variable
 
 # load appropriate CUDA flags
 ifneq (,$(filter $(CARLSIM_CUDAVER),3 4))
