@@ -16,6 +16,7 @@ $(carlsim_lib): $(carlsim_sources) $(carlsim_inc) $(carlsim_objs)
 	ar rcs $@.$(lib_ver) $(carlsim_objs)
 
 install: $(carlsim_lib)
+	@echo "CARLsim installation path:" $(CARLSIM_LIB_DIR)
 	@test -d $(CARLSIM_LIB_DIR) || \
 		mkdir -p $(CARLSIM_LIB_DIR)
 	@test -d $(CARLSIM_LIB_DIR)/lib || mkdir \

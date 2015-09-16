@@ -38,7 +38,12 @@
  */
 
 #include <snn.h>
-#include <sstream>
+
+#if defined(WIN32) || defined(WIN64)
+	#include <Windows.h>
+#else
+	#include <sys/stat.h>		// mkdir
+#endif
 
 #include <connection_monitor.h>
 #include <connection_monitor_core.h>
@@ -1817,15 +1822,43 @@ void CpuSNN::CpuSNNinit() {
 	break;
 	default:
 		fpErr_ = stderr; // need to open file stream first
-		KERNEL_ERROR("Unknown logger mode");
+		KERNEL_ERROR("Unknown logger mode. Aborting simulation...");
 		exit(1);
 	}
-	#if defined(WIN32) || defined(WIN64)
-		fpLog_= fopen("results\\carlsim.log","w");
-	#else
-		fpLog_ = fopen("results/carlsim.log","w");
-	#endif
 
+	// try to open log file in results folder: create if not exists
+	#if defined(WIN32) || defined(WIN64)
+		CreateDirectory("results", NULL);
+		fpLog_ = fopen("results/carlsim.log", "w");
+	#else
+		struct stat sb;
+		int createDir = 1;
+		if (stat("results", &sb) == -1 || !S_ISDIR(sb.st_mode)) {
+			// results dir does not exist, try to create:
+			createDir = mkdir("results", 0777);
+		}
+
+		if (createDir == -1) {
+			// tried to create dir, but failed
+			fprintf(stderr, "Could not create directory \"results/\", which is required to "
+				"store simulation results. Aborting simulation...\n");
+			exit(1);
+		} else {
+			// open log file
+			fpLog_ = fopen("results/carlsim.log","w");
+
+			if (createDir == 0) {
+				// newly created dir: now that fpLog_/fpInf_ exist, inform user
+				KERNEL_INFO("Created results directory \"results/\".");
+			}
+		}
+	#endif
+	if (fpLog_ == NULL) {
+		fprintf(stderr, "Could not create the directory \"results/\" or the log file \"results/carlsim.log\""
+			", which is required to store simulation results. Aborting simulation...\n");
+		exit(1);
+	}
+	
 	#ifdef __REGRESSION_TESTING__
 	#if defined(WIN32) || defined(WIN64)
 		fpInf_ = fopen("nul","w");
