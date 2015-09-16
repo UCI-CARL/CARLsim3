@@ -48,6 +48,7 @@
 
 #include <callback.h>
 #include <carlsim_definitions.h>
+#include <carlsim_log_definitions.h>
 #include <carlsim_datastructures.h>
 
 // include the following core functionalities instead of forward-declaring, so that the user only needs to include

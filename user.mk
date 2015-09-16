@@ -23,7 +23,7 @@ CUDA_INSTALL_PATH ?= /usr/local/cuda
 # debugging info.  Default: 0.
 CARLSIM_FASTMATH ?= 0
 CARLSIM_CUOPTLEVEL ?= 0
-CARLSIM_DEBUG ?= 0
+CARLSIM_DEBUG ?= 1
 
 
 #------------------------------------------------------------------------------
@@ -113,7 +113,7 @@ endif
 
 # set debug flag
 ifeq ($(strip $(CARLSIM_DEBUG)),1)
-
+	CARLSIM_FLAGS += --compiler-options -Wall
 endif
 
 # location of .h files

@@ -39,40 +39,13 @@
  * Ver 9/16/2015
  */
 
-#ifndef _CARLSIM_DEFINITIONS_H_
-#define _CARLSIM_DEFINITIONS_H_
+#include <stdio.h>
 
+#ifndef _CARLSIM_LOG_DEFINITIONS_H_
+#define _CARLSIM_LOG_DEFINITIONS_H_
 
-#include <cuda_version_control.h>
-
-
-//! CARLsim common definitions
-#define ALL -1 //!< used for the set* methods to specify all groups and/or configIds
-
-#define SYN_FIXED      false
-#define SYN_PLASTIC    true
-
-// Bit flags to be used to specify the type of neuron.  Future types can be added in the future such as Dopamine, etc.
-// Yes, they should be bit flags because some neurons release more than one transmitter at a synapse.
-#define UNKNOWN_NEURON	(0)
-#define POISSON_NEURON	(1 << 0)
-#define TARGET_AMPA	(1 << 1)
-#define TARGET_NMDA	(1 << 2)
-#define TARGET_GABAa	(1 << 3)
-#define TARGET_GABAb	(1 << 4)
-#define TARGET_DA		(1 << 5)
-#define TARGET_5HT		(1 << 6)
-#define TARGET_ACh		(1 << 7)
-#define TARGET_NE		(1 << 8)
-
-#define INHIBITORY_NEURON 		(TARGET_GABAa | TARGET_GABAb)
-#define EXCITATORY_NEURON 		(TARGET_NMDA | TARGET_AMPA)
-#define DOPAMINERGIC_NEURON		(TARGET_DA | EXCITATORY_NEURON)
-#define EXCITATORY_POISSON 		(EXCITATORY_NEURON | POISSON_NEURON)
-#define INHIBITORY_POISSON		(INHIBITORY_NEURON | POISSON_NEURON)
-#define IS_INHIBITORY_TYPE(type)	(((type) & TARGET_GABAa) || ((type) & TARGET_GABAb))
-#define IS_EXCITATORY_TYPE(type)	(!IS_INHIBITORY_TYPE(type))
-
-#define MAX_NUM_CUDA_DEVICES 8
+#define CARLSIM_ERROR(where, what) fprintf(stderr, "\033[31;1m[USER ERROR %s] %s\033[0m\n", where, what)
+#define CARLSIM_WARN(where, what) fprintf(stderr, "\033[33;1m[USER WARNING %s] %s\033[0m\n", where, what)
+#define CARLSIM_INFO(where, what) fprintf(stdout, "\033[%s] %s\n", where, what)
 
 #endif

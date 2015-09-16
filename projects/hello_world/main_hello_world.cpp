@@ -48,7 +48,7 @@
 int main() {
 	// keep track of execution time
 	Stopwatch watch;
-
+	
 
 	// ---------------- CONFIG STATE -------------------
 
@@ -90,7 +90,7 @@ int main() {
 	// run for a total of 10 seconds
 	// at the end of each runNetwork call, SpikeMonitor stats will be printed
 	for (int i=0; i<10; i++) {
-		sim.runNetwork(10,0);
+		sim.runNetwork(1,0);
 	}
 
 	// print stopwatch summary

@@ -41,10 +41,10 @@
 #include <poisson_rate.h>
 
 #include <assert.h>					// assert
-#include <carlsim_definitions.h> 	// ALL
 
-// include CUDA version-dependent macros and include files
+#include <carlsim_definitions.h> 	// ALL
 #include <cuda_version_control.h>
+
 
 // constructor
 PoissonRate::PoissonRate(int nNeur, bool onGPU): nNeur_(nNeur), onGPU_(onGPU) {
