@@ -4,14 +4,14 @@
 # Note: all paths should be absolute (start with /)
 #------------------------------------------------------------------------------
 # desired installation path of libcarlsim and headers
-CARLSIM_LIB_DIR ?= /opt/CARL/CARLsim-3.1-dev
+CARLSIM_LIB_DIR ?= /opt/CARL/CARLsim
 
 # cuda capability major version number for GPU device
 CUDA_MAJOR_NUM ?= 3
 # cuda capability minor version number for GPU device
 CUDA_MINOR_NUM ?= 5
 # cuda toolkit version (major number only)
-CARLSIM_CUDAVER ?= 7
+CARLSIM_CUDAVER ?= 6
 
 # CUDA Installation location. If your CUDA installation is not /usr/local/cuda,
 # please set CUDA_INSTALL_PATH to point to the correct location or set it as
@@ -25,7 +25,8 @@ CARLSIM_FASTMATH ?= 0
 CARLSIM_CUOPTLEVEL ?= 0
 CARLSIM_DEBUG ?= 0
 
-CPU_ONLY ?= 1
+# disable GPU support by setting CPU_ONLY to 1
+CPU_ONLY ?= 0
 
 
 #------------------------------------------------------------------------------

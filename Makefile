@@ -1,10 +1,6 @@
 # Main Makefile for compiling, testing, and installing CARLsim
 # these variables collect the information from the other modules
 
-carlsim_major_num := 3
-carlsim_minor_num := 0
-carlsim_build_num := 3
-
 default_targets :=
 common_sources :=
 common_objs :=
