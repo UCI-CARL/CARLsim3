@@ -11,6 +11,11 @@ Release 3.1
 Build 3.1.0
 ---------------------
 
+2015-09-16     Eric 'Siggy' Scott <escott8@gmu.edu>
+  * Fix chunking and logging features in tools/ecj_pti.
+  * Rename user.mk to user.mk.sample
+  * Change ECJ_DIR parameter to ECJ_JAR, pointing directly to the jar file.
+
 2015-09-16     Ting-Shuo Chou <tingshuc@uci.edu>
   + Replace 'long int' and 'long' by 'int64_t', which fixes cross-platform
     issues.
