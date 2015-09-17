@@ -146,8 +146,8 @@ short int CpuSNN::connect(int grpId1, int grpId2, const std::string& _type, floa
 
 	if ( _type.find("random") != std::string::npos) {
 		newInfo->type 	= CONN_RANDOM;
-		newInfo->numPostSynapses	= std::min(grp_Info[grpId2].SizeN,((int) (prob*grp_Info[grpId2].SizeN +6.5*sqrt(prob*(1-prob)*grp_Info[grpId2].SizeN)+0.5))); // estimate the maximum number of connections we need.  This uses a binomial distribution at 6.5 stds.
-		newInfo->numPreSynapses   = std::min(grp_Info[grpId1].SizeN,((int) (prob*grp_Info[grpId1].SizeN +6.5*sqrt(prob*(1-prob)*grp_Info[grpId1].SizeN)+0.5))); // estimate the maximum number of connections we need.  This uses a binomial distribution at 6.5 stds.
+		newInfo->numPostSynapses	= (std::min)(grp_Info[grpId2].SizeN,((int) (prob*grp_Info[grpId2].SizeN +6.5*sqrt(prob*(1-prob)*grp_Info[grpId2].SizeN)+0.5))); // estimate the maximum number of connections we need.  This uses a binomial distribution at 6.5 stds.
+		newInfo->numPreSynapses   = (std::min)(grp_Info[grpId1].SizeN,((int) (prob*grp_Info[grpId1].SizeN +6.5*sqrt(prob*(1-prob)*grp_Info[grpId1].SizeN)+0.5))); // estimate the maximum number of connections we need.  This uses a binomial distribution at 6.5 stds.
 	}
 	//so you're setting the size to be prob*Number of synapses in group info + some standard deviation ...
 	else if ( _type.find("full-no-direct") != std::string::npos) {
@@ -698,7 +698,7 @@ int CpuSNN::runNetwork(int _nsec, int _nmsec, bool printRunSummary, bool copySta
 
 	// set the Poisson generation time slice to be at the run duration up to PROPOGATED_BUFFER_SIZE ms.
 	// \TODO: should it be PROPAGATED_BUFFER_SIZE-1 or PROPAGATED_BUFFER_SIZE ?
-	setGrpTimeSlice(ALL, std::max(1,std::min(runDurationMs,PROPAGATED_BUFFER_SIZE-1)));
+	setGrpTimeSlice(ALL, (std::max)(1,(std::min)(runDurationMs,PROPAGATED_BUFFER_SIZE-1)));
 
 #ifndef __CPU_ONLY__
 	CUDA_RESET_TIMER(timer);
@@ -3333,7 +3333,7 @@ void CpuSNN::generateSpikesFromFuncPtr(int grpId) {
 
 		// the end of the valid time window is either the length of the scheduling time slice from now (because that
 		// is the max of the allowed propagated buffer size) or simply the end of the simulation
-		unsigned int endOfTimeWindow = std::min(currTime+timeSlice,simTimeRunStop);
+		unsigned int endOfTimeWindow = (std::min)(currTime+timeSlice,simTimeRunStop);
 
 		done = false;
 		while (!done) {

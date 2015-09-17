@@ -351,7 +351,7 @@ void SpikeMonitorCore::calculateFiringRates() {
 	// compute firing rate
 	assert(totalTime_>0); // avoid division by zero
 	for(int i=0;i<nNeurons_;i++) {
-		firingRates_[i]=spkVector_[i].size()*1000.0/totalTime_;
+		firingRates_[i]=spkVector_[i].size()*1000.0f/totalTime_;
 	}
 
 	needToCalculateFiringRates_ = false;
