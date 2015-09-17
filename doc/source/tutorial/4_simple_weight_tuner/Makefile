@@ -26,7 +26,7 @@ all: $(local_targets)
 
 # list all rules, one per target
 simple_weight_tuner: main_simple_weight_tuner.cpp
-	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(CARLSIM_LFLAGS) $< -o $@ $(CARLSIM_LIBS)
+	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $< -o $@ $(CARLSIM_LFLAGS) $(CARLSIM_LIBS)
 
 clean:
 	$(RM) $(local_targets)

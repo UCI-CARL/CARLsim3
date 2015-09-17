@@ -48,8 +48,14 @@
 TEST(CUBA, firingRateVsData) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	for (int hasHighFiring=0; hasHighFiring<=1; hasHighFiring++) {
-		for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+		for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 			CARLsim* sim = new CARLsim("CUBA.firingRateVsData",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
 			int g1=sim->createGroup("excit", 1, EXCITATORY_NEURON);
 			sim->setNeuronParameters(g1, 0.02f, 0.2f, -65.0f, 8.0f); // RS
@@ -108,7 +114,13 @@ TEST(CUBA, firingRateCPUvsGPU) {
 	int runTimeMs = 767;
 //	fprintf(stderr,"runTime=%d, delay=%d, wt=%f, input=%f\n",runTimeMs,delay,wt,inputRate);
 
-	for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 		CARLsim sim("CUBA.firingRateCPUvsGPU",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
 		int g1=sim.createGroup("excit", 1, EXCITATORY_NEURON);
 		sim.setNeuronParameters(g1, 0.02f, 0.2f, -65.0f, 8.0f); // RS

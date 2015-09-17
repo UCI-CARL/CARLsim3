@@ -76,7 +76,7 @@ public:
 
 		// keep track of accumulated record time
 		// check for arithmetic overflow
-		assert(_accumTimeMs + lapMs > _accumTimeMs);
+		assert(_accumTimeMs + lapMs >= _accumTimeMs);
 		_accumTimeMs += lapMs;
 
 		if (printMessage) {

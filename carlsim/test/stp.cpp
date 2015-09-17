@@ -54,9 +54,15 @@ TEST(STP, firingRateSTDvsSTF) {
 	SpikeMonitor *spkMonG2 = NULL, *spkMonG3 = NULL;
 	PeriodicSpikeGenerator *spkGenG0 = NULL, *spkGenG1 = NULL;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	for (int isRunLong=0; isRunLong<=1; isRunLong++) {
 		for (int hasCOBA=0; hasCOBA<=1; hasCOBA++) {
-			for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+			for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 				// compare
 				float rateG2noSTP = -1.0f;
 				float rateG3noSTP = -1.0f;
@@ -157,7 +163,13 @@ TEST(STP, spikeTimesCPUvsGPU) {
 	for (int hasCOBA=0; hasCOBA<=1; hasCOBA++) {
 		// compare spike times cpu vs gpu
 
-		for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+		for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 			sim = new CARLsim("STP.spikeTimesCPUvsGPU",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
 			int g2=sim->createGroup("STD", 1, EXCITATORY_NEURON);
 			int g3=sim->createGroup("STF", 1, EXCITATORY_NEURON);

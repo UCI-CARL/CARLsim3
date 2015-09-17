@@ -28,7 +28,13 @@ TEST(STDP, setSTDPTrue) {
 	float delta = 40.0f;
 	CARLsim* sim;
 
-	for (int mode=0; mode<=1; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode=0; mode<numModes; mode++) {
 		for (int stdpType = 0; stdpType < 2; stdpType++) { // we have two stdp types {STANDARD, DA_MOD}
 			for(int stdpCurve = 0; stdpCurve < 2; stdpCurve++) { // we have four stdp curves, two for ESTDP, two for ISTDP
 				sim = new CARLsim("STDP.setSTDPTrue",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
@@ -112,7 +118,13 @@ TEST(STDP, setSTDPFalse) {
 	float delta = 4.0f;
 	CARLsim* sim;
 
-	for (int mode=0; mode<=1; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode=0; mode<numModes; mode++) {
 		sim = new CARLsim("STDP.setSTDPFalse",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
 		int g1=sim->createGroup("excit", 10, EXCITATORY_NEURON);
@@ -162,7 +174,13 @@ TEST(STDP, setNeuromodulatorParameters) {
 	float tauNE = 400.0f;
 	CARLsim* sim;
 
-	for (int mode=0; mode<=1; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode=0; mode<numModes; mode++) {
 		sim = new CARLsim("STDP.setNeuromodulatorParameters",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
 		int g1=sim->createGroup("excit", 10, EXCITATORY_NEURON);
@@ -210,7 +228,13 @@ TEST(STDP, DASTDPWeightBoost) {
 	SpikeMonitor* spikeMonPre;
 	float weightDAMod, weightNonDAMod;
 
-	for (int mode = 0; mode < 2; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode = 0; mode < numModes; mode++) {
 		for (int coba = 0; coba < 2; coba++) {
 			for (int damod = 0; damod < 2; damod++) {
 				CARLsim* sim = new CARLsim("STDP.DASTDPWeightBoost", mode?GPU_MODE:CPU_MODE, SILENT, 0, 42);
@@ -320,7 +344,13 @@ TEST(STDP, ESTDPExpCurve) {
 	float initWeight = 5.0f;
 	float minInhWeight = 0.0f;
 
-	for (int mode = 0; mode < 2; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode = 0; mode < numModes; mode++) {
 		for (int coba = 0; coba < 2; coba++) {
 			for (int offset = -30; offset <= 30; offset += 5) {
 				if (offset == 0) continue; // skip offset == 0;
@@ -404,7 +434,13 @@ TEST(STDP, ESTDPTimingBasedCurve) {
 	float initWeight = 5.0f;
 	float minInhWeight = 0.0f;
 
-	for (int mode = 0; mode < 2; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode = 0; mode < numModes; mode++) {
 		for (int coba = 0; coba < 2; coba++) {
 			for (int offset = -24; offset <= 24; offset += 3) {
 				if (offset == 0) continue; // skip offset == 0;
@@ -492,7 +528,13 @@ TEST(STDP, ISTDPPulseCurve) {
 	float initWeight = 5.0f;
 	float minInhWeight = 0.0f;
 
-	for (int mode = 0; mode < 2; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode = 0; mode < numModes; mode++) {
 		for (int coba = 0; coba < 2; coba++) {
 			for (int offset = -15; offset <= 15; offset += 10) {
 				// create a network
