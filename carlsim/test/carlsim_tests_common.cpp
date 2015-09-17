@@ -13,9 +13,9 @@
 // adding more meta-data to the header section of the binary file), then this function
 // here needs to be adjusted...
 // Same goes for readAndPrintSpikeFile.
-void readAndReturnSpikeFile(const std::string fileName, int*& AERArray, long &arraySize){
+void readAndReturnSpikeFile(const std::string fileName, int*& AERArray, int64_t &arraySize){
 	FILE* pFile;
-	long lSize;
+	int64_t lSize;
 	size_t result;
 	pFile = fopen ( fileName.c_str() , "rb" );
 	if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
@@ -61,7 +61,7 @@ void readAndReturnSpikeFile(const std::string fileName, int*& AERArray, long &ar
 // \FIXME: same as above
 void readAndPrintSpikeFile(const std::string fileName){
 	int* arrayAER;
-	long arraySize;
+	int64_t arraySize;
 	readAndReturnSpikeFile(fileName, arrayAER, arraySize);
 
 	for (int i=0; i<arraySize; i+=2)

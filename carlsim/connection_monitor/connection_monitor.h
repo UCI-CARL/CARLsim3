@@ -44,6 +44,7 @@
 
 #include <vector>					// std::vector
 #include <carlsim_definitions.h>	// ALL
+#include <stdint.h>
 
 class ConnectionMonitorCore; // forward declaration of implementation
 
@@ -391,7 +392,7 @@ class ConnectionMonitor {
 	 * time reported here is not necessarily equal to the time reported by CARLsim::getSimTime.
 	 * \since v3.0
 	 */
-	long int getTimeMsCurrentSnapshot();
+	int64_t getTimeMsCurrentSnapshot();
 
 	/*!
 	 * \brief Returns the timestamp of the last snapshot (ms since beginning of simulation)
@@ -400,7 +401,7 @@ class ConnectionMonitor {
 	 * passed since the beginning of the simulation (in milliseconds).
 	 * \since v3.0
 	 */
-	long int getTimeMsLastSnapshot();
+	int64_t getTimeMsLastSnapshot();
 
 	/*!
 	 * \brief Returns the timestamp difference of the current and last snapshot
@@ -411,7 +412,7 @@ class ConnectionMonitor {
 	 * This is a convenience function whose result is equivalent to getTimeMsCurrentSnapshot()-getTimeMsLastSnapshot().
 	 * \since v3.0
 	 */
-	long int getTimeMsSinceLastSnapshot();
+	int64_t getTimeMsSinceLastSnapshot();
 
 	/*!
 	 * \brief Returns the absolute sum of all the weight changes since the last snapshot

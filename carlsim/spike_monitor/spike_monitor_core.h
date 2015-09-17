@@ -44,6 +44,7 @@
 
 #include <carlsim_datastructures.h>	// spikeMonMode_t
 #include <stdio.h>					// FILE
+#include <stdint.h>					// int64_t
 #include <vector>					// std::vector
 
 class CpuSNN; // forward declaration of CpuSNN class
@@ -126,16 +127,16 @@ public:
 	float getPopStdFiringRate();
 
 	//! returns the total recorded time in ms
-	long int getRecordingTotalTime() { return totalTime_; }
+	int64_t getRecordingTotalTime() { return totalTime_; }
 
 	//! retunrs the timestamp of the first startRecording in ms
-	long int getRecordingStartTime() { return startTime_; }
+	int64_t getRecordingStartTime() { return startTime_; }
 
 	//! returns the timestamp of the last startRecording in ms
-	long int getRecordingLastStartTime() { return startTimeLast_; }
+	int64_t getRecordingLastStartTime() { return startTimeLast_; }
 
 	//! returns the timestamp of stopRecording
-	long int getRecordingStopTime() { return stopTime_; }
+	int64_t getRecordingStopTime() { return stopTime_; }
 
 	//! returns the 2D AER vector
 	std::vector<std::vector<int> > getSpikeVector2D();
@@ -174,19 +175,19 @@ public:
 	void setSpikeFileId(FILE* spikeFileId);
 
 	//! returns timestamp of last SpikeMonitor update
-	long int getLastUpdated() { return spkMonLastUpdated_; }
+	int64_t getLastUpdated() { return spkMonLastUpdated_; }
 
 	//! sets timestamp of last SpikeMonitor update
-	void setLastUpdated(long int lastUpdate) { spkMonLastUpdated_ = lastUpdate; }
+	void setLastUpdated(int64_t lastUpdate) { spkMonLastUpdated_ = lastUpdate; }
 
     //! returns true if spike buffer is close to maxAllowedBufferSize
     bool isBufferBig();
 
     //! returns the approximate size of the spike vector in bytes
-    long int getBufferSize();
+    int64_t getBufferSize();
 
     //! returns the total accumulated time
-    long int getAccumTime();
+    int64_t getAccumTime();
 
 private:
 	//! initialization method
@@ -226,13 +227,13 @@ private:
 	std::vector<float> firingRatesSorted_;
 
 	bool recordSet_;			//!< flag that indicates whether we're currently recording
-	long int startTime_;	 	//!< time (ms) of first call to startRecording
-	long int startTimeLast_; 	//!< time (ms) of last call to startRecording
-	long int stopTime_;		 	//!< time (ms) of stopRecording
-	long int totalTime_;		//!< the total amount of recording time (over all recording periods)
-	long int accumTime_;
+	int64_t startTime_;	 	//!< time (ms) of first call to startRecording
+	int64_t startTimeLast_; 	//!< time (ms) of last call to startRecording
+	int64_t stopTime_;		 	//!< time (ms) of stopRecording
+	int64_t totalTime_;		//!< the total amount of recording time (over all recording periods)
+	int64_t accumTime_;
 
-	long int spkMonLastUpdated_;//!< time (ms) when group was last run through updateSpikeMonitor
+	int64_t spkMonLastUpdated_;//!< time (ms) when group was last run through updateSpikeMonitor
 
 	//! whether data should be persistent (true) or clear() should be automatically called by startRecording (false)
 	bool persistentData_;

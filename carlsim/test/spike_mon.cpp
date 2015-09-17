@@ -326,7 +326,7 @@ TEST(SpikeMon, spikeTimes) {
 
 		// read spike file
 		int* inputArray = NULL;
-		long inputSize;
+		int64_t inputSize;
 		readAndReturnSpikeFile("spkG0.dat",inputArray,inputSize);
 
 		// sanity-check the size of the arrays
@@ -423,10 +423,10 @@ TEST(SpikeMon, getGroupFiringRate){
 
 		// read spike files (which are now complete because of stopRecording above)
 		int* inputArray = NULL;
-		long inputSize;
+		int64_t inputSize;
 		readAndReturnSpikeFile("spkInputGrp.dat",inputArray,inputSize);
 		int* g1Array = NULL;
-		long g1Size;
+		int64_t g1Size;
 		readAndReturnSpikeFile("spkG1Grp.dat",g1Array,g1Size);
 
 		// activity in the input group was recorded only for a short period
@@ -503,10 +503,10 @@ TEST(SpikeMon, getMaxMinNeuronFiringRate){
 		spikeMonG1->stopRecording();
 
 		int* inputArray = NULL;
-		long inputSize;
+		int64_t inputSize;
 		readAndReturnSpikeFile("spkInputGrp.dat",inputArray,inputSize);
 		int* g1Array = NULL;
-		long g1Size;
+		int64_t g1Size;
 		readAndReturnSpikeFile("spkG1Grp.dat",g1Array,g1Size);
 
 		// divide both by two, because we are only counting spike events, for
@@ -605,7 +605,7 @@ TEST(SpikeMon, setLogFile) {
 
 		// read spike file
 		int* inputArray = NULL;
-		long inputSize;
+		int64_t inputSize;
 		readAndReturnSpikeFile("spkG0.dat",inputArray,inputSize);
 
 		// sanity-check the size of the arrays

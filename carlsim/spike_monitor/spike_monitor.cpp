@@ -164,28 +164,28 @@ void SpikeMonitor::stopRecording(){
 	spikeMonitorCorePtr_->stopRecording();
 }
 
-long int SpikeMonitor::getRecordingTotalTime() {
+int64_t SpikeMonitor::getRecordingTotalTime() {
 	std::string funcName = "getRecordingTotalTime()";
 	UserErrors::assertTrue(!isRecording(), UserErrors::CANNOT_BE_ON, funcName, "Recording");
 
 	return spikeMonitorCorePtr_->getRecordingTotalTime();
 }
 
-long int SpikeMonitor::getRecordingLastStartTime() {
+int64_t SpikeMonitor::getRecordingLastStartTime() {
 	std::string funcName = "getRecordingLastStartTime()";
 	UserErrors::assertTrue(!isRecording(), UserErrors::CANNOT_BE_ON, funcName, "Recording");
 
 	return spikeMonitorCorePtr_->getRecordingLastStartTime();
 }
 
-long int SpikeMonitor::getRecordingStartTime() {
+int64_t SpikeMonitor::getRecordingStartTime() {
 	std::string funcName = "getRecordingStartTime()";
 	UserErrors::assertTrue(!isRecording(), UserErrors::CANNOT_BE_ON, funcName, "Recording");
 
 	return spikeMonitorCorePtr_->getRecordingStartTime();
 }
 
-long int SpikeMonitor::getRecordingStopTime() {
+int64_t SpikeMonitor::getRecordingStopTime() {
 	std::string funcName = "getRecordingStopTime()";
 	UserErrors::assertTrue(!isRecording(), UserErrors::CANNOT_BE_ON, funcName, "Recording");
 

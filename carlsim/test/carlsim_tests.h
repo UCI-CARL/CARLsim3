@@ -41,6 +41,7 @@
 #ifndef _CARLSIM_TEST_H_
 #define _CARLSIM_TEST_H_
 
+#include <stdint.h>
 #include <algorithm>		// std::find
 #include <vector>			// std::vector
 #include <string>			// std::string, memset
@@ -89,7 +90,7 @@
 /// Utility Functions
 /// **************************************************************************************************************** ///
 
-void readAndReturnSpikeFile(const std::string fileName, int*& AERArray, long &arraySize);
+void readAndReturnSpikeFile(const std::string fileName, int*& AERArray, int64_t &arraySize);
 void readAndPrintSpikeFile(const std::string fileName);
 
 #endif // _CARLSIM_TEST_H_
