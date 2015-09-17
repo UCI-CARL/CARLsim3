@@ -37,6 +37,8 @@ install: $(carlsim_lib)
 		$(CARLSIM_LIB_DIR)/include/spike_generators
 	@test -d $(CARLSIM_LIB_DIR)/include/simple_weight_tuner || mkdir \
 		$(CARLSIM_LIB_DIR)/include/simple_weight_tuner
+	@test -d $(CARLSIM_LIB_DIR)/include/stopwatch || mkdir \
+		$(CARLSIM_LIB_DIR)/include/stopwatch
 	@test -d $(CARLSIM_LIB_DIR)/include/visual_stimulus || mkdir \
 		$(CARLSIM_LIB_DIR)/include/visual_stimulus
 	@install -m 0755 $(carlsim_lib).$(lib_ver) $(CARLSIM_LIB_DIR)/lib
@@ -50,6 +52,7 @@ install: $(carlsim_lib)
 	@install -m 0644 $(interface_dir)/include/callback.h \
 		$(interface_dir)/include/carlsim_datastructures.h \
 		$(interface_dir)/include/carlsim_definitions.h \
+		$(interface_dir)/include/carlsim_log_definitions.h \
 		$(interface_dir)/include/linear_algebra.h \
 		$(interface_dir)/include/poisson_rate.h \
 		$(interface_dir)/include/carlsim.h $(interface_dir)/include/user_errors.h \
@@ -70,6 +73,8 @@ install: $(carlsim_lib)
 		$(CARLSIM_LIB_DIR)/include/spike_generators
 	@install -m 0644 $(tools_swt_dir)/simple_weight_tuner.h \
 		$(CARLSIM_LIB_DIR)/include/simple_weight_tuner
+	@install -m 0644 $(tools_stopwatch_dir)/stopwatch.h \
+		$(CARLSIM_LIB_DIR)/include/stopwatch
 
 # uninstall LIB folder, which by default is under /opt/
 uninstall:

@@ -1,11 +1,11 @@
 #include <user_errors.h>
 
-#include <carlsim_definitions.h>
+#include <iostream>						// std::cerr, std::cerr, std::endl
+#include <stdlib.h>						// exit, EXIT_FAILURE
+#include <string>						// std::string
 
-#include <stdio.h>
-#include <iostream>		// std::cerr, std::cerr, std::endl
-#include <stdlib.h>		// exit, EXIT_FAILURE
-#include <string>		// std::string
+#include <carlsim_log_definitions.h>	// CARLSIM_ERROR
+
 
 /// **************************************************************************************************************** ///
 /// PUBLIC METHODS

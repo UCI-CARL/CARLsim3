@@ -23,7 +23,7 @@ CUDA_INSTALL_PATH ?= /usr/local/cuda
 # debugging info.  Default: 0.
 CARLSIM_FASTMATH ?= 0
 CARLSIM_CUOPTLEVEL ?= 0
-CARLSIM_DEBUG ?= 0
+CARLSIM_DEBUG ?= 1
 
 
 #------------------------------------------------------------------------------

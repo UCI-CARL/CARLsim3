@@ -11,6 +11,9 @@ Release 3.1
 Build 3.1.0
 ---------------------
 
+2015-09-16     Michael Beyeler <mbeyeler@uci.edu>
+  + Added Stopwatch utility.
+
 2015-09-15     Michael Beyeler <mbeyeler@uci.edu>
                Ting-Shuo Chou <tingshuc@uci.edu>
   + Create "results/" directory automatically if necessary.
@@ -67,39 +70,6 @@ Release 3.0
 ---------------------
 Build 3.0.2
 ---------------------
-
-2015-07-14     Michael Beyeler <mbeyeler@uci.edu>
-  * Fixed ln -T compilation issues for Mac OS X.
-  * Fixed most compiler warnings for CARLsim kernel.
-  * Fixed std::pow issue for C++11 in snn_gpu.cu.
-  * Fixed outcome of test Interface.setNeuronParametersDeath.
-
-2015-07-04     Kristofor D. Carlson <kdcarlso@uci.edu>
-  * Changed USER_MK_PATH default path value (. instead of ./). Users
-	  should not have a slash at the end of their USER_MK_PATH variable.
-	- Removed assertions that forced Izh parameters to be positive.
-	* Changed format of ECJ_DIR environment variable. It now must name
-	  the ECJ jar file explicitly instead of pointing to the ECJ
-		installation directory.
-
-2015-06-08     Michael Beyeler <mbeyeler@uci.edu>
-  * Fixed handling of scheduling time slice in SpikeGenerator::nextSpikeTime.
-  * Fixed dropping of spikes in SpikeGeneratorFromFile and
-    SpikeGeneratorFromVector.
-  * Fixed multiple scheduling of the same spike time in CPU mode.
-  
-2015-05-26     Michael Beyeler <mbeyeler@uci.edu>
-  * Fixed third grid dimension in GroupMonitor (OAT) heatmap plot.
-  
-2015-05-25     Michael Beyeler <mbeyeler@uci.edu>
-  * Improved handling of "gaussian" connection when pre and post have different
-    Grid3D sizes.
-  * Improved ConnMon test case.
-  * Fixed SpikeMon.clear test.
-  * Fixed sign of weights in user-defined connections.
-
-2015-05-24     Michael Beyeler <mbeyeler@uci.edu>
-  * Fixed ConnectionMonitor (OAT) issue concerning large number of subplots.
 
 2015-05-21     Michael Beyeler <mbeyeler@uci.edu>
   * Fixed Endianness issue in OAT readers.

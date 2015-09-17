@@ -670,6 +670,7 @@ INPUT                  = ../carlsim/interface/include \
                          ../tools/offline_analysis_toolbox \
                          ../tools/spike_generators \
                          ../tools/simple_weight_tuner \
+                         ../tools/stopwatch/stopwatch.h \
                          source/user_guide \
                          source/user_guide/1_getting_started \
                          source/user_guide/2_basics \
