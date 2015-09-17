@@ -6,6 +6,7 @@ import ecjapp.util.Option;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -59,9 +60,13 @@ public class CommandController {
         PopulationToFile.DoubleVectorPopulationToFile(individuals, carlSimInput);
         carlSimInput.close(); // Sends EOF
         p.waitFor();
+        
+        System.err.println(streamToString(p.getErrorStream()));
+        return streamToString(p.getInputStream());
+    }
 
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
+    private String streamToString(final InputStream s) throws IOException {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(s));
         final StringBuilder sb = new StringBuilder();
         String line = "";			
         while ((line = reader.readLine())!= null) {

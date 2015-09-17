@@ -3,7 +3,7 @@
 # PTI exmaple programs from libCARLsim.a.
 
 # set this to wherever user.mk is located
-USER_MK_PATH ?= .
+USER_MK_PATH ?= ../../
 include $(USER_MK_PATH)/user.mk
 
 # -----------------------------------------------------------------------------
@@ -37,7 +37,8 @@ CARLSIM_FLAGS += -I$(CARLSIM_LIB_DIR)/include/kernel \
 				 -I$(CARLSIM_LIB_DIR)/include/connection_monitor \
 				 -I$(CARLSIM_LIB_DIR)/include/spike_generators \
 				 -I$(CARLSIM_LIB_DIR)/include/visual_stimulus \
-				 -I$(CARLSIM_LIB_DIR)/include/simple_weight_tuner
+				 -I$(CARLSIM_LIB_DIR)/include/simple_weight_tuner \
+				 -I$(CARLSIM_LIB_DIR)/include/stopwatch
 CARLSIM_LIBS  += -L$(CARLSIM_LIB_DIR)/lib -lCARLsim
 
 
@@ -54,8 +55,10 @@ all: $(all_targets)
 install: $(install_targets)
 
 clean:
-	$(RM) $(objects) $(libraries) $(pti_programs) $(izk_build_files)
+	$(RM) $(objects) $(libraries) $(pti_programs) $(izk_build_files) $(all_targets)
+	ant clean
 
 distclean:
-	$(RM) $(objects) $(libraries) $(pti_programs) $(output_files) $(izk_build_files)
+	$(RM) $(objects) $(libraries) $(pti_programs) $(output_files) $(izk_build_files) $(all_targets)
+	ant clean
 

@@ -211,6 +211,7 @@ public class ThreadDynamicArgumentsTest {
         final ThreadDynamicArguments sut3 = new ThreadDynamicArguments();
         sut3.setup(state3, BASE);
         
+        assertTrue(sut.equals(sut));
         assertTrue(sut.equals(sut1));
         assertFalse(sut.equals(sut2));
         assertFalse(sut.equals(sut3));

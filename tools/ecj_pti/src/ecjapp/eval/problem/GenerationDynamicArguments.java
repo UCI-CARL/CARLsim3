@@ -12,13 +12,13 @@ import ecjapp.util.Option;
  * "option" specifies the name of the CLI parameter to use.
  * 
  * Example: If the option is "-gen" and the EvolutionState passed to get() is on
- * generation 20, then the arguments "-gen 3" is returned by get().
+ * generation 20, then the arguments "-gen 20" is returned by get().
  * 
  * If another DynamicArguments is specified for the "dynamicArguments" option,
  * then the result of its get() method will be prepended.
  * 
  * Example: If the object in the "dynamicArguments" field returns "-device 3",
- * then the result of the above example will be "-device 3 -gen 3".
+ * then the result of the above example will be "-device 3 -gen 20".
  * 
  * @author Eric 'Siggy' Scott
  */

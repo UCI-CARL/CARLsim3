@@ -160,6 +160,7 @@ public class GenerationDynamicArgumentsTest {
         final GenerationDynamicArguments sut3 = new GenerationDynamicArguments();
         sut3.setup(state3, BASE);
         
+        assertTrue(sut.equals(sut));
         assertTrue(sut.equals(sut1));
         assertFalse(sut.equals(sut2));
         assertFalse(sut.equals(sut3));

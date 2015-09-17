@@ -4,7 +4,7 @@
 local_dir := $(ex_dir)
 
 # Examples that don't have any special dependencies.
-example_names := ReprintExample SumExample
+example_names := ReprintExample SumExample AbortExample
 example := $(addprefix $(local_dir)/, $(example_names))
 output := error.log $(results_dir)/*.log
 local_prog := $(example)

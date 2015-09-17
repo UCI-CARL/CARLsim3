@@ -10,6 +10,7 @@ import ecjapp.eval.problem.objective.ObjectiveFunction;
 import ecjapp.util.Misc;
 import ecjapp.util.Option;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,10 +47,16 @@ public class CommandProblem extends Problem implements SimpleGroupedProblemForm 
     public final static String P_SIMULATION_COMMAND_ARGUMENTS = "simulationCommandArguments";
     public final static String P_OBJECTIVE_FUNCTION = "objective";
     public final static String P_DYNAMIC_ARGUMENTS = "dynamicArguments";
+    public final static String P_REEVALUATE = "reevaluate";
+    public final static String P_ERROR_GENES_FILE = "errorGenesFile";
+    public final static String P_ERROR_RESULTS_FILE = "errorResultsFile";
     
     private ObjectiveFunction objective;
     private Option<DynamicArguments> dynamicArguments;
     private CommandController controller;
+    private boolean reevaluate;
+    private int genesErrorLog;
+    private int resultsErrorLog;
     
     public ObjectiveFunction getObjective() { return objective; }
     public CommandController getCommandController() { return controller; }
@@ -78,6 +85,22 @@ public class CommandProblem extends Problem implements SimpleGroupedProblemForm 
         else
             this.dynamicArguments = Option.NONE;
         this.controller = new CommandController(commandPath, commandArguments, remoteInfo);
+        this.reevaluate = state.parameters.getBoolean(base.push(P_REEVALUATE), null, false);
+        
+        final File genesErrorFile = state.parameters.getFile(base.push(P_ERROR_GENES_FILE),null);
+        if (genesErrorFile!=null) try {
+            genesErrorLog = state.output.addLog(genesErrorFile, true, false);
+        }
+        catch (final IOException i) {
+            state.output.fatal("An IOException occurred trying to create the log " + genesErrorFile + ":\n" + i);
+        }
+        final File resultsErrorFile = state.parameters.getFile(base.push(P_ERROR_RESULTS_FILE),null);
+        if (resultsErrorFile!=null) try {
+            resultsErrorLog = state.output.addLog(resultsErrorFile, true, false);
+        }
+        catch (final IOException i) {
+            state.output.fatal("An IOException occurred trying to create the log " + resultsErrorFile + ":\n" + i);
+        }
         
         assert(repOK());
     }
@@ -135,27 +158,45 @@ public class CommandProblem extends Problem implements SimpleGroupedProblemForm 
         
         final List<DoubleVectorIndividual> chunk = new ArrayList<DoubleVectorIndividual>() {{
 		for(int i = from; i < to; i++)
-		    if (!individuals[i].evaluated)
+		    if (reevaluate || !individuals[i].evaluated)
 			add((DoubleVectorIndividual)individuals[i]);
         }};
-        
-        try {
+        if (!chunk.isEmpty()) {
             final String extraArguments = (dynamicArguments.isDefined()) ? dynamicArguments.get().get(state, individuals, from, to, subpopulation, threadnum) : "";
-            final String simulationResult = controller.execute(chunk, extraArguments);
-            final String[] lines = simulationResult.split("\n");
-            if (lines.length != chunk.size())
-                throw new IllegalStateException(String.format("%s: Sent %d individuals to external command %s, but the returned simulation results had %d lines.", this.getClass().getSimpleName(), chunk.size(), controller.getCommandPath(), lines.length));
-            for (int i = 0; i < lines.length; i++) {
-                final Individual ind = individuals[from + i];
-                ind.fitness = objective.evaluate(state, lines[i]);
-                ind.evaluated = true;
+            try {
+                final String simulationResult = controller.execute(chunk, extraArguments);
+                final String[] lines = simulationResult.split("\n");
+                if (lines.length != chunk.size()) {
+                    writeGenomesAndResults(state, chunk, lines);
+                    throw new IllegalStateException(String.format("%s: Sent %d individuals to external command %s, but the returned simulation results had %d lines.", this.getClass().getSimpleName(), chunk.size(), controller.getCommandPath(), lines.length));
+                }
+                for (int i = 0; i < lines.length; i++) {
+                    final Individual ind = individuals[from + i];
+                    ind.fitness = objective.evaluate(state, lines[i]);
+                    ind.evaluated = true;
+                }
             }
-            
-        }
-        catch (final Exception e) {
-            state.output.fatal(e.toString());
+            catch (final Exception e) {
+                state.output.fatal(e.toString());
+            }
         }
         assert(repOK());
+    }
+    
+    /** If the simulator fails, we write some data so we can determine what caused it. */
+    private void writeGenomesAndResults(final EvolutionState state, final List<DoubleVectorIndividual> chunk, final String[] lines) {
+        assert(chunk != null);
+        assert(lines != null);
+        
+        final StringBuilder genesSb = new StringBuilder();
+        for (final DoubleVectorIndividual ind : chunk)
+            genesSb.append(ind.genotypeToString()).append("\n");
+        state.output.println(genesSb.toString(), genesErrorLog);
+
+        final StringBuilder resultsSb = new StringBuilder();
+        for (final String s : lines)
+            resultsSb.append(s).append("\n");
+        state.output.println(resultsSb.toString(), resultsErrorLog);
     }
     
     public final boolean repOK() {
