@@ -1,4 +1,4 @@
-Legend:
+﻿Legend:
   + added element
   - removed element
   * changed element
@@ -10,6 +10,10 @@ Release 3.1
 ---------------------
 Build 3.1.0
 ---------------------
+
+2015-09-16     Ting-Shuo Chou <tingshuc@uci.edu>
+  + Replaced 'long int' and 'long' by 'int64_t', which fixed cross-platform
+    issuses.
 
 2015-09-16     Michael Beyeler <mbeyeler@uci.edu>
   + Added Stopwatch utility.
