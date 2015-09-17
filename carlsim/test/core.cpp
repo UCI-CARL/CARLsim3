@@ -119,8 +119,14 @@ TEST(CORE, setExternalCurrent) {
 	CARLsim * sim;
 	int nNeur = 10;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	for (int hasCOBA=0; hasCOBA<=1; hasCOBA++) {
-		for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+		for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 			sim = new CARLsim("CORE.setExternalCurrent", isGPUmode?GPU_MODE:CPU_MODE, SILENT, 0, 42);
 			int g1=sim->createGroup("excit1", nNeur, EXCITATORY_NEURON);
 			sim->setNeuronParameters(g1, 0.02f, 0.2f, -65.0f, 8.0f);
@@ -188,7 +194,13 @@ TEST(CORE, biasWeights) {
 	int *nSpkHighWt = new int[nNeur];
 	memset(nSpkHighWt, 0, nNeur*sizeof(int));
 
-	for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 		sim = new CARLsim("CORE.biasWeights",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
 		int g1=sim->createGroup("excit", nNeur, EXCITATORY_NEURON);
 		sim->setNeuronParameters(g1, 0.02f, 0.2f,-65.0f,8.0f);
@@ -237,7 +249,13 @@ TEST(CORE, scaleWeights) {
 	int *nSpkHighWt = new int[nNeur];
 	memset(nSpkHighWt, 0, nNeur*sizeof(int));
 
-	for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 		sim = new CARLsim("CORE.scaleWeights",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
 		int g1=sim->createGroup("excit", nNeur, EXCITATORY_NEURON);
 		sim->setNeuronParameters(g1, 0.02f, 0.2f,-65.0f,8.0f);
@@ -286,7 +304,13 @@ TEST(CORE, setWeight) {
 	int *nSpkHighWt = new int[nNeur];
 	memset(nSpkHighWt, 0, nNeur*sizeof(int));
 
-	for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 		sim = new CARLsim("CORE.setWeight",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
 		int g1=sim->createGroup("excit", nNeur, EXCITATORY_NEURON);
 		sim->setNeuronParameters(g1, 0.02f, 0.2f,-65.0f,8.0f);
@@ -333,7 +357,13 @@ TEST(CORE, getDelayRange) {
 	int minDelay = 1;
 	int maxDelay = 10;
 
-	for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 		sim = new CARLsim("CORE.getDelayRange",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
 		int g1=sim->createGroup("excit", nNeur, EXCITATORY_NEURON);
 		sim->setNeuronParameters(g1, 0.02f, 0.2f,-65.0f,8.0f);
@@ -370,7 +400,13 @@ TEST(CORE, getWeightRange) {
 	float initWt = 1.25f;
 	float maxWt = 10.0f;
 
-	for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 		sim = new CARLsim("CORE.getWeightRange",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
 		int g1=sim->createGroup("excit", nNeur, EXCITATORY_NEURON);
 		sim->setNeuronParameters(g1, 0.02f, 0.2f,-65.0f,8.0f);
@@ -492,10 +528,16 @@ TEST(CORE, startStopTestingPhase) {
 
 	CARLsim* sim;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	// run twice, once with expected start/stop order, once with a bunch of additional (but
 	// irrelevant start/stop calls)
 	for (int run=0; run<=1; run++) {
-		for (int mode=0; mode<=1; mode++) {
+		for (int mode=0; mode<numModes; mode++) {
 			sim = new CARLsim("CORE.startStopTestingPhase",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
 			int gExc = sim->createGroup("output", 1, EXCITATORY_NEURON);
@@ -573,7 +615,13 @@ TEST(CORE, saveLoadSimulation) {
 	std::vector<std::vector<float> > weightsSave;
 	std::vector<std::vector<float> > weightsLoad;
 
-	for (int mode=0; mode<=1; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode=0; mode<numModes; mode++) {
 		for (int coba=0; coba<=1; coba++) {
 			for (int isPlastic=0; isPlastic<=1; isPlastic++) {
 				for (int loadSim=0; loadSim<=1; loadSim++) {

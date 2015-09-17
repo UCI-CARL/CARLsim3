@@ -16,7 +16,11 @@ TEST(PoissRate, getRateNeurId) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
 	int nNeur = 100;
+#ifdef __CPU_ONLY__
+	for (int onGPU=0; onGPU<=0; onGPU++) {
+#else
 	for (int onGPU=0; onGPU<=1; onGPU++) {
+#endif
 		PoissonRate rate(nNeur,onGPU==true);
 
 		for (int i=0; i<nNeur; i++) {
@@ -30,7 +34,11 @@ TEST(PoissRate, getRates) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
 	int nNeur = 100;
+#ifdef __CPU_ONLY__
+	for (int onGPU=0; onGPU<=0; onGPU++) {
+#else
 	for (int onGPU=0; onGPU<=1; onGPU++) {
+#endif
 		PoissonRate rate(nNeur,true==onGPU);
 		std::vector<float> ratesVec = rate.getRates();
 
@@ -50,7 +58,11 @@ TEST(PoissRate, setRatesVector) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
 	int nNeur = 100;
+#ifdef __CPU_ONLY__
+	for (int onGPU=0; onGPU<=0; onGPU++) {
+#else
 	for (int onGPU=0; onGPU<=1; onGPU++) {
+#endif
 		PoissonRate rate(nNeur,true==onGPU);
 		std::vector<float> ratesVecIn;
 
@@ -75,7 +87,11 @@ TEST(PoissRate, setRatesFloat) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
 	int nNeur = 100;
+#ifdef __CPU_ONLY__
+	for (int onGPU=0; onGPU<=0; onGPU++) {
+#else
 	for (int onGPU=0; onGPU<=1; onGPU++) {
+#endif
 		PoissonRate rate(nNeur,true==onGPU);
 		rate.setRates(42.0f);
 
@@ -97,7 +113,11 @@ TEST(PoissRate, setRateNeurId) {
 	int nNeur = 100;
 	int neurId = 42;
 	float neurIdRate = 10.25f;
+#ifdef __CPU_ONLY__
+	for (int onGPU=0; onGPU<=0; onGPU++) {
+#else
 	for (int onGPU=0; onGPU<=1; onGPU++) {
+#endif
 		PoissonRate rate(nNeur,true==onGPU);
 		rate.setRate(neurId,neurIdRate);
 

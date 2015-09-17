@@ -76,7 +76,9 @@
 
 #include <propagated_spike_buffer.h>
 #include <poisson_rate.h>
-#include <gpu_random.h>
+#ifndef __CPU_ONLY__
+	#include <gpu_random.h>
+#endif
 
 class SpikeMonitor;
 class SpikeMonitorCore;
@@ -628,6 +630,9 @@ private:
 	void generateSpikesFromFuncPtr(int grpId);
 	void generateSpikesFromRate(int grpId);
 
+	//! stops the CPU/GPU timer and retrieves actual execution time for printSimSummary
+	float getActualExecutionTimeMs();
+
 	int getPoissNeuronPos(int nid);
 	float getWeights(int connProp, float initWt, float maxWt, unsigned int nid, int grpId);
 
@@ -736,17 +741,22 @@ private:
 	void swapConnections(int nid, int oldPos, int newPos);
 
 	void updateAfterMaxTime();
+	void updateFiringTable();
 	void updateSpikesFromGrp(int grpId);
 	void updateSpikeGenerators();
 	void updateSpikeGeneratorsInit();
-
 	int  updateSpikeTables();
+
 	//void updateStateAndFiringTable();
 	bool updateTime(); //!< updates simTime, returns true when a new second is started
+
+	void updateWeights();
+
 
 	// +++++ GPU MODE +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	// TODO: consider moving to snn_gpu.h
 	
+#ifndef __CPU_ONLY__
 	//! initializes params needed in snn_gpu.cu (gets called in CpuSNN constructor)
 	void CpuSNNinit_GPU();
 
@@ -809,6 +819,9 @@ private:
 	void dumpSpikeBuffToFile_GPU(int gid);
 	void findFiring_GPU(int gridSize=64, int blkSize=128);
 
+	//! stops the GPU timer and retrieves actual execution time for printSimSummary
+	float getActualExecutionTimeMs_GPU();
+
 	/*!
 	 * \brief return the number of spikes per neuron for a certain group in GPU mode
 	 *
@@ -841,14 +854,12 @@ private:
 	void spikeGeneratorUpdate_GPU();
 	void startGPUTiming();
 	void stopGPUTiming();
-	void updateFiringTable();
 	void updateFiringTable_GPU();
 	void updateNetwork_GPU(bool resetFiringInfo); //!< Allows parameters to be reset in the middle of the simulation
-	void updateWeights();
 	void updateWeights_GPU();
 	//void updateStateAndFiringTable_GPU();
 	void updateTimingTable_GPU();
-
+#endif
 
 	// +++++ PRIVATE PROPERTIES +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	FILE* loadSimFID;
@@ -993,10 +1004,12 @@ private:
 	unsigned int	nPoissonSpikes;
 
 		//cuda keep track of performance...
-#if __CUDA3__
+#ifndef __CPU_ONLY__
+	#if __CUDA3__
 		unsigned int    timer;
-#else
+	#else
 		StopWatchInterface* timer;
+	#endif
 #endif
 		float		cumExecutionTime;
 		float		lastExecutionTime;
@@ -1091,7 +1104,9 @@ private:
 	float stdpScaleFactor_;
 	float wtChangeDecay_; //!< the wtChange decay
 
+#ifndef __CPU_ONLY__
 	RNG_rand48* gpuPoissonRand;
+#endif
 };
 
 #endif

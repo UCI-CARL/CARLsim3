@@ -2919,42 +2919,20 @@ void CpuSNN::allocateSNN_GPU() {
 	initGPU(gridSize, blkSize);
 }
 
-void CpuSNN::printSimSummary() {
+
+float CpuSNN::getActualExecutionTimeMs_GPU() {
 	checkAndSetGPUDevice();
+	assert(simMode_ == GPU_MODE);
 
-	float etime;
-	if(simMode_ == GPU_MODE) {
-		stopGPUTiming();
-		etime = gpuExecutionTime;
-		CUDA_CHECK_ERRORS( cudaMemcpyFromSymbol( &spikeCountD2Host, secD2fireCnt, sizeof(int), 0, cudaMemcpyDeviceToHost));
-		CUDA_CHECK_ERRORS( cudaMemcpyFromSymbol( &spikeCountD1Host, secD1fireCnt, sizeof(int), 0, cudaMemcpyDeviceToHost));
-		spikeCountAll1secHost = spikeCountD1Host + spikeCountD2Host;
-		CUDA_CHECK_ERRORS( cudaMemcpyFromSymbol( &spikeCountD2Host, spikeCountD2, sizeof(int), 0, cudaMemcpyDeviceToHost));
-		CUDA_CHECK_ERRORS( cudaMemcpyFromSymbol( &spikeCountD1Host, spikeCountD1, sizeof(int), 0, cudaMemcpyDeviceToHost));
-		spikeCountAllHost      = spikeCountD1Host + spikeCountD2Host;
-	}
-	else {
-		stopCPUTiming();
-		etime = cpuExecutionTime;
-	}
+	// stop timer and update class members
+	stopGPUTiming();
+	float etime = gpuExecutionTime;
+	CUDA_CHECK_ERRORS( cudaMemcpyFromSymbol( &spikeCountD2Host, secD2fireCnt, sizeof(int), 0, cudaMemcpyDeviceToHost));
+	CUDA_CHECK_ERRORS( cudaMemcpyFromSymbol( &spikeCountD1Host, secD1fireCnt, sizeof(int), 0, cudaMemcpyDeviceToHost));
+	spikeCountAll1secHost = spikeCountD1Host + spikeCountD2Host;
+	CUDA_CHECK_ERRORS( cudaMemcpyFromSymbol( &spikeCountD2Host, spikeCountD2, sizeof(int), 0, cudaMemcpyDeviceToHost));
+	CUDA_CHECK_ERRORS( cudaMemcpyFromSymbol( &spikeCountD1Host, spikeCountD1, sizeof(int), 0, cudaMemcpyDeviceToHost));
+	spikeCountAllHost = spikeCountD1Host + spikeCountD2Host;
 
-	KERNEL_INFO("\n");
-	KERNEL_INFO("********************      %s Simulation Summary      ***************************",
-		simMode_==GPU_MODE?"GPU":"CPU");
-
-	KERNEL_INFO("Network Parameters: \tnumNeurons = %d (numNExcReg:numNInhReg = %2.1f:%2.1f)", 
-		numN, 100.0*numNExcReg/numN, 100.0*numNInhReg/numN);
-	KERNEL_INFO("\t\t\tnumSynapses = %d", postSynCnt);
-	KERNEL_INFO("\t\t\tmaxDelay = %d", maxDelay_);
-	KERNEL_INFO("Simulation Mode:\t%s",sim_with_conductances?"COBA":"CUBA");
-	KERNEL_INFO("Random Seed:\t\t%d", randSeed_);
-	KERNEL_INFO("Timing:\t\t\tModel Simulation Time = %lld sec", (uint64_t)simTimeSec);
-	KERNEL_INFO("\t\t\tActual Execution Time = %4.2f sec", etime/1000.0);
-	KERNEL_INFO("Average Firing Rate:\t2+ms delay = %3.3f Hz", spikeCountD2Host/(1.0*simTimeSec*numNExcReg));
-	KERNEL_INFO("\t\t\t1ms delay = %3.3f Hz", spikeCountD1Host/(1.0*simTimeSec*numNInhReg));
-	KERNEL_INFO("\t\t\tOverall = %3.3f Hz", spikeCountAllHost/(1.0*simTimeSec*numN));
-	KERNEL_INFO("Overall Firing Count:\t2+ms delay = %d", spikeCountD2Host);
-	KERNEL_INFO("\t\t\t1ms delay = %d", spikeCountD1Host);
-	KERNEL_INFO("\t\t\tTotal = %d", spikeCountAllHost);
-	KERNEL_INFO("*********************************************************************************\n");
+	return etime;
 }

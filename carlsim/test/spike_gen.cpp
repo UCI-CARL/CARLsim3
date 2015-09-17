@@ -122,7 +122,13 @@ TEST(SpikeGen, SpikeGeneratorFromFile) {
 	std::vector< std::vector<int> > spkVec0, spkVec1;
 	SpikeMonitor *SM0, *SM1;
 
-	for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 		for (int isCOBA=0; isCOBA<=1; isCOBA++) {
 			for (int run=0; run<=1; run++) {
 				sim = new CARLsim("SpikeGeneratorFromFile",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
@@ -205,7 +211,13 @@ TEST(SpikeGen, SpikeGeneratorFromFileLoadFile) {
 	std::vector< std::vector<int> > spkVec0, spkVec1;
 	SpikeMonitor *SM0, *SM1;
 
-	for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
 		for (int isCOBA=0; isCOBA<=1; isCOBA++) {
 			for (int run=0; run<=1; run++) {
 				sim = new CARLsim("SpikeGeneratorFromFileLoadFile",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);

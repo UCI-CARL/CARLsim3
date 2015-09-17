@@ -28,7 +28,7 @@ CARLSIM_LIBS  += -L$(CARLSIM_LIB_DIR)/lib -lCARLsim
 
 # carlsim ecj components
 ECJ_PTI_FLAGS += -I$(ECJ_PTI_DIR)/include
-ECJ_PTI_LIBS  += $(ECJ_PTI_DIR)/lib/libCARLsimPTI.a
+ECJ_PTI_LIBS  += -L$(ECJ_PTI_DIR)/lib -lCARLsimPTI
 
 local_src  := main_$(local_targets).cpp
 local_prog := $(local_targets)
@@ -40,13 +40,13 @@ all: $(local_targets)
 # create executable bash script for user to run
 $(local_prog): $(local_src) $(carlsim_prog)
 	@echo "#!/bin/bash" > $(local_prog)
-	@echo "java -cp \"$(ECJ_DIR)/jar/ecj.22.jar:$(ECJ_PTI_DIR)/lib/CARLsim-ECJ.jar\" ecjapp.CARLsimEC -file ./$(ecj_param_file)" >> $(local_prog)
+	@echo "java -cp \"$(ECJ_JAR):$(ECJ_PTI_DIR)/lib/CARLsim-ECJ.jar\" ecjapp.CARLsimEC -file ./$(ecj_param_file)" >> $(local_prog)
 	@chmod u+x $(local_prog)
 
 # compile from CARLsim lib
 $(carlsim_prog): $(local_src)
 	$(NVCC) $(CARLSIM_INCLUDES) $(ECJ_PTI_FLAGS) $(CARLSIM_FLAGS) \
-	$(CARLSIM_LFLAGS) $(CARLSIM_LIBS) $(ECJ_PTI_LIBS) $< -o $@
+	$< -o $@ $(CARLSIM_LFLAGS) $(CARLSIM_LIBS) $(ECJ_PTI_LIBS)
 
 # build debugging script
 $(debug_prog): scripts/generateTestInput.bash $(ecj_param_file) $(carlsim_prog)

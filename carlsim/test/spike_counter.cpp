@@ -40,7 +40,13 @@ TEST(SpikeCounter, SpikeCntvsSpikeMon) {
 	int grpIds[nGrp];
 	SpikeMonitor* SM[nGrp];
 
-	for (int mode=0; mode<=1; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode=0; mode<numModes; mode++) {
 		sim = new CARLsim("SpikeCounter.SpikeCntvsSpikeMon",mode?GPU_MODE:CPU_MODE,SHOWTIME,0,42);
 
 		grpIds[0]=sim->createGroup("excit", nNeur, EXCITATORY_NEURON);
@@ -104,7 +110,13 @@ TEST(SpikeCounter, CPUvsGPU) {
 	int *spkCnt;
 	int timeMs = 500;
 
-	for (int mode=0; mode<=1; mode++) {
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int mode=0; mode<numModes; mode++) {
 		sim = new CARLsim("SpikeCounter.CPUvsGPU",mode?GPU_MODE:CPU_MODE,SILENT,0,42);
 
 		// record spikes in CPU mode, compare GPU values

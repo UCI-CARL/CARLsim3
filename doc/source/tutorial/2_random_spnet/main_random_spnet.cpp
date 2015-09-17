@@ -41,6 +41,8 @@
 #include <carlsim.h>
 #include <vector>
 
+#include <stdlib.h>			// drand48
+
 
 int main(int argc, const char* argv[]) {
 	// ---------------- CONFIG STATE -------------------

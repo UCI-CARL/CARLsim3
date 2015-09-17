@@ -7,11 +7,11 @@
 CARLSIM_LIB_DIR ?= /opt/CARL/CARLsim
 
 # cuda capability major version number for GPU device
-CUDA_MAJOR_NUM ?= 2
+CUDA_MAJOR_NUM ?= 3
 # cuda capability minor version number for GPU device
-CUDA_MINOR_NUM ?= 0
+CUDA_MINOR_NUM ?= 5
 # cuda toolkit version (major number only)
-CARLSIM_CUDAVER ?= 5
+CARLSIM_CUDAVER ?= 6
 
 # CUDA Installation location. If your CUDA installation is not /usr/local/cuda,
 # please set CUDA_INSTALL_PATH to point to the correct location or set it as
@@ -23,7 +23,10 @@ CUDA_INSTALL_PATH ?= /usr/local/cuda
 # debugging info.  Default: 0.
 CARLSIM_FASTMATH ?= 0
 CARLSIM_CUOPTLEVEL ?= 0
-CARLSIM_DEBUG ?= 1
+CARLSIM_DEBUG ?= 0
+
+# disable GPU support by setting CPU_ONLY to 1
+CPU_ONLY ?= 0
 
 
 #------------------------------------------------------------------------------
@@ -44,7 +47,7 @@ EO_PTI_DIR ?= /opt/CARL/carlsim_eo_pti
 #------------------------------------------------------------------------------
 # absolute path and name of evolutionary computation in java installation jar
 # file for ECJ-PTI CARLsim support.
-ECJ_DIR ?= /opt/ecj/jar/ecj.22.jar
+ECJ_JAR ?= /opt/ecj/jar/ecj.22.jar
 ECJ_PTI_DIR ?= /opt/CARL/carlsim_ecj_pti
 
 #------------------------------------------------------------------------------
@@ -70,7 +73,7 @@ DARWIN  	:=$(strip $(findstring DARWIN, $(OS_UPPER)))
 # variable defintions
 CXX = g++
 CC  = g++
-NVCC = nvcc
+NVCC = $(CUDA_INSTALL_PATH)/bin/nvcc
 CPPFLAGS = $(DEBUG_FLAG) $(OPT_FLAG) -Wall -std=c++0x
 
 MV := mv -f
@@ -81,24 +84,29 @@ ifeq ($(DARWIN),DARWIN)
 	CARLSIM_FLAGS +=-Xlinker -lstdc++ -lc++
 endif
 
-# add compute capability to compile flags
-CARLSIM_FLAGS += -arch sm_$(CUDA_MAJOR_NUM)$(CUDA_MINOR_NUM)
-ifeq (${strip ${CUDA_MAJOR_NUM}},1)
-	CARLSIM_FLAGS += -D__NO_ATOMIC_ADD__
-endif
-
-# add CUDA version to compile flags
-CARLSIM_FLAGS += -D__CUDA$(CARLSIM_CUDAVER)__ --compiler-options -Wunused-variable
-
-# load appropriate CUDA flags
-ifneq (,$(filter $(CARLSIM_CUDAVER),3 4))
-	CARLSIM_INCLUDES = -I${NVIDIA_SDK}/C/common/inc/
-	CARLSIM_LFLAGS = -L${NVIDIA_SDK}/C/lib
-	CARLSIM_LIBS = -lcutil_x86_64
+ifeq ($(strip $(CPU_ONLY)),1)
+	CARLSIM_FLAGS += -D__CPU_ONLY__
+	NVCC = $(CXX)
 else
-	CARLSIM_INCLUDES = -I$(CUDA_INSTALL_PATH)/samples/common/inc/
-	CARLSIM_LFLAGS =
-	CARLSIM_LIBS =
+	# add compute capability to compile flags
+	CARLSIM_FLAGS += -arch sm_$(CUDA_MAJOR_NUM)$(CUDA_MINOR_NUM)
+	ifeq (${strip ${CUDA_MAJOR_NUM}},1)
+		CARLSIM_FLAGS += -D__NO_ATOMIC_ADD__
+	endif
+
+	# add CUDA version to compile flags
+	CARLSIM_FLAGS += -D__CUDA$(CARLSIM_CUDAVER)__
+
+	# load appropriate CUDA flags
+	ifneq (,$(filter $(CARLSIM_CUDAVER),3 4))
+		CARLSIM_INCLUDES = -I${NVIDIA_SDK}/C/common/inc/
+		CARLSIM_LFLAGS = -L${NVIDIA_SDK}/C/lib
+		CARLSIM_LIBS = -lcutil_x86_64
+	else
+		CARLSIM_INCLUDES = -I$(CUDA_INSTALL_PATH)/samples/common/inc/
+		CARLSIM_LFLAGS =
+		CARLSIM_LIBS =
+	endif
 endif
 
 # use fast math
