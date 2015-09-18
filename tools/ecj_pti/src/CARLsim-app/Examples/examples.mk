@@ -42,10 +42,10 @@ $(local_dir)/IzkExample: $(local_dir)/IzkExample.cpp $(pti_deps) $(pti_objs)
 	$(CC) -g $(PTI_FLAGS) $< $(pti_objs) $(izk_lib) -o $@ $(LDFLAGS)
 
 $(local_dir)/SimpleCA3: $(local_dir)/SimpleCA3.cpp $(pti_deps) $(pti_objs)
-	nvcc -g $(PTI_FLAGS) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $< $(pti_objs) $(CARLSIM_LIBS) -o $@ $(LDFLAGS)
+	$(NVCC) -g $(PTI_FLAGS) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $< $(pti_objs) $(CARLSIM_LIBS) -o $@ $(LDFLAGS)
 
 $(local_dir)/TuneFiringRatesECJ: $(local_dir)/TuneFiringRatesECJ.cpp $(pti_deps) $(pti_objs)
-	nvcc -g $(PTI_FLAGS) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(CARLSIM_LFLAGS) \
+	$(NVCC) -g $(PTI_FLAGS) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(CARLSIM_LFLAGS) \
 		$< $(pti_objs) $(CARLSIM_LIBS) -o $@ $(LDFLAGS)
 
 # these make it so you can type 'make <example_name>' with tab-complete
