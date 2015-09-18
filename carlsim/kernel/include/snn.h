@@ -615,7 +615,7 @@ private:
 	void doD2CurrentUpdate();
 	void doGPUSim();
 	void doSnnSim();
-	void doSTPUpdateAndDecayCond();
+	void globalStateDecay();
 
 	void findFiring();
 	int findGrpId(int nid);//!< For the given neuron nid, find the group id

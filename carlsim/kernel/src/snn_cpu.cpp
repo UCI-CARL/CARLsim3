@@ -2993,7 +2993,7 @@ void CpuSNN::doSnnSim() {
 	}
 
 	// decay STP vars and conductances
-	doSTPUpdateAndDecayCond();
+	globalStateDecay();
 
 	updateSpikeGenerators();
 
@@ -3013,25 +3013,45 @@ void CpuSNN::doSnnSim() {
 	return;
 }
 
-void CpuSNN::doSTPUpdateAndDecayCond() {
+void CpuSNN::globalStateDecay() {
 	int spikeBufferFull = 0;
 
-	//decay the STP variables before adding new spikes.
-	for(int g=0; (g < numGrp) & !spikeBufferFull; g++) {
-		for(int i=grp_Info[g].StartN; i<=grp_Info[g].EndN; i++) {
-	   		//decay the STP variables before adding new spikes.
-			if (grp_Info[g].WithSTP) {
+	// having outer loop is grpId produces slightly more code (every flag needs its own neurId inner loop)
+	// but avoids having to check the condition for every neuron in the network (= faster)
+
+	// decay the STP variables before adding new spikes.
+	for(int grpId=0; (grpId < numGrp) & !spikeBufferFull; grpId++) {
+		// decay homeostasis avg firing
+		if (grp_Info[grpId].WithHomeostasis) {
+			for(int i=grp_Info[grpId].StartN; i<=grp_Info[grpId].EndN; i++) {
+				avgFiring[i] *= grp_Info[grpId].avgTimeScale_decay;
+			}
+		}
+
+		// decay the STP variables before adding new spikes.
+		if (grp_Info[grpId].WithSTP) {
+			for(int i=grp_Info[grpId].StartN; i<=grp_Info[grpId].EndN; i++) {
 				int ind_plus  = STP_BUF_POS(i,simTime);
 				int ind_minus = STP_BUF_POS(i,(simTime-1));
-				stpu[ind_plus] = stpu[ind_minus]*(1.0-grp_Info[g].STP_tau_u_inv);
-				stpx[ind_plus] = stpx[ind_minus] + (1.0-stpx[ind_minus])*grp_Info[g].STP_tau_x_inv;
+				stpu[ind_plus] = stpu[ind_minus]*(1.0-grp_Info[grpId].STP_tau_u_inv);
+				stpx[ind_plus] = stpx[ind_minus] + (1.0-stpx[ind_minus])*grp_Info[grpId].STP_tau_x_inv;
 			}
+		}
 
-			if (grp_Info[g].Type&POISSON_NEURON)
-				continue;
+		if (grp_Info[grpId].Type&POISSON_NEURON)
+			continue;
 
-			// decay conductances
-			if (sim_with_conductances) {
+		// decay dopamine concentration
+		if ((grp_Info[grpId].WithESTDPtype == DA_MOD || grp_Info[grpId].WithISTDP == DA_MOD) && 
+			cpuNetPtrs.grpDA[grpId] > grp_Info[grpId].baseDP)
+		{
+			cpuNetPtrs.grpDA[grpId] *= grp_Info[grpId].decayDP;
+		}
+		cpuNetPtrs.grpDABuffer[grpId][simTimeMs] = cpuNetPtrs.grpDA[grpId];
+
+		// decay conductances
+		if (sim_with_conductances) {
+			for(int i=grp_Info[grpId].StartN; i<=grp_Info[grpId].EndN; i++) {
 				gAMPA[i]  *= dAMPA;
 				gGABAa[i] *= dGABAa;
 
@@ -3049,7 +3069,8 @@ void CpuSNN::doSTPUpdateAndDecayCond() {
 					gGABAb[i] *= dGABAb;	// instantaneous rise
 				}
 			}
-			else {
+		} else {
+			for(int i=grp_Info[grpId].StartN; i<=grp_Info[grpId].EndN; i++) {
 				current[i] = 0.0f; // in CUBA mode, reset current to 0 at each time step and sum up all wts
 			}
 		}
@@ -3461,23 +3482,23 @@ void  CpuSNN::globalStateUpdate() {
 
 	for(int g=0; g < numGrp; g++) {
 		if (grp_Info[g].Type&POISSON_NEURON) {
-			if (grp_Info[g].WithHomeostasis) {
-				for(int i=grp_Info[g].StartN; i <= grp_Info[g].EndN; i++)
-					avgFiring[i] *= grp_Info[g].avgTimeScale_decay;
-			}
+			// if (grp_Info[g].WithHomeostasis) {
+			// 	for(int i=grp_Info[g].StartN; i <= grp_Info[g].EndN; i++)
+			// 		avgFiring[i] *= grp_Info[g].avgTimeScale_decay;
+			// }
 			continue;
 		}
 
-		// decay dopamine concentration
-		if ((grp_Info[g].WithESTDPtype == DA_MOD || grp_Info[g].WithISTDP == DA_MOD) && cpuNetPtrs.grpDA[g] > grp_Info[g].baseDP) {
-			cpuNetPtrs.grpDA[g] *= grp_Info[g].decayDP;
-		}
-		cpuNetPtrs.grpDABuffer[g][simTimeMs] = cpuNetPtrs.grpDA[g];
+		// // decay dopamine concentration
+		// if ((grp_Info[g].WithESTDPtype == DA_MOD || grp_Info[g].WithISTDP == DA_MOD) && cpuNetPtrs.grpDA[g] > grp_Info[g].baseDP) {
+		// 	cpuNetPtrs.grpDA[g] *= grp_Info[g].decayDP;
+		// }
+		// cpuNetPtrs.grpDABuffer[g][simTimeMs] = cpuNetPtrs.grpDA[g];
 
 		for(int i=grp_Info[g].StartN; i <= grp_Info[g].EndN; i++) {
 			assert(i < numNReg);
-			if (grp_Info[g].WithHomeostasis)
-				avgFiring[i] *= grp_Info[g].avgTimeScale_decay;
+			// if (grp_Info[g].WithHomeostasis)
+			// 	avgFiring[i] *= grp_Info[g].avgTimeScale_decay;
 
 			if (sim_with_conductances) {
 				// COBA model
