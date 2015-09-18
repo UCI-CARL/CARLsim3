@@ -815,7 +815,7 @@ private:
 
 	void deleteObjects_GPU();		//!< deallocates all used data structures in snn_gpu.cu
 	void doCurrentUpdate_GPU();
-	void doSTPUpdateAndDecayCond_GPU(int gridSize=64, int blkSize=128);
+	void globalStateDecay_GPU(int gridSize=64, int blkSize=128);
 	void dumpSpikeBuffToFile_GPU(int gid);
 	void findFiring_GPU(int gridSize=64, int blkSize=128);
 

@@ -922,14 +922,6 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 	gpuPtrs.recovery[nid] = u;
 }
 
-// homeostasis in GPU_MODE
-__device__ inline void updateHomeoStaticState(unsigned int& pos, int& grpId)
-{
-	// here the homeostasis adjustment
-	if (gpuGrpInfo[grpId].WithHomeostasis)
-		gpuPtrs.avgFiring[pos] *= (gpuGrpInfo[grpId].avgTimeScale_decay);
-}
-
 //!
 /*! Global Kernel function:      kernel_globalStateUpdate
  *  \brief update neuron state
@@ -955,20 +947,17 @@ __global__ void kernel_globalStateUpdate (int t, int sec, int simTime)
 
 				// update neuron state here....
 				updateNeuronState(nid, grpId);
-
-				// TODO: Could check with homeostasis flag here
-				updateHomeoStaticState(nid, grpId);
 			}
 		}
 	}		
 }
 
 //!
-/*! Global Kernel function:      kernel_globalGroupStateUpdate
+/*! Global Kernel function:      kernel_groupStateDecay
  *  \brief update group state
  *  update the concentration of neuronmodulator
  */
-__global__ void kernel_globalGroupStateUpdate (int t)
+__global__ void kernel_groupStateDecay(int t)
 {
 	// update group state
 	int grpIdx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -982,7 +971,25 @@ __global__ void kernel_globalGroupStateUpdate (int t)
 	}
 }
 
+__global__ void kernel_homeostasisDecay() {
+	const int totBuffers=loadBufferCount;
+	for (int bufPos = blockIdx.x; bufPos < totBuffers; bufPos += gridDim.x) {
+		// KILLME !!! This can be further optimized ....
+		// instead of reading each neuron group separately .....
+		// read a whole buffer and use the result ......
+		int2 threadLoad  = getStaticThreadLoad(bufPos);
+		unsigned int nid        = (STATIC_LOAD_START(threadLoad) + threadIdx.x);
+		uint32_t  grpId  = STATIC_LOAD_GROUP(threadLoad);
+
+		if (gpuGrpInfo[grpId].WithHomeostasis) {
+			gpuPtrs.avgFiring[nid] *= (gpuGrpInfo[grpId].avgTimeScale_decay);
+		}
+	}
+}
+
+
 //******************************** UPDATE STP STATE  EVERY TIME STEP **********************************************
+
 ///////////////////////////////////////////////////////////
 /// 	Global Kernel function: gpu_STPUpdate		///
 /// 	This function is called every time step			///
@@ -2322,15 +2329,24 @@ void CpuSNN::doCurrentUpdate_GPU() {
 	CUDA_GET_LAST_ERROR("Kernel execution failed");
 }
 
-void CpuSNN::doSTPUpdateAndDecayCond_GPU(int gridSize, int blkSize) {
+void CpuSNN::globalStateDecay_GPU(int gridSize, int blkSize) {
 	checkAndSetGPUDevice();
 		
 	assert(cpu_gpuNetPtrs.allocated);
 
 	if (sim_with_stp || sim_with_conductances) {
-		kernel_STPUpdateAndDecayConductances <<<gridSize, blkSize>>>(simTimeMs, simTimeSec, simTime);
+		kernel_STPUpdateAndDecayConductances<<<gridSize, blkSize>>>(simTimeMs, simTimeSec, simTime);
 		CUDA_GET_LAST_ERROR("STP update\n");
 	}
+
+	// update all group state (i.e., concentration of neuronmodulators)
+	// currently support 4 x 128 groups
+	kernel_groupStateDecay<<<4, blkSize>>> (simTimeMs);
+	CUDA_GET_LAST_ERROR("kernel_groupStateDecay failed");
+
+	// update all homeostasis avgfiring
+	kernel_homeostasisDecay<<<gridSize, blkSize>>>();
+	CUDA_GET_LAST_ERROR("kernel_homeostasisDecay failed");
 }
 
 void CpuSNN::initGPU(int gridSize, int blkSize) {
@@ -2457,11 +2473,6 @@ void CpuSNN::globalStateUpdate_GPU() {
 	// update all neuron state (i.e., voltage and recovery)
 	kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
 	CUDA_GET_LAST_ERROR("Kernel execution failed");
-
-	// update all group state (i.e., concentration of neuronmodulators)
-	// currently support 4 x 128 groups
-	kernel_globalGroupStateUpdate <<<4, blkSize>>> (simTimeMs);
-	CUDA_GET_LAST_ERROR("Kernel execution failed");
 }
 
 void CpuSNN::assignPoissonFiringRate_GPU() {
@@ -2501,7 +2512,7 @@ void CpuSNN::doGPUSim() {
 	int blkSize  = 128;
 	int gridSize = 64;
 
-	doSTPUpdateAndDecayCond_GPU(gridSize, blkSize);
+	globalStateDecay_GPU(gridSize, blkSize);
 
 	// \TODO this should probably be in spikeGeneratorUpdate_GPU
 	if (spikeRateUpdated) {
