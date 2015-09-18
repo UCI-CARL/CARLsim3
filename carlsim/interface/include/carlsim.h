@@ -466,6 +466,72 @@ public:
 	void setNeuronParameters(int grpId, float izh_a, float izh_b, float izh_c, float izh_d);
 
 	/*!
+	 * \brief Sets Izhikevich params C, k, vr, vt, a, b, vpeak, c, and d of a neuron group
+	 * C must be positive. There are no limits imposed on other parameters
+	 * This is a nine parameter Izhikevich simple spiking model
+	 *
+	 * \STATE CONFIG
+	 * \param[in] grpId			the group ID of a group for which these settings are applied
+	 * \param[in] izh_C			Membrane capacitance parameter
+	 * \param[in] izh_k			Coefficient present in equation for voltage
+	 * \param[in] izh_vr		Resting membrane potential parameter
+	 * \param[in] izh_vt		Instantaneous threshold potential parameter
+	 * \param[in] izh_a			Recovery time constant
+	 * \param[in] izh_b			Coefficient present in equation for voltage
+	 * \param[in] izh_vpeak		The spike cutoff value parameter
+	 * \param[in] izh_c			The voltage reset value parameter
+	 * \param[in] izh_d			Parameter describing the total amount of outward minus inward currents activated
+	 *                          during the spike and affecting the after spike behavior
+	 * \since v3.1
+	 */
+	void setNeuronParameters(int grpId, float izh_C, float izh_k, float izh_vr, float izh_vt,
+							float izh_a, float izh_b, float izh_vpeak, float izh_c, float izh_d);
+
+	/*!
+	 * \brief Sets Izhikevich params C, k, vr, vt, a, b, vpeak, c, and d with as mean +- standard deviation
+	 * C must be positive. There are no limits imposed on other parameters
+	 * This is a nine parameter Izhikevich simple spiking model
+	 *
+	 * \STATE CONFIG
+	 * \param[in] grpId			the group ID of a group for which these settings are applied
+	 * \param[in] izh_C			Membrane capacitance parameter
+	 * \param[in] izh_k			Coefficient present in equation for voltage
+	 * \param[in] izh_vr		Resting membrane potential parameter
+	 * \param[in] izh_vt		Instantaneous threshold potential parameter
+	 * \param[in] izh_a			Recovery time constant
+	 * \param[in] izh_b			Coefficient present in equation for voltage
+	 * \param[in] izh_vpeak		The spike cutoff value parameter
+	 * \param[in] izh_c			The voltage reset value parameter
+	 * \param[in] izh_d			Parameter describing the total amount of outward minus inward currents activated
+	 *                          during the spike and affecting the after spike behavior
+	 * \since v3.1
+	 */
+	void setNeuronParameters(int grpId, float izh_C, float izh_C_sd, float izh_k, float izh_k_sd,
+		float izh_vr, float izh_vr_sd, float izh_vt, float izh_vt_sd,
+		float izh_a, float izh_a_sd, float izh_b, float izh_b_sd,
+		float izh_vpeak, float izh_vpeak_sd, float izh_c, float izh_c_sd,
+		float izh_d, float izh_d_sd);
+
+	/*!
+	* \brief Sets an Izhikevich parameter of user's choice, call after setupNetwork().
+	*
+	* This function allows you to update an Izhikevich parameter in ::SETUP_STATE or ::RUN_STATE. The parameter is
+	* specified as a string.
+	* Possible values are:
+	* - for 4-param Izhikevich: "a", "b", "c", "d"
+	* - for 9-param Izhikevich: "a", "b", "c", "d", "vr", "vt", "C", "vpeak", "k"
+	*
+	* \STATE ::SETUP_STATE, ::RUN_STATE.
+	* \param[in] grpId the symbolic name of a group
+	* \param[in] nid the neuron's id within the group (not a global neuron id)
+	* \param[in] IzhikevichParameter the string representing chosen Izhikevich parameter.
+	*            Possible values: "a", "b", "c", "d", "vr", "vt", "C", "vpeak", "k"
+	* \param[in] value the value to be assigned to the given Izhikevich parameter
+	* \since v3.1
+	*/
+	void setIzhikevichParameter(int grpId, int nid, const std::string& IzhikevichParameter, float value);
+
+	/*!
 	 * \brief Sets baseline concentration and decay time constant of neuromodulators (DP, 5HT, ACh, NE) for a neuron
 	 * group.
 	 *
