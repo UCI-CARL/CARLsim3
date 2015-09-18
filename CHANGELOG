@@ -11,6 +11,9 @@ Release 3.1
 Build 3.1.0
 ---------------------
 
+2015-09-17     Michael Beyeler <mbeyeler@uci.edu>
+  * Add CpuSNN::globalStateDecay, separate state var decay from step-increase.
+
 2015-09-16     Eric 'Siggy' Scott <escott8@gmu.edu>
   * Fix chunking and logging features in tools/ecj_pti.
   * Rename user.mk to user.mk.sample
