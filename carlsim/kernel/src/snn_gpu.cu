@@ -944,7 +944,6 @@ __global__ void kernel_globalStateUpdate (int t, int sec, int simTime)
 		if ((threadIdx.x < lastId) && (nid < gpuNetInfo.numN)) {
 
 			if (IS_REGULAR_NEURON(nid, gpuNetInfo.numNReg, gpuNetInfo.numNPois)) {
-
 				// update neuron state here....
 				updateNeuronState(nid, grpId);
 			}
@@ -957,8 +956,7 @@ __global__ void kernel_globalStateUpdate (int t, int sec, int simTime)
  *  \brief update group state
  *  update the concentration of neuronmodulator
  */
-__global__ void kernel_groupStateDecay(int t)
-{
+__global__ void kernel_groupStateDecay(int t) {
 	// update group state
 	int grpIdx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -967,6 +965,14 @@ __global__ void kernel_groupStateDecay(int t)
 		if ((gpuGrpInfo[grpIdx].WithESTDPtype == DA_MOD || gpuGrpInfo[grpIdx].WithISTDPtype == DA_MOD) && gpuPtrs.grpDA[grpIdx] > gpuGrpInfo[grpIdx].baseDP) {
 			gpuPtrs.grpDA[grpIdx] *= gpuGrpInfo[grpIdx].decayDP;
 		}
+	}
+}
+
+__global__ void kernel_globalGroupStateUpdate(int t) {
+	// update group state
+	int grpIdx = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if (grpIdx < gpuNetInfo.numGrp) {
 		gpuPtrs.grpDABuffer[grpIdx][t] = gpuPtrs.grpDA[grpIdx]; // log dopamine concentration
 	}
 }
@@ -2472,7 +2478,10 @@ void CpuSNN::globalStateUpdate_GPU() {
 
 	// update all neuron state (i.e., voltage and recovery)
 	kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
-	CUDA_GET_LAST_ERROR("Kernel execution failed");
+	CUDA_GET_LAST_ERROR("kernel_globalStateUpdate failed");
+
+	kernel_globalGroupStateUpdate <<<4, blkSize>>> (simTimeMs);
+	CUDA_GET_LAST_ERROR("kernel_globalGroupStateUpdate  failed");
 }
 
 void CpuSNN::assignPoissonFiringRate_GPU() {
