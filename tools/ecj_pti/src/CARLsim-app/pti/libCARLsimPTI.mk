@@ -22,9 +22,9 @@ install_carlsim_pti: $(pti_lib)
 	@test -d $(ECJ_PTI_DIR)/lib || mkdir $(ECJ_PTI_DIR)/lib
 	@test -d $(ECJ_PTI_DIR)/include || mkdir $(ECJ_PTI_DIR)/include
 	@install -m 0755 $(pti_lib).$(lib_ver) $(ECJ_PTI_DIR)/lib
-	@ln -Tfs $(ECJ_PTI_DIR)/lib/$(lib_name).$(lib_ver) \
+	@ln -fs $(ECJ_PTI_DIR)/lib/$(lib_name).$(lib_ver) \
 		$(ECJ_PTI_DIR)/lib/$(lib_name).$(num_ver)
-	@ln -Tfs $(ECJ_PTI_DIR)/lib/$(lib_name).$(num_ver) \
+	@ln -fs $(ECJ_PTI_DIR)/lib/$(lib_name).$(num_ver) \
 		$(ECJ_PTI_DIR)/lib/$(lib_name)
 	@install -m 0644 $(pti_dir)/Experiment.h $(pti_dir)/Logger.h \
 		$(pti_dir)/PTI.h $(pti_dir)/Util.h $(pti_dir)/ParameterInstances.h \
