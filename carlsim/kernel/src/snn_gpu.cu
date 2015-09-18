@@ -927,8 +927,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
  *  \brief update neuron state
  *  change this with selective upgrading technique used for firing neurons
  */
-__global__ void kernel_globalStateUpdate (int t, int sec, int simTime)
-{
+__global__ void kernel_globalStateUpdate (int t, int sec, int simTime) {
 	const int totBuffers = loadBufferCount;
 
 	// update neuron state
@@ -1000,8 +999,7 @@ __global__ void kernel_homeostasisDecay() {
 /// 	Global Kernel function: gpu_STPUpdate		///
 /// 	This function is called every time step			///
 ///////////////////////////////////////////////////////////
-__global__ void kernel_STPUpdateAndDecayConductances (int t, int sec, int simTime)
-{
+__global__ void kernel_STPUpdateAndDecayConductances (int t, int sec, int simTime) {
 	// global id
 	// int gid=threadIdx.x + blockDim.x*blockIdx.x;
 

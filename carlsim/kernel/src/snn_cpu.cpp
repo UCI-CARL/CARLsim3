@@ -3481,31 +3481,15 @@ void  CpuSNN::globalStateUpdate() {
 
 	for(int g=0; g < numGrp; g++) {
 		if (grp_Info[g].Type&POISSON_NEURON) {
-			// if (grp_Info[g].WithHomeostasis) {
-			// 	for(int i=grp_Info[g].StartN; i <= grp_Info[g].EndN; i++)
-			// 		avgFiring[i] *= grp_Info[g].avgTimeScale_decay;
-			// }
 			continue;
 		}
 
 		// update dopamine
 		cpuNetPtrs.grpDABuffer[g][simTimeMs] = cpuNetPtrs.grpDA[g];
 
-
-		// // decay dopamine concentration
-		// if ((grp_Info[g].WithESTDPtype == DA_MOD || grp_Info[g].WithISTDP == DA_MOD) && cpuNetPtrs.grpDA[g] > grp_Info[g].baseDP) {
-		// 	cpuNetPtrs.grpDA[g] *= grp_Info[g].decayDP;
-		// }
-		// cpuNetPtrs.grpDABuffer[g][simTimeMs] = cpuNetPtrs.grpDA[g];
-
 		for(int i=grp_Info[g].StartN; i <= grp_Info[g].EndN; i++) {
 			assert(i < numNReg);
-			// if (grp_Info[g].WithHomeostasis)
-			// 	avgFiring[i] *= grp_Info[g].avgTimeScale_decay;
-
-			if (sim_with_conductances) {
-				// COBA model
-
+			if (sim_with_conductances) { // COBA model
 				// all the tmpIs will be summed into current[i] in the following loop
 				current[i] = 0.0f;
 
