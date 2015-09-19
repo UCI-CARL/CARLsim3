@@ -513,25 +513,6 @@ public:
 		float izh_d, float izh_d_sd);
 
 	/*!
-	* \brief Sets an Izhikevich parameter of user's choice, call after setupNetwork().
-	*
-	* This function allows you to update an Izhikevich parameter in ::SETUP_STATE or ::RUN_STATE. The parameter is
-	* specified as a string.
-	* Possible values are:
-	* - for 4-param Izhikevich: "a", "b", "c", "d"
-	* - for 9-param Izhikevich: "a", "b", "c", "d", "vr", "vt", "C", "vpeak", "k"
-	*
-	* \STATE ::SETUP_STATE, ::RUN_STATE.
-	* \param[in] grpId the symbolic name of a group
-	* \param[in] nid the neuron's id within the group (not a global neuron id)
-	* \param[in] IzhikevichParameter the string representing chosen Izhikevich parameter.
-	*            Possible values: "a", "b", "c", "d", "vr", "vt", "C", "vpeak", "k"
-	* \param[in] value the value to be assigned to the given Izhikevich parameter
-	* \since v3.1
-	*/
-	void setIzhikevichParameter(int grpId, int nid, const std::string& IzhikevichParameter, float value);
-
-	/*!
 	 * \brief Sets baseline concentration and decay time constant of neuromodulators (DP, 5HT, ACh, NE) for a neuron
 	 * group.
 	 *

@@ -481,6 +481,49 @@ void CpuSNN::setNeuronParameters(int grpId, float izh_a, float izh_a_sd, float i
 		grp_Info2[grpId].Izh_c_sd	=   izh_c_sd;
 		grp_Info2[grpId].Izh_d		=   izh_d;
 		grp_Info2[grpId].Izh_d_sd	=   izh_d_sd;
+		grp_Info[grpId].withParamModel_9 = 0;
+	}
+}
+
+// set (9) Izhikevich parameters for group
+void CpuSNN::setNeuronParameters(int grpId, float izh_C, float izh_C_sd, float izh_k, float izh_k_sd,
+									float izh_vr, float izh_vr_sd, float izh_vt, float izh_vt_sd,
+									float izh_a, float izh_a_sd, float izh_b, float izh_b_sd,
+									float izh_vpeak, float izh_vpeak_sd, float izh_c, float izh_c_sd,
+									float izh_d, float izh_d_sd)
+{
+	//Finish the assertment statements part.
+	assert(grpId >= -1); assert(izh_C_sd >= 0); assert(izh_k_sd >= 0); assert(izh_vr_sd >= 0);
+	assert(izh_vt_sd >= 0); assert(izh_a_sd >= 0); assert(izh_b_sd >= 0); assert(izh_vpeak_sd >= 0);
+	assert(izh_c_sd >= 0); assert(izh_d_sd >= 0);
+
+	if (grpId == ALL) { // shortcut for all groups
+		for (int grpId1 = 0; grpId1<numGrp; grpId1++) {
+			setNeuronParameters(grpId1,  izh_C,  izh_C_sd,  izh_k, izh_k_sd, izh_vr,  izh_vr_sd,  izh_vt,  izh_vt_sd,
+									izh_a,  izh_a_sd,  izh_b,  izh_b_sd, izh_vpeak,  izh_vpeak_sd,  izh_c,  izh_c_sd,
+									izh_d,  izh_d_sd);
+		}
+	}
+	else {
+		grp_Info2[grpId].Izh_C = izh_C;
+		grp_Info2[grpId].Izh_C_sd = izh_C_sd;
+		grp_Info2[grpId].Izh_k = izh_k;
+		grp_Info2[grpId].Izh_k_sd = izh_k_sd;
+		grp_Info2[grpId].Izh_vr = izh_vr;
+		grp_Info2[grpId].Izh_vr_sd = izh_vr_sd;
+		grp_Info2[grpId].Izh_vt = izh_vt;
+		grp_Info2[grpId].Izh_vt_sd = izh_vt_sd;
+		grp_Info2[grpId].Izh_a = izh_a;
+		grp_Info2[grpId].Izh_a_sd = izh_a_sd;
+		grp_Info2[grpId].Izh_b = izh_b;
+		grp_Info2[grpId].Izh_b_sd = izh_b_sd;
+		grp_Info2[grpId].Izh_vpeak = izh_vpeak;
+		grp_Info2[grpId].Izh_vpeak_sd = izh_vpeak_sd;
+		grp_Info2[grpId].Izh_c = izh_c;
+		grp_Info2[grpId].Izh_c_sd = izh_c_sd;
+		grp_Info2[grpId].Izh_d = izh_d;
+		grp_Info2[grpId].Izh_d_sd = izh_d_sd;
+		grp_Info[grpId].withParamModel_9 = 1;
 	}
 }
 
@@ -2124,10 +2167,15 @@ void CpuSNN::buildNetworkInit() {
 
 	voltage	   = new float[numNReg];
 	recovery   = new float[numNReg];
-	Izh_a	   = new float[numNReg];
-	Izh_b      = new float[numNReg];
-	Izh_c	   = new float[numNReg];
-	Izh_d	   = new float[numNReg];
+	Izh_C = new float[numNReg];
+	Izh_k = new float[numNReg];
+	Izh_vr = new float[numNReg];
+	Izh_vt = new float[numNReg];
+	Izh_a = new float[numNReg];
+	Izh_b = new float[numNReg];
+	Izh_vpeak = new float[numNReg];
+	Izh_c = new float[numNReg];
+	Izh_d = new float[numNReg];
 	current	   = new float[numNReg];
 	extCurrent = new float[numNReg];
 	memset(extCurrent, 0, sizeof(extCurrent[0])*numNReg);
@@ -3089,7 +3137,15 @@ void CpuSNN::findFiring() {
 
 			assert(i < numNReg);
 
-			if (voltage[i] >= 30.0) {
+			bool process = false;
+			//FIX THIS, should differentiate based on whether this is 4 or 9 parameter model.
+			if ((grp_Info[g].withParamModel_9 == 1) && (voltage[i] >= Izh_vpeak[i]))
+			{process = true;}
+			else if ((grp_Info[g].withParamModel_9 == 0) && (voltage[i] >= 30.0))
+			{process = true;}
+			if (process == true)
+			{
+
 				voltage[i] = Izh_c[i];
 				recovery[i] += Izh_d[i];
 
@@ -3489,6 +3545,17 @@ void  CpuSNN::globalStateUpdate() {
 
 		for(int i=grp_Info[g].StartN; i <= grp_Info[g].EndN; i++) {
 			assert(i < numNReg);
+
+			//Pre-Load izhekevich variables to avoid unnecessary memory accesses + unclutter the code.
+			float k, vr, vt, inverse_C, a, b, vpeak;
+			k = Izh_k[i];
+			vr = Izh_vr[i];
+			vt = Izh_vt[i];
+			inverse_C = 1.0f / Izh_C[i];
+			a = Izh_a[i];
+			b = Izh_b[i];
+			vpeak = Izh_vpeak[i];
+
 			if (sim_with_conductances) { // COBA model
 				// all the tmpIs will be summed into current[i] in the following loop
 				current[i] = 0.0f;
@@ -3528,19 +3595,34 @@ void  CpuSNN::globalStateUpdate() {
 					}
 					if (voltage[i] < -90)
 						voltage[i] = -90;
-					recovery[i]+=Izh_a[i]*(Izh_b[i]*voltage[i]-recovery[i])/COND_INTEGRATION_SCALE;
+					recovery[i]+=a*(b*voltage[i]-recovery[i])/COND_INTEGRATION_SCALE;
 				} // end COND_INTEGRATION_SCALE loop
 			} else {
 				// CUBA model
-				voltage[i] += 0.5*((0.04*voltage[i]+5.0)*voltage[i] + 140.0 - recovery[i]
-					+ current[i] + extCurrent[i]); //for numerical stability
-				voltage[i] += 0.5*((0.04*voltage[i]+5.0)*voltage[i] + 140.0 - recovery[i]
-					+ current[i] + extCurrent[i]); //time step is 0.5 ms
-				if (voltage[i] > 30)
-					voltage[i] = 30;
-				if (voltage[i] < -90)
-					voltage[i] = -90;
-				recovery[i]+=Izh_a[i]*(Izh_b[i]*voltage[i]-recovery[i]);
+				if(withParamModel_9 == 0)//4 parameter model
+				{
+					voltage[i] += 0.5*((0.04*voltage[i]+5.0)*voltage[i] + 140.0 - recovery[i]
+						+ current[i] + extCurrent[i]); //for numerical stability
+					voltage[i] += 0.5*((0.04*voltage[i]+5.0)*voltage[i] + 140.0 - recovery[i]
+						+ current[i] + extCurrent[i]); //time step is 0.5 ms
+					if (voltage[i] > 30)
+						voltage[i] = 30;
+					if (voltage[i] < -90)
+						voltage[i] = -90;
+					recovery[i]+=a*(b*voltage[i]-recovery[i]);
+				}
+				else //9 parameter model
+				{
+					voltage[i] += 0.5f * (k * (voltage[i] - vr) * (voltage[i] - vt) - recovery[i] + current[i] + extCurrent[i]) * inverse_C;
+					voltage[i] += 0.5f * (k * (voltage[i] - vr) * (voltage[i] - vt) - recovery[i] + current[i] + extCurrent[i]) * inverse_C;
+					if (voltage[i] > vpeak) 
+                    	voltage[i] = vpeak;
+
+                	if (voltage[i] < -90)
+                    	voltage[i] = -90;
+
+					recovery[i] += 1.0f * a * (b * (voltage[i] - vr) - recovery[i]);
+				}
 			} // end COBA/CUBA
 		} // end StartN...EndN
 	} // end numGrp
@@ -4245,14 +4327,26 @@ void CpuSNN::resetNeuron(unsigned int neurId, int grpId) {
 		exitSimulation(1);
 	}
 
+	Izh_C[neurId] = grp_Info2[grpId].Izh_C + grp_Info2[grpId].Izh_C_sd*(float)drand48();
+	Izh_k[neurId] = grp_Info2[grpId].Izh_k + grp_Info2[grpId].Izh_k_sd*(float)drand48();
+	Izh_vr[neurId] = grp_Info2[grpId].Izh_vr + grp_Info2[grpId].Izh_vr_sd*(float)drand48();
+	Izh_vt[neurId] = grp_Info2[grpId].Izh_vt + grp_Info2[grpId].Izh_vt_sd*(float)drand48();
 	Izh_a[neurId] = grp_Info2[grpId].Izh_a + grp_Info2[grpId].Izh_a_sd*(float)drand48();
 	Izh_b[neurId] = grp_Info2[grpId].Izh_b + grp_Info2[grpId].Izh_b_sd*(float)drand48();
+	Izh_vpeak[neurId] = grp_Info2[grpId].Izh_vpeak + grp_Info2[grpId].Izh_vpeak_sd*(float)drand48();
 	Izh_c[neurId] = grp_Info2[grpId].Izh_c + grp_Info2[grpId].Izh_c_sd*(float)drand48();
 	Izh_d[neurId] = grp_Info2[grpId].Izh_d + grp_Info2[grpId].Izh_d_sd*(float)drand48();
 
-	voltage[neurId] = Izh_c[neurId];	// initial values for new_v
-	recovery[neurId] = Izh_b[neurId]*voltage[neurId]; // initial values for u
-
+	if (grp_Info[grpId].withParamModel_9 == 0)//Initial values for 4 parameter model.
+	{
+		voltage[neurId] = Izh_c[neurId];	// initial values for new_v
+	    recovery[neurId] = Izh_b[neurId] * voltage[neurId]; // initial values for u
+	}
+	else if (grp_Info[grpId].withParamModel_9 == 1)//Initial values for 9 parameter model.
+	{
+		voltage[neurId] = Izh_vr[neurId];
+		recovery[neurId] = 0;
+	}
 
  	if (grp_Info[grpId].WithHomeostasis) {
 		// set the baseFiring with some standard deviation.
@@ -4371,11 +4465,16 @@ void CpuSNN::resetPointers(bool deallocate) {
 	if (extCurrent!=NULL && deallocate) delete[] extCurrent;
 	voltage=NULL; recovery=NULL; current=NULL; extCurrent=NULL;
 
+	if (Izh_C != NULL && deallocate) delete[] Izh_C;
+	if (Izh_k != NULL && deallocate) delete[] Izh_k;
+	if (Izh_vr != NULL && deallocate) delete[] Izh_vr;
+	if (Izh_vt != NULL && deallocate) delete[] Izh_vt;
 	if (Izh_a!=NULL && deallocate) delete[] Izh_a;
 	if (Izh_b!=NULL && deallocate) delete[] Izh_b;
+	if (Izh_vpeak != NULL && deallocate) delete[] Izh_vpeak;
 	if (Izh_c!=NULL && deallocate) delete[] Izh_c;
 	if (Izh_d!=NULL && deallocate) delete[] Izh_d;
-	Izh_a=NULL; Izh_b=NULL; Izh_c=NULL; Izh_d=NULL;
+	Izh_C = NULL; Izh_k = NULL; Izh_vr = NULL; Izh_vt = NULL; Izh_a = NULL; Izh_b = NULL; Izh_vpeak = NULL; Izh_c = NULL; Izh_d = NULL;
 
 	if (Npre!=NULL && deallocate) delete[] Npre;
 	if (Npre_plastic!=NULL && deallocate) delete[] Npre_plastic;
