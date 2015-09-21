@@ -206,6 +206,11 @@ void CARLsim::CARLsimInit() {
 	// set default save sim params
 	// TODO: when we run executable from local dir, put save file in results/
 	setDefaultSaveOptions("results/sim_"+netName_+".dat",false);
+
+	grpIds_.clear();
+	grpNeurParams_.clear();
+	spkGen_.clear();
+	connGen_.clear();
 }
 
 
@@ -311,9 +316,8 @@ short int CARLsim::connect(int grpId1, int grpId2, ConnectionGenerator* conn, fl
 
 // create group of Izhikevich spiking neurons on 1D grid
 int CARLsim::createGroup(const std::string& grpName, int nNeur, int neurType) {
-	int grpId = createGroup(grpName, Grid3D(nNeur,1,1), neurType);
-	grpIds_.push_back(grpId);
-	return grpId;
+	// no need to keep track of grpIds_, will be done by the following call
+	return createGroup(grpName, Grid3D(nNeur,1,1), neurType);
 }
 
 // create group of Izhikevich spiking neurons on 3D grid
@@ -337,15 +341,15 @@ int CARLsim::createGroup(const std::string& grpName, const Grid3D& grid, int neu
 
 	int grpId = snn_->createGroup(grpName.c_str(),grid,neurType);
 	grpIds_.push_back(grpId); // keep track of all groups
+	grpNeurParams_.push_back(false); // hasn't called setNeuronParams yet
 
 	return grpId;
 }
 
 // create group of spike generators on 1D grid
 int CARLsim::createSpikeGeneratorGroup(const std::string& grpName, int nNeur, int neurType) {
-	int grpId = createSpikeGeneratorGroup(grpName, Grid3D(nNeur,1,1), neurType);
-	grpIds_.push_back(grpId);
-	return grpId;
+	// no need to keep track of grpIds_, will be done by the following call
+	return createSpikeGeneratorGroup(grpName, Grid3D(nNeur,1,1), neurType);
 }
 
 // create group of spike generators on 3D grid
@@ -358,6 +362,7 @@ int CARLsim::createSpikeGeneratorGroup(const std::string& grpName, const Grid3D&
 
 	int grpId = snn_->createSpikeGeneratorGroup(grpName.c_str(),grid,neurType);
 	grpIds_.push_back(grpId); // keep track of all groups
+	grpNeurParams_.push_back(true); // doesn't need setNeuronParams
 
 	return grpId;
 }
@@ -482,6 +487,11 @@ void CARLsim::setNeuronParameters(int grpId, float izh_a, float izh_a_sd, float 
 
 	// wrapper identical to core func
 	snn_->setNeuronParameters(grpId, izh_a, izh_a_sd, izh_b, izh_b_sd, izh_c, izh_c_sd, izh_d, izh_d_sd);
+
+	// has called setNeuronParams on group
+	if (grpIds_[grpId] < grpNeurParams_.size()) {
+		grpNeurParams_[grpIds_[grpId]] = true;
+	}
 }
 
 // set neuron parameters for Izhikevich neuron
@@ -492,6 +502,11 @@ void CARLsim::setNeuronParameters(int grpId, float izh_a, float izh_b, float izh
 
 	// set standard deviations of Izzy params to zero
 	snn_->setNeuronParameters(grpId, izh_a, 0.0f, izh_b, 0.0f, izh_c, 0.0f, izh_d, 0.0f);
+
+	// has called setNeuronParams on group
+	if (grpIds_[grpId] < grpNeurParams_.size()) {
+		grpNeurParams_[grpIds_[grpId]] = true;
+	}
 }
 void CARLsim::setNeuronParameters(int grpId, float izh_C, float izh_k, float izh_vr, float izh_vt,
 									float izh_a, float izh_b, float izh_vpeak, float izh_c, float izh_d){
@@ -502,6 +517,11 @@ void CARLsim::setNeuronParameters(int grpId, float izh_C, float izh_k, float izh
 	// set standard deviations of Izzy params to zero
 	snn_->setNeuronParameters( grpId,  izh_C, 0.0f,  izh_k,  0.0f, izh_vr,  0.0f,  izh_vt,  0.0f,
 								izh_a,  0.0f,  izh_b,  0.0f, izh_vpeak,  0.0f,  izh_c,  0.0f, izh_d,  0.0f);
+
+	// has called setNeuronParams on group
+	if (grpIds_[grpId] < grpNeurParams_.size()) {
+		grpNeurParams_[grpIds_[grpId]] = true;
+	}
 }
 
 
@@ -518,6 +538,10 @@ void CARLsim::setNeuronParameters(int grpId, float izh_C, float izh_C_sd, float 
 	snn_->setNeuronParameters( grpId,  izh_C,  izh_C_sd,  izh_k,  izh_k_sd, izh_vr,  izh_vr_sd,  izh_vt,  izh_vt_sd,
 								 izh_a,  izh_a_sd,  izh_b,  izh_b_sd, izh_vpeak,  izh_vpeak_sd,  izh_c,  izh_c_sd, izh_d,  izh_d_sd);
 
+	// has called setNeuronParams on group
+	if (grpIds_[grpId] < grpNeurParams_.size()) {
+		grpNeurParams_[grpIds_[grpId]] = true;
+	}
 }
 
 // set parameters for each neuronmodulator
@@ -717,7 +741,6 @@ int CARLsim::runNetwork(int nSec, int nMsec, bool printRunSummary, bool copyStat
 		if (!hasSetConductances_) {
 			userWarnings_.push_back("CARLsim::setConductances has not been called. Setting simulation mode to CUBA.");
 		}
-
 		// make sure user didn't provoque any user warnings
 		handleUserWarnings();
 	}
@@ -731,6 +754,16 @@ int CARLsim::runNetwork(int nSec, int nMsec, bool printRunSummary, bool copyStat
 void CARLsim::setupNetwork(bool removeTempMemory) {
 	std::string funcName = "setupNetwork()";
 	UserErrors::assertTrue(carlsimState_==CONFIG_STATE, UserErrors::CAN_ONLY_BE_CALLED_IN_STATE, funcName, funcName, "CONFIG.");
+
+	// check if user has called setNeuronParameters on all groups
+	vector<bool>::iterator found = std::find(grpNeurParams_.begin(), grpNeurParams_.end(), false);
+	if (found != grpNeurParams_.end()) {
+		int grpId = std::distance(grpNeurParams_.begin(), found);
+		std::stringstream errorSuffix;
+		errorSuffix << "on group " << getGroupName(grpIds_[grpId]) << " (" << grpIds_[grpId] << ").";
+		UserErrors::assertTrue(false, UserErrors::MUST_BE_CALLED, "setupNetwork", "CARLsim::setNeuronParameters", 
+			errorSuffix.str());
+	}
 
 	carlsimState_ = SETUP_STATE;
 

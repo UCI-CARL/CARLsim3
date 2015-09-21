@@ -680,3 +680,49 @@ TEST(CORE, saveLoadSimulation) {
 		}
 	}
 }
+
+// repeat a config phase where we forget to call setNeuronParameters on one group: if that group is a regular
+// group, we expect the simulation to break upon calling setupNetwork
+TEST(CORE, setNeuronParameters) {
+	::testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
+	for (int runs=0; runs<5; runs++) {
+		// don't call setNeuronParams on one group picked at random
+		int numGroups = 10;
+		int forgetGroup = rand() % numGroups;
+
+		for (int mode=0; mode<numModes; mode++) {
+			for (int coba=0; coba<=1; coba++) {
+				CARLsim* sim = new CARLsim("CORE.setNeuronParameters", mode?GPU_MODE:CPU_MODE, SILENT, 0, 42);
+
+				for (int g=0; g<numGroups; g++) {
+					if (1.0 * rand() / RAND_MAX < 0.5) {
+						sim->createSpikeGeneratorGroup("name", 1, EXCITATORY_NEURON);
+					} else {
+						sim->createGroup("name", 1, EXCITATORY_NEURON);
+					}
+				}
+				sim->setConductances(coba>0);
+
+				for (int g=0; g<numGroups; g++) {
+					if (g != forgetGroup && !sim->isPoissonGroup(g)) {
+						sim->setNeuronParameters(g, 0.1f, 0.2f, 0.3f, 0.4f);
+					}
+				}
+
+				if (!sim->isPoissonGroup(forgetGroup)) {
+					// we forgot setNeuronParams
+					EXPECT_DEATH({sim->setupNetwork();},"");
+				}
+
+				delete sim;
+			}
+		}
+	}
+}
