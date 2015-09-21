@@ -311,7 +311,9 @@ short int CARLsim::connect(int grpId1, int grpId2, ConnectionGenerator* conn, fl
 
 // create group of Izhikevich spiking neurons on 1D grid
 int CARLsim::createGroup(const std::string& grpName, int nNeur, int neurType) {
-	return createGroup(grpName, Grid3D(nNeur,1,1), neurType);
+	int grpId = createGroup(grpName, Grid3D(nNeur,1,1), neurType);
+	grpIds_.push_back(grpId);
+	return grpId;
 }
 
 // create group of Izhikevich spiking neurons on 3D grid
@@ -341,7 +343,9 @@ int CARLsim::createGroup(const std::string& grpName, const Grid3D& grid, int neu
 
 // create group of spike generators on 1D grid
 int CARLsim::createSpikeGeneratorGroup(const std::string& grpName, int nNeur, int neurType) {
-	return createSpikeGeneratorGroup(grpName, Grid3D(nNeur,1,1), neurType);
+	int grpId = createSpikeGeneratorGroup(grpName, Grid3D(nNeur,1,1), neurType);
+	grpIds_.push_back(grpId);
+	return grpId;
 }
 
 // create group of spike generators on 3D grid
