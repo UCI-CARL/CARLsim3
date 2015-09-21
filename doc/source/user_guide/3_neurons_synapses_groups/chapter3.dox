@@ -7,13 +7,14 @@
 
 \section ch3s1_neurons 3.1 Neurons
 \author Michael Beyeler
+\author Stanislav Listopad
 
 CARLsim currently supports Izhikevich spiking neurons with either current-based or conductance-based synapses
 (see \ref ch3s2_synapses), but more neuron types are planned for the future.
 Different groups of neurons can be created from a one-dimensional array to a three-dimensional grid (see
 \ref ch3s3s2_topography) via <tt>createSpikeGeneratorGroup</tt> and <tt>createGroup</tt>.
 
-\subsection ch3s1s1_izhikevich_neurons 3.1.1 Izhikevich Neurons
+\subsection ch3s1s1_izhikevich_neurons4 3.1.1 Izhikevich Neurons (4-Parameter Model)
 
 The Izhikevich neuron is a dynamical systems model that can be described by a two-dimensional system of ordinary
 differential equations:
@@ -48,10 +49,35 @@ For example, regular spiking (RS) neurons (class 1 excitable) have \f$a=0.02, b=
 Fast spiking (FS) neurons (class 2 excitable) have \f$a=0.1, b=0.2, c=-65, d=2)\f$.
 For more information on different neuron types, see Izhikevich (2003, 2004).
 
+\see \ref ch3s1s2_izhikevich_neurons9
 
-\subsection ch3s1s2_other_neurons 3.1.2 Other Neuron Types
-In the future, we plan to include other types of neuron models, such as the full 9-parameter Izhikevich model,
-a compartmental model, the leaky integrate-and-fire model, and the adaptive exponential integrate-and-fire model.
+
+
+\subsection ch3s1s2_izhikevich_neurons9 3.1.2 Izhikevich Neurons (9-Parameter Model)
+
+TODO.
+
+The 9-param model has the following form:
+
+show v-update equation
+
+explain equation (what the parameters are, similar to 3.1.1)
+
+show u-update equation
+
+explain equation (what the parameters are, similar to 3.1.1)
+
+give the parameters used for RS and FS neuron, for the user's convenience
+
+mention where more information can be found (Izzy paper? Izzy book?)
+
+
+\see \ref ch3s1s1_izhikevich_neurons4
+
+\subsection ch3s1s3_other_neurons 3.1.3 Other Neuron Types
+In the future, we plan to include other types of neuron models, such as the leaky integrate-and-fire model,
+the adaptive exponential integrate-and-fire model, and a compartmental model.
+
 
 
 \section ch3s2_synapses 3.2 Synapses

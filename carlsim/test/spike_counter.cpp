@@ -55,7 +55,7 @@ TEST(SpikeCounter, SpikeCntvsSpikeMon) {
 		grpIds[1]=sim->createSpikeGeneratorGroup("inputCallback", nNeur, EXCITATORY_NEURON);
 		grpIds[2]=sim->createSpikeGeneratorGroup("inputPoisson", nNeur, EXCITATORY_NEURON);
 
-		sim->connect(grpIds[1],grpIds[0],"full",RangeWeight(0.01f),1.0f);
+		sim->connect(grpIds[1],grpIds[0],"full",RangeWeight(0.02f),1.0f);
 		sim->setConductances(true,5,150,6,150);
 
 		for (int g=0; g<nGrp; g++) {

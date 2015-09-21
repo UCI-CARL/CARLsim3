@@ -278,7 +278,7 @@ int CpuSNN::allocateStaticLoad(int bufSize) {
 		int grpBufCnt = (int) ceil(1.0f * grp_Info[g].SizeN / bufSize);
 		assert(grpBufCnt>=0);
 		bufferCnt += grpBufCnt;
-		KERNEL_DEBUG("Grp Size = %d, Total Buffer Cnt = %d, Buffer Cnt = %f", grp_Info[g].SizeN, bufferCnt, grpBufCnt);
+		KERNEL_DEBUG("Grp Size = %d, Total Buffer Cnt = %d, Buffer Cnt = %d", grp_Info[g].SizeN, bufferCnt, grpBufCnt);
 	}
 	assert(bufferCnt>0);
 
@@ -288,8 +288,8 @@ int CpuSNN::allocateStaticLoad(int bufSize) {
 	KERNEL_DEBUG("Buffer Size = %d, Buffer Count = %d", bufSize, bufferCnt);
 
 	bufferCnt = 0;
-	for (int g = 0; g < net_Info.numGrp; g++) {
-		for (int n = grp_Info[g].StartN; n <= grp_Info[g].EndN; n += bufSize) {
+	for (int g=0; g<net_Info.numGrp; g++) {
+		for (int n=grp_Info[g].StartN; n<=grp_Info[g].EndN; n+=bufSize) {
 			int2  threadLoad;
 			// starting neuron id is saved...
 			threadLoad.x = n;
@@ -891,59 +891,62 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 	float I_sum, NMDAtmp;
 	float gNMDA, gGABAb;
 
-	//Pre-Load izhekevich variables to avoid unnecessary memory accesses.
-	float k, vr, vt, inverse_C, a, b, vpeak;
-	k = gpuPtrs.Izh_k[nid];
-	vr = gpuPtrs.Izh_vr[nid];
-	vt = gpuPtrs.Izh_vt[nid];
-	inverse_C = 1.0f / gpuPtrs.Izh_C[nid];
-	a = gpuPtrs.Izh_a[nid];
-	b = gpuPtrs.Izh_b[nid];
-	vpeak = gpuPtrs.Izh_vpeak[nid];
+	// pre-Load izhekevich variables to avoid unnecessary memory accesses.
+	float k = gpuPtrs.Izh_k[nid];
+	float vr = gpuPtrs.Izh_vr[nid];
+	float vt = gpuPtrs.Izh_vt[nid];
+	float inverse_C = 1.0f / gpuPtrs.Izh_C[nid];
+	float a = gpuPtrs.Izh_a[nid];
+	float b = gpuPtrs.Izh_b[nid];
+//	float vpeak = gpuPtrs.Izh_vpeak[nid]; // ??
 
 	// loop that allows smaller integration time step for v's and u's
 	for (int c=0; c<COND_INTEGRATION_SCALE; c++) {
 		I_sum = 0.0f;
 		if (gpuNetInfo.sim_with_conductances) {
-			NMDAtmp = (v+80.0f)*(v+80.0f)/60.0f/60.0f;
+			NMDAtmp = (v + 80.0f) * (v + 80.0f) / 60.0f / 60.0f;
 			gNMDA = (gpuNetInfo.sim_with_NMDA_rise) ? (gpuPtrs.gNMDA_d[nid]-gpuPtrs.gNMDA_r[nid]) : gpuPtrs.gNMDA[nid];
 			gGABAb = (gpuNetInfo.sim_with_GABAb_rise) ? (gpuPtrs.gGABAb_d[nid]-gpuPtrs.gGABAb_r[nid]) : gpuPtrs.gGABAb[nid];
-			I_sum = -(   gpuPtrs.gAMPA[nid]*(v-0.0f)
-					   + gNMDA*NMDAtmp/(1.0f+NMDAtmp)*(v-0.0f)
-					   + gpuPtrs.gGABAa[nid]*(v+70.0f)
-					   + gGABAb*(v+90.0f)
+			I_sum = -(   gpuPtrs.gAMPA[nid] * (v - 0.0f)
+					   + gNMDA * NMDAtmp / (1.0f + NMDAtmp) * (v - 0.0f)
+					   + gpuPtrs.gGABAa[nid] * (v + 70.0f)
+					   + gGABAb * (v + 90.0f)
 					 );
 		}
 		else {
 			I_sum = gpuPtrs.current[nid];
 		}
 
-		if(gpuGrpInfo[grpId].withParamModel_9 == 0)//4-param model
-		{
+		if (gpuGrpInfo[grpId].withParamModel_9 == 0) {//4-param model
 			// update vpos and upos for the current neuron
-			v += ((0.04f*v+5.0f)*v+140.0f-u+I_sum+gpuPtrs.extCurrent[nid])/COND_INTEGRATION_SCALE;
-			if (v > 30.0f) { 
-				v = 30.0f; // break the loop but evaluate u[i]
-				c=COND_INTEGRATION_SCALE;
-			}
-			if (v < -90.0f)
-				v = -90.0f;
-			u += (a*(b*v-u)/COND_INTEGRATION_SCALE);
+			v += ((0.04f * v + 5.0f) * v + 140.0f - u + I_sum + gpuPtrs.extCurrent[nid]) / COND_INTEGRATION_SCALE;
+		} else {
+			v += ((k * (v - vr) * (v - vt) - u + I_sum + gpuPtrs.extCurrent[nid]) * inverse_C) / COND_INTEGRATION_SCALE;
 		}
-		else//9-param model
-		{
-			v += ((k * (v - vr) * (v - vt) - u + I_sum+gpuPtrs.extCurrent[nid]) * inverse_C)/COND_INTEGRATION_SCALE;
-			if (v > vpeak)
-			{
-				v = vpeak;
-				c=COND_INTEGRATION_SCALE;
-			}
-			if (v < -90.0f)
-				v = -90.0f;
-			u += (a * (b * (v - vr) - u)/COND_INTEGRATION_SCALE);
+
+		if (v > 30.0f) { 
+			v = 30.0f; // break the loop but evaluate u[i]
+			c=COND_INTEGRATION_SCALE;
+		}
+		if (v < -90.0f) {
+			v = -90.0f;
+		}
+#if defined(WIN32) || defined(WIN64)
+				assert(!_isnan(v));
+				assert(_finite(v));
+#else
+				assert(!isnan(v));
+				assert(!isinf(v));
+#endif
+
+		if (gpuGrpInfo[grpId].withParamModel_9 == 0) {
+			u += (a * (b * v - u) / COND_INTEGRATION_SCALE);
+		} else {
+			u += (a * (b * (v - vr) - u) / COND_INTEGRATION_SCALE);
 		}
 	}
-	if(gpuNetInfo.sim_with_conductances) {
+
+	if (gpuNetInfo.sim_with_conductances) {
 		gpuPtrs.current[nid] = I_sum;
 	} else {
 		// current must be reset here for CUBA and not kernel_STPUpdateAndDecayConductances

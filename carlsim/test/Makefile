@@ -7,8 +7,8 @@ include $(USER_MK_PATH)user.mk
 # e.g., file "test/coba.cpp" should appear here as "coba"
 # the prefix (directory "test") and suffix (".cpp") will be appended afterwards
 # test cases might be run in reverse order (depends on compiler)
-carlsim_tests_cpps := stdp stp cuba coba interface spike_mon conn_mon group_mon \
-	core connect carlsim_tests_common spike_gen spike_counter poiss_rate
+carlsim_tests_cpps := stdp stp cuba coba core interface spike_mon conn_mon group_mon \
+	connect carlsim_tests_common spike_gen spike_counter poiss_rate
 
 local_src := $(addsuffix .cpp,$(carlsim_tests_cpps))
 local_objs := $(addsuffix .o,$(carlsim_tests_cpps))

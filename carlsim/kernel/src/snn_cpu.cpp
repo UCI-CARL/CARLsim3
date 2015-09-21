@@ -3535,95 +3535,87 @@ void  CpuSNN::globalStateUpdate() {
 	double tmp_iNMDA, tmp_I;
 	double tmp_gNMDA, tmp_gGABAb;
 
-	for(int g=0; g < numGrp; g++) {
-		if (grp_Info[g].Type&POISSON_NEURON) {
+	for(int g=0; g<numGrp; g++) {
+		if (grp_Info[g].Type & POISSON_NEURON) {
 			continue;
 		}
 
 		// update dopamine
 		cpuNetPtrs.grpDABuffer[g][simTimeMs] = cpuNetPtrs.grpDA[g];
 
-		for(int i=grp_Info[g].StartN; i <= grp_Info[g].EndN; i++) {
+		for(int i=grp_Info[g].StartN; i<=grp_Info[g].EndN; i++) {
 			assert(i < numNReg);
 
-			//Pre-Load izhekevich variables to avoid unnecessary memory accesses + unclutter the code.
-			float k, vr, vt, inverse_C, a, b, vpeak;
-			k = Izh_k[i];
-			vr = Izh_vr[i];
-			vt = Izh_vt[i];
-			inverse_C = 1.0f / Izh_C[i];
-			a = Izh_a[i];
-			b = Izh_b[i];
-			vpeak = Izh_vpeak[i];
+			// pre-Load izhekevich variables to avoid unnecessary memory accesses + unclutter the code.
+			float k = Izh_k[i];
+			float vr = Izh_vr[i];
+			float vt = Izh_vt[i];
+			float inverse_C = 1.0f / Izh_C[i];
+			float a = Izh_a[i];
+			float b = Izh_b[i];
+//			float vpeak = Izh_vpeak[i];
 
-			if (sim_with_conductances) { // COBA model
-				// all the tmpIs will be summed into current[i] in the following loop
-				current[i] = 0.0f;
+			for (int j=0; j<COND_INTEGRATION_SCALE; j++) {
+				if (sim_with_conductances) { // COBA model
+					// all the tmpIs will be summed into current[i] in the following loop
+					current[i] = 0.0f;
 
-				// \FIXME: these tmp vars cause a lot of rounding errors... consider rewriting
-				for (int j=0; j<COND_INTEGRATION_SCALE; j++) {
-					tmp_iNMDA = (voltage[i]+80.0)*(voltage[i]+80.0)/60.0/60.0;
+					// \FIXME: these tmp vars cause a lot of rounding errors... consider rewriting
+					tmp_iNMDA = (voltage[i] + 80.0f) * (voltage[i] + 80.0f) / 60.0f / 60.0f;
 
 					tmp_gNMDA = sim_with_NMDA_rise ? gNMDA_d[i]-gNMDA_r[i] : gNMDA[i];
 					tmp_gGABAb = sim_with_GABAb_rise ? gGABAb_d[i]-gGABAb_r[i] : gGABAb[i];
 
-					tmp_I = -(   gAMPA[i]*(voltage[i]-0)
-									 + tmp_gNMDA*tmp_iNMDA/(1+tmp_iNMDA)*(voltage[i]-0)
-									 + gGABAa[i]*(voltage[i]+70)
-									 + tmp_gGABAb*(voltage[i]+90)
+					tmp_I = -(   gAMPA[i] * (voltage[i] - 0.0f)
+									 + tmp_gNMDA * tmp_iNMDA / (1.0f + tmp_iNMDA) * (voltage[i] - 0.0f)
+									 + gGABAa[i] * (voltage[i] + 70.0f)
+									 + tmp_gGABAb * (voltage[i] + 90.0f)
 								   );
 
 					#ifdef NEURON_NOISE
 					double noiseI = -intrinsicWeight[i]*log(drand48());
 					if (isnan(noiseI) || isinf(noiseI))
-						noiseI = 0;
+						noiseI = 0.0f;
 					tmp_I += noiseI;
 					#endif
 
-					voltage[i] += ((0.04*voltage[i]+5.0)*voltage[i]+140.0-recovery[i]+tmp_I+extCurrent[i])
-						/ COND_INTEGRATION_SCALE;
-					assert(!isnan(voltage[i]) && !isinf(voltage[i]));
-
 					// keep track of total current
 					current[i] += tmp_I;
-
-					if (voltage[i] > 30) {
-						voltage[i] = 30;
-						j=COND_INTEGRATION_SCALE; // break the loop but evaluate u[i]
-//						if (gNMDA[i]>=10.0f) KERNEL_WARN("High NMDA conductance (gNMDA>=10.0) may cause instability");
-//						if (gGABAb[i]>=2.0f) KERNEL_WARN("High GABAb conductance (gGABAb>=2.0) may cause instability");
-					}
-					if (voltage[i] < -90)
-						voltage[i] = -90;
-					recovery[i]+=a*(b*voltage[i]-recovery[i])/COND_INTEGRATION_SCALE;
-				} // end COND_INTEGRATION_SCALE loop
-			} else {
-				// CUBA model
-				if(withParamModel_9 == 0)//4 parameter model
-				{
-					voltage[i] += 0.5*((0.04*voltage[i]+5.0)*voltage[i] + 140.0 - recovery[i]
-						+ current[i] + extCurrent[i]); //for numerical stability
-					voltage[i] += 0.5*((0.04*voltage[i]+5.0)*voltage[i] + 140.0 - recovery[i]
-						+ current[i] + extCurrent[i]); //time step is 0.5 ms
-					if (voltage[i] > 30)
-						voltage[i] = 30;
-					if (voltage[i] < -90)
-						voltage[i] = -90;
-					recovery[i]+=a*(b*voltage[i]-recovery[i]);
+				} else { // CUBA model
+					// do nothing, because current[i] is already set
 				}
-				else //9 parameter model
-				{
-					voltage[i] += 0.5f * (k * (voltage[i] - vr) * (voltage[i] - vt) - recovery[i] + current[i] + extCurrent[i]) * inverse_C;
-					voltage[i] += 0.5f * (k * (voltage[i] - vr) * (voltage[i] - vt) - recovery[i] + current[i] + extCurrent[i]) * inverse_C;
-					if (voltage[i] > vpeak) 
-                    	voltage[i] = vpeak;
 
-                	if (voltage[i] < -90)
-                    	voltage[i] = -90;
-
-					recovery[i] += 1.0f * a * (b * (voltage[i] - vr) - recovery[i]);
+				if (withParamModel_9 == 0) {
+					// 4-parameter model
+					voltage[i] += ((0.04f * voltage[i] + 5.0f) * voltage[i] + 140.0f - recovery[i] + current[i]
+					 + extCurrent[i]) / COND_INTEGRATION_SCALE;
+				} else {
+					// 9-parameter model
+					voltage[i] += (k * (voltage[i] - vr) * (voltage[i] - vt) - recovery[i] + current[i]
+					 + extCurrent[i]) * inverse_C / COND_INTEGRATION_SCALE;
 				}
-			} // end COBA/CUBA
+
+				if (voltage[i] > 30.0f) {
+					voltage[i] = 30.0f;
+					j = COND_INTEGRATION_SCALE; // break the loop, but evaluate recovery var
+				}
+				if (voltage[i] < -90.0f) {
+					voltage[i] = -90.0f;
+				}
+#if defined(WIN32) || defined(WIN64)
+				assert(!_isnan(voltage[i]));
+				assert(_finite(voltage[i]));
+#else
+				assert(!isnan(voltage[i]));
+				assert(!isinf(voltage[i]));
+#endif
+
+				if (withParamModel_9 == 0) {
+					recovery[i] += a * (b * voltage[i] - recovery[i]) / COND_INTEGRATION_SCALE;
+				} else {
+					recovery[i] += a * (b * (voltage[i] - vr) - recovery[i]) / COND_INTEGRATION_SCALE;
+				}
+			} // end COND_INTEGRATION_SCALE loop
 		} // end StartN...EndN
 	} // end numGrp
 }
