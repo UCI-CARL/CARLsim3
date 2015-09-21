@@ -3553,7 +3553,7 @@ void  CpuSNN::globalStateUpdate() {
 			float inverse_C = 1.0f / Izh_C[i];
 			float a = Izh_a[i];
 			float b = Izh_b[i];
-//			float vpeak = Izh_vpeak[i];
+			float vpeak = Izh_vpeak[i];
 
 			for (int j=0; j<COND_INTEGRATION_SCALE; j++) {
 				if (sim_with_conductances) { // COBA model
@@ -3589,16 +3589,20 @@ void  CpuSNN::globalStateUpdate() {
 					// 4-parameter model
 					voltage[i] += ((0.04f * voltage[i] + 5.0f) * voltage[i] + 140.0f - recovery[i] + current[i]
 					 + extCurrent[i]) / COND_INTEGRATION_SCALE;
+					if (voltage[i] > 30.0f) {
+						voltage[i] = 30.0f;
+						j = COND_INTEGRATION_SCALE; // break the loop, but evaluate recovery var
+					}
 				} else {
 					// 9-parameter model
 					voltage[i] += (k * (voltage[i] - vr) * (voltage[i] - vt) - recovery[i] + current[i]
 					 + extCurrent[i]) * inverse_C / COND_INTEGRATION_SCALE;
+					if (voltage[i] > vpeak) {
+						voltage[i] = vpeak;
+						j = COND_INTEGRATION_SCALE; // break the loop, but evaluate recovery var
+					}
 				}
 
-				if (voltage[i] > 30.0f) {
-					voltage[i] = 30.0f;
-					j = COND_INTEGRATION_SCALE; // break the loop, but evaluate recovery var
-				}
 				if (voltage[i] < -90.0f) {
 					voltage[i] = -90.0f;
 				}

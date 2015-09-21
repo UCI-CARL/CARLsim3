@@ -898,7 +898,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 	float inverse_C = 1.0f / gpuPtrs.Izh_C[nid];
 	float a = gpuPtrs.Izh_a[nid];
 	float b = gpuPtrs.Izh_b[nid];
-//	float vpeak = gpuPtrs.Izh_vpeak[nid]; // ??
+	float vpeak = gpuPtrs.Izh_vpeak[nid];
 
 	// loop that allows smaller integration time step for v's and u's
 	for (int c=0; c<COND_INTEGRATION_SCALE; c++) {
@@ -920,14 +920,18 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 		if (gpuGrpInfo[grpId].withParamModel_9 == 0) {//4-param model
 			// update vpos and upos for the current neuron
 			v += ((0.04f * v + 5.0f) * v + 140.0f - u + I_sum + gpuPtrs.extCurrent[nid]) / COND_INTEGRATION_SCALE;
+			if (v > 30.0f) { 
+				v = 30.0f; // break the loop but evaluate u[i]
+				c=COND_INTEGRATION_SCALE;
+			}
 		} else {
 			v += ((k * (v - vr) * (v - vt) - u + I_sum + gpuPtrs.extCurrent[nid]) * inverse_C) / COND_INTEGRATION_SCALE;
+			if (v > vpeak) { 
+				v = vpeak; // break the loop but evaluate u[i]
+				c=COND_INTEGRATION_SCALE;
+			}
 		}
 
-		if (v > 30.0f) { 
-			v = 30.0f; // break the loop but evaluate u[i]
-			c=COND_INTEGRATION_SCALE;
-		}
 		if (v < -90.0f) {
 			v = -90.0f;
 		}
