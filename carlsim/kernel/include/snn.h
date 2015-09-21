@@ -968,7 +968,6 @@ private:
 	int				numNInhPois;		//!< number of inhibitory poisson neurons
 	int				numNPois;			//!< number of poisson neurons
 	float       	*voltage, *recovery, *Izh_C, *Izh_k, *Izh_vr, *Izh_vt, *Izh_vpeak, *Izh_a, *Izh_b, *Izh_c, *Izh_d, *current, *extCurrent;
-	bool			*withParamModel_9;
 	bool			*curSpike;
 	int         	*nSpikeCnt;     //!< spike counts per neuron
 	unsigned short       	*Npre;			//!< stores the number of input connections to the neuron

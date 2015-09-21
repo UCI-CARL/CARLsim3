@@ -3585,7 +3585,7 @@ void  CpuSNN::globalStateUpdate() {
 					// do nothing, because current[i] is already set
 				}
 
-				if (withParamModel_9 == 0) {
+				if (grp_Info[g].withParamModel_9 == 0) {
 					// 4-parameter model
 					voltage[i] += ((0.04f * voltage[i] + 5.0f) * voltage[i] + 140.0f - recovery[i] + current[i]
 					 + extCurrent[i]) / COND_INTEGRATION_SCALE;
@@ -3614,7 +3614,7 @@ void  CpuSNN::globalStateUpdate() {
 				assert(!isinf(voltage[i]));
 #endif
 
-				if (withParamModel_9 == 0) {
+				if (grp_Info[g].withParamModel_9 == 0) {
 					recovery[i] += a * (b * voltage[i] - recovery[i]) / COND_INTEGRATION_SCALE;
 				} else {
 					recovery[i] += a * (b * (voltage[i] - vr) - recovery[i]) / COND_INTEGRATION_SCALE;

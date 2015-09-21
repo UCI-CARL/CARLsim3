@@ -47,6 +47,9 @@
 
 
 int main() {
+	/*
+	
+
 	// keep track of execution time
 	Stopwatch watch;
 	
@@ -96,6 +99,34 @@ int main() {
 
 	// print stopwatch summary
 	watch.stop();
+	
+	*/
+	
+	int ithGPU = 0;
+        int randSeed = 42;
+        CARLsim sim("hello_world", CPU_MODE, USER, ithGPU, randSeed);
+	
+	int N = 1; //number of neurons
+	int s = sim.createGroup("soma", N, EXCITATORY_NEURON);
+	sim.setNeuronParameters(s, 100.0f, 0.7f, -60.0f, -40.0f, 0.03f, -2.0f, 35.0f, -50.0f, 100.0f);
+	int gin = sim.createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
+	sim.connect(gin, s, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
+	sim.setConductances(false);	
+	sim.setupNetwork();
+	SpikeMonitor* SM = sim.setSpikeMonitor(s, "DEFAULT"); // put spike times into file
+	SM->startRecording();//Record spikes within group s
+	PoissonRate in(N);
+
+        in.setRates(0.0f);//Set the poissonRate to be inactive (rate 0)
+        sim.setSpikeRate(gin, &in);//Make gin an inactive (silent) input group.
+
+	sim.setExternalCurrent(s, 0);//Set external current of 0 into group s 
+        sim.runNetwork(0, 100);//Run network for 100ms
+        sim.setExternalCurrent(s, 70);//Set external current of 70 into group s
+        sim.runNetwork(0, 900);//Run network for 900ms
+
+	SM->stopRecording();
+	SM->print();
 
 	return 0;
 }
