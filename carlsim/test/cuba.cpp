@@ -130,7 +130,7 @@ TEST(CUBA, firingRateCPUvsGPU) {
 			} else {
 				// 9-param model
 				// TODO: add 9-param call for regular-spiking
-				sim.setNeuronParameters(g1, 0.02f, 0.2f, -65.0f, 8.0f); // RS
+				sim.setNeuronParameters(g1, 100.0f, 0.7f, -60.0f, -40.0f, 0.03f, -2.0f, 35.0f, -50.0f, 100.0f);//RS
 			}
 
 			int g0=sim.createSpikeGeneratorGroup("input", 1 ,EXCITATORY_NEURON);

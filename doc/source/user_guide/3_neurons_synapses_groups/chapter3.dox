@@ -27,7 +27,7 @@ Here, (1) describes the membrane potential \f$v\f$ for a given synaptic current 
 whereas (2) describes a recovery variable \f$u\f$;
 the parameter \f$a\f$ is the rate constant of the recovery variable,
 and the parameter \f$b\f$ describes the sensitivity of the recovery variable to the subthreshold fluctuations of the
-membrane potneital.
+membrane potential.
 All parameters in (1) and (2) are dimensionless; however, the right-hand side of (1) is in a form such that the 
 membrane potential \f$v\f$ has mV scale and the time \f$t\f$ has ms scale.
 is voltage, \f$u\f$ is the recovery variable, \f$I\f$ is the input current, and \f$a, b, c, d\f$ are
@@ -51,25 +51,53 @@ For more information on different neuron types, see Izhikevich (2003, 2004).
 
 \see \ref ch3s1s2_izhikevich_neurons9
 
-
-
 \subsection ch3s1s2_izhikevich_neurons9 3.1.2 Izhikevich Neurons (9-Parameter Model)
 
-TODO.
+The 9-parameter izhikevich neuron model is equivalent to the 4-parameter one. Larger number of parameters is used for
+convenience in describing various neuron types.
 
-The 9-param model has the following form:
+\f{align*}{
+\frac{dv}{dt}  = & ~ (k (v - vr) (v - vt) - u + i_{syn}) / C & \text{(14)}\\ 
+\f}
 
-show v-update equation
+Here, (14) describes the membrane potential \f$v\f$ for a given synaptic current \f$i_{syn}\f$ (see \ref ch3s2_synapses).
+The parameter \f$k\f$ can be found using rheobase and the input resistance of a neuron. This parameter is a rate constant
+of membrane potential. 
+The parameter \f$vr\f$ is the resting membrane potential.
+The parameter \f$vt\f$ is the instantaneous threshold potential.
+The parameter \f$C\f$ is the membrane capacitance.
 
-explain equation (what the parameters are, similar to 3.1.1)
+\f{align*}{
+\frac{dv}{dt}  = & ~ a (b (v - vr) - u) & \text{(15)}\\
+\f}
 
-show u-update equation
+Here, (15) describes a recovery variable \f$u\f$;
 
-explain equation (what the parameters are, similar to 3.1.1)
+The parameter \f$a\f$ is the rate constant of the recovery variable.
+The parameter \f$b\f$ describes the sensitivity of the recovery variable to the subthreshold fluctuations of the
+membrane potential.
+The parameter \f$vr\f$ is the resting membrane potential.
 
-give the parameters used for RS and FS neuron, for the user's convenience
+All parameters in (14) and (15) are dimensionless; however, the right-hand side of (14) is in a form such that the
+membrane potential \f$v\f$ has mV scale and the time \f$t\f$ has ms scale.
+is voltage, \f$u\f$ is the recovery variable, \f$I\f$ is the input current, and \f$C, k, vr, vt, a, b, vpeak, c, d\f$ are
+open parameters that have different values for different neuron types.
 
-mention where more information can be found (Izzy paper? Izzy book?)
+In contrast to other simple models such as the leaky integrate-and-fire (LIF) neuron, the Izhikevich neuron is able
+to generate the upstroke of the spike itself. Thus the voltage reset occurs not at the threshold, but at the peak
+(\f$v_{cutoff}=+vpeak\f$) of the spike.
+The action potential downstroke is modeled using an instantaneous reset of the membrane potential whenever \f$v\f$
+reaches the spike cutoff, plus a stepping of the recovery variable:
+
+\f{align*}{ 
+ v(v>vpeak)  = & ~ c & \text{(16)}\\
+ u(v>vpeak)  = & ~ u + d & \text{(17)}\f}
+
+Regular spiking (RS) neurons (class 1 excitable) have \f$C=100, k=0.7, vr=-60, vt=-40, a=0.03, b=-2.0, vpeak=35, c=-50, d=100\f$.
+Fast spiking (FS) neurons (class 2 excitable) have \f$C=20, k=1, vr=-55, vt=-40, a=0.15, b=8, vpeak=25, c=-55, d=200)\f$.
+For more information on different neuron types, see Izhikevich (2003, 2004).
+For more information about 9-parameter model see Dynamical Systems in Neuroscience - The Geometry of Excitability and Bursting
+by Eugene M. Izhikevich.
 
 
 \see \ref ch3s1s1_izhikevich_neurons4
