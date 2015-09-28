@@ -54,15 +54,21 @@ TEST(STP, firingRateSTDvsSTF) {
 	SpikeMonitor *spkMonG2 = NULL, *spkMonG3 = NULL;
 	PeriodicSpikeGenerator *spkGenG0 = NULL, *spkGenG1 = NULL;
 
+#ifdef __CPU_ONLY__
+	int numModes = 1;
+#else
+	int numModes = 2;
+#endif
+
 	for (int isRunLong=0; isRunLong<=1; isRunLong++) {
 		for (int hasCOBA=0; hasCOBA<=1; hasCOBA++) {
-			for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
+			for (int mode=0; mode<numModes; mode++) {
 				// compare
 				float rateG2noSTP = -1.0f;
 				float rateG3noSTP = -1.0f;
 
 				for (int hasSTP=0; hasSTP<=1; hasSTP++) {
-					sim = new CARLsim("STP.firingRateSTDvsSTF",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,randSeed);
+					sim = new CARLsim("STP.firingRateSTDvsSTF",mode?GPU_MODE:CPU_MODE,SILENT,0,randSeed);
 					int g2=sim->createGroup("STD", 1, EXCITATORY_NEURON);
 					int g3=sim->createGroup("STF", 1, EXCITATORY_NEURON);
 					sim->setNeuronParameters(g2, 0.02f, 0.2f, -65.0f, 8.0f);
