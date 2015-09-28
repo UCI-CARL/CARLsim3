@@ -368,6 +368,8 @@ TEST(Interface, setNeuronParametersDeath) {
 	sim = new CARLsim("Interface.setNeuronParametersDeath",CPU_MODE,SILENT,0,42);
 	int g0=sim->createGroup("excit", Grid3D(10,1,1), EXCITATORY_NEURON);
 
+	// 4-parameter model
+
 	// set silly values to all possible input arguments
 	// e.g., negative values for things>=0, values>numGrpsetc.
 	EXPECT_DEATH({sim->setNeuronParameters(-2, 0.02f, 0.2f, -65.0f, 8.0f);},"");
@@ -386,6 +388,22 @@ TEST(Interface, setNeuronParametersDeath) {
 	EXPECT_DEATH({sim->setNeuronParameters(g0, 0.02f, 0.0f, 0.2f, 0.0f, -65.0f, -2.0f, 8.0f, 0.0f);},"");
 //	EXPECT_DEATH({sim->setNeuronParameters(g0, 0.02f, 0.0f, 0.2f, 0.0f, -65.0f, 0.0f, -8.0f, 0.0f);},"");
 	EXPECT_DEATH({sim->setNeuronParameters(g0, 0.02f, 0.0f, 0.2f, 0.0f, -65.0f, 0.0f, 8.0f, -10.0f);},"");
+
+
+	// 9-parameter model
+	//Negative Group ID
+	EXPECT_DEATH({sim->setNeuronParameters(-5, 100.0f, 0.7f, -60.0f, -40.0f, 0.03f, -2.0f, 35.0f, -50.0f, 100.0f);}, "");
+		
+	// set negative values for standard deviations
+	EXPECT_DEATH({sim->setNeuronParameters(g0, 100.0f, -2.0f, 0.7f, 0.0f, -60.0f, 2.0f, -40.0f, 0.0f, 0.03f, 0.01f, -2.0f, 0.0f, 35.0f, 2.5f, -50.0f, 2.0f, 100.0f, 8.0f);}, "");
+	EXPECT_DEATH({sim->setNeuronParameters(g0, 100.0f, 2.0f, 0.7f, -0.01f, -60.0f, 2.0f, -40.0f, 0.0f, 0.03f, 0.01f, -2.0f, 0.0f, 35.0f, 2.5f, -50.0f, 2.0f, 100.0f, 8.0f);}, "");
+	EXPECT_DEATH({sim->setNeuronParameters(g0, 100.0f, 2.0f, 0.7f, 0.0f, -60.0f, -2.0f, -40.0f, 0.0f, 0.03f, 0.01f, -2.0f, 0.0f, 35.0f, 2.5f, -50.0f, 2.0f, 100.0f, 8.0f);}, "");
+	EXPECT_DEATH({sim->setNeuronParameters(g0, 100.0f, 2.0f, 0.7f, 0.0f, -60.0f, 2.0f, -40.0f, -0.5f, 0.03f, 0.01f, -2.0f, 0.0f, 35.0f, 2.5f, -50.0f, 2.0f, 100.0f, 8.0f);}, "");
+	EXPECT_DEATH({sim->setNeuronParameters(g0, 100.0f, 2.0f, 0.7f, 0.0f, -60.0f, 2.0f, -40.0f, 0.0f, 0.03f, -0.01f, -2.0f, 0.0f, 35.0f, 2.5f, -50.0f, 2.0f, 100.0f, 8.0f);}, "");
+	EXPECT_DEATH({sim->setNeuronParameters(g0, 100.0f, 2.0f, 0.7f, 0.0f, -60.0f, 2.0f, -40.0f, 0.0f, 0.03f, 0.01f, -2.0f, -0.05f, 35.0f, 2.5f, -50.0f, 2.0f, 100.0f, 8.0f);}, "");
+	EXPECT_DEATH({sim->setNeuronParameters(g0, 100.0f, 2.0f, 0.7f, 0.0f, -60.0f, 2.0f, -40.0f, 0.0f, 0.03f, 0.01f, -2.0f, 0.0f, 35.0f, -2.5f, -50.0f, 2.0f, 100.0f, 8.0f);}, "");
+	EXPECT_DEATH({sim->setNeuronParameters(g0, 100.0f, 2.0f, 0.7f, 0.0f, -60.0f, 2.0f, -40.0f, 0.0f, 0.03f, 0.01f, -2.0f, 0.0f, 35.0f, 2.5f, -50.0f, -2.0f, 100.0f, 8.0f);}, "");
+	EXPECT_DEATH({sim->setNeuronParameters(g0, 100.0f, 2.0f, 0.7f, 0.0f, -60.0f, 2.0f, -40.0f, 0.0f, 0.03f, 0.01f, -2.0f, 0.0f, 35.0f, 2.5f, -50.0f, 2.0f, 100.0f, -8.0f);}, "");
 
 	if (sim!=NULL)
 		delete sim;

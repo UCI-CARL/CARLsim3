@@ -70,10 +70,14 @@ void UserErrors::throwError(std::string errorFunc, errorType error, std::string 
 		errorMsg += " could not be opened."; break;
 	case IS_DEPRECATED:
 		errorMsg += " is deprecated."; break;
+	case MUST_BE_CALLED:
+		errorMsg += " must be called "; break;
 	case MUST_BE_IDENTICAL:
 		errorMsg += " must be identical."; break;
 	case MUST_BE_LARGER:
 		errorMsg += " must be larger than "; break;
+	case MUST_BE_LOGGER_CUSTOM:
+		errorMsg += " must be in CUSTOM logger mode."; break;
 	case MUST_BE_NEGATIVE:
 		errorMsg += " must be negative."; break;
 	case MUST_BE_POSITIVE:

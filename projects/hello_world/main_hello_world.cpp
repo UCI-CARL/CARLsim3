@@ -47,6 +47,7 @@
 
 
 int main() {
+
 	// keep track of execution time
 	Stopwatch watch;
 	
@@ -96,6 +97,6 @@ int main() {
 
 	// print stopwatch summary
 	watch.stop();
-
+	
 	return 0;
 }

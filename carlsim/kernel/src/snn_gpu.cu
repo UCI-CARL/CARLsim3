@@ -278,7 +278,7 @@ int CpuSNN::allocateStaticLoad(int bufSize) {
 		int grpBufCnt = (int) ceil(1.0f * grp_Info[g].SizeN / bufSize);
 		assert(grpBufCnt>=0);
 		bufferCnt += grpBufCnt;
-		KERNEL_DEBUG("Grp Size = %d, Total Buffer Cnt = %d, Buffer Cnt = %f", grp_Info[g].SizeN, bufferCnt, grpBufCnt);
+		KERNEL_DEBUG("Grp Size = %d, Total Buffer Cnt = %d, Buffer Cnt = %d", grp_Info[g].SizeN, bufferCnt, grpBufCnt);
 	}
 	assert(bufferCnt>0);
 
@@ -288,8 +288,8 @@ int CpuSNN::allocateStaticLoad(int bufSize) {
 	KERNEL_DEBUG("Buffer Size = %d, Buffer Count = %d", bufSize, bufferCnt);
 
 	bufferCnt = 0;
-	for (int g = 0; g < net_Info.numGrp; g++) {
-		for (int n = grp_Info[g].StartN; n <= grp_Info[g].EndN; n += bufSize) {
+	for (int g=0; g<net_Info.numGrp; g++) {
+		for (int n=grp_Info[g].StartN; n<=grp_Info[g].EndN; n+=bufSize) {
 			int2  threadLoad;
 			// starting neuron id is saved...
 			threadLoad.x = n;
@@ -662,7 +662,13 @@ __global__ 	void kernel_findFiring (int t, int sec, int simTime) {
 				}
 			}
 			else {
-				if (gpuPtrs.voltage[nid] >= 30.0f) {
+				bool process = false;
+				if ((gpuPtrs.voltage[nid] >= gpuPtrs.Izh_vpeak[nid]) && gpuGrpInfo[grpId].withParamModel_9 == 1) 
+				{ process = true;}
+				else if ((gpuPtrs.voltage[nid] >= 30.0) && gpuGrpInfo[grpId].withParamModel_9 == 0)
+				{process = true;}
+				if (process == true)
+				{
 					needToWrite = true;
 					if (gpuGrpInfo[grpId].withSpikeCounter) {
 						int bufPos = gpuGrpInfo[grpId].spkCntBufPos;
@@ -885,34 +891,66 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 	float I_sum, NMDAtmp;
 	float gNMDA, gGABAb;
 
+	// pre-Load izhekevich variables to avoid unnecessary memory accesses.
+	float k = gpuPtrs.Izh_k[nid];
+	float vr = gpuPtrs.Izh_vr[nid];
+	float vt = gpuPtrs.Izh_vt[nid];
+	float inverse_C = 1.0f / gpuPtrs.Izh_C[nid];
+	float a = gpuPtrs.Izh_a[nid];
+	float b = gpuPtrs.Izh_b[nid];
+	float vpeak = gpuPtrs.Izh_vpeak[nid];
+
 	// loop that allows smaller integration time step for v's and u's
 	for (int c=0; c<COND_INTEGRATION_SCALE; c++) {
 		I_sum = 0.0f;
 		if (gpuNetInfo.sim_with_conductances) {
-			NMDAtmp = (v+80.0f)*(v+80.0f)/60.0f/60.0f;
+			NMDAtmp = (v + 80.0f) * (v + 80.0f) / 60.0f / 60.0f;
 			gNMDA = (gpuNetInfo.sim_with_NMDA_rise) ? (gpuPtrs.gNMDA_d[nid]-gpuPtrs.gNMDA_r[nid]) : gpuPtrs.gNMDA[nid];
 			gGABAb = (gpuNetInfo.sim_with_GABAb_rise) ? (gpuPtrs.gGABAb_d[nid]-gpuPtrs.gGABAb_r[nid]) : gpuPtrs.gGABAb[nid];
-			I_sum = -(   gpuPtrs.gAMPA[nid]*(v-0.0f)
-					   + gNMDA*NMDAtmp/(1.0f+NMDAtmp)*(v-0.0f)
-					   + gpuPtrs.gGABAa[nid]*(v+70.0f)
-					   + gGABAb*(v+90.0f)
+			I_sum = -(   gpuPtrs.gAMPA[nid] * (v - 0.0f)
+					   + gNMDA * NMDAtmp / (1.0f + NMDAtmp) * (v - 0.0f)
+					   + gpuPtrs.gGABAa[nid] * (v + 70.0f)
+					   + gGABAb * (v + 90.0f)
 					 );
 		}
 		else {
 			I_sum = gpuPtrs.current[nid];
 		}
 
-		// update vpos and upos for the current neuron
-		v += ((0.04f*v+5.0f)*v+140.0f-u+I_sum+gpuPtrs.extCurrent[nid])/COND_INTEGRATION_SCALE;
-		if (v > 30.0f) { 
-			v = 30.0f; // break the loop but evaluate u[i]
-			c=COND_INTEGRATION_SCALE;
+		if (gpuGrpInfo[grpId].withParamModel_9 == 0) {//4-param model
+			// update vpos and upos for the current neuron
+			v += ((0.04f * v + 5.0f) * v + 140.0f - u + I_sum + gpuPtrs.extCurrent[nid]) / COND_INTEGRATION_SCALE;
+			if (v > 30.0f) { 
+				v = 30.0f; // break the loop but evaluate u[i]
+				c=COND_INTEGRATION_SCALE;
+			}
+		} else {
+			v += ((k * (v - vr) * (v - vt) - u + I_sum + gpuPtrs.extCurrent[nid]) * inverse_C) / COND_INTEGRATION_SCALE;
+			if (v > vpeak) { 
+				v = vpeak; // break the loop but evaluate u[i]
+				c=COND_INTEGRATION_SCALE;
+			}
 		}
-		if (v < -90.0f)
+
+		if (v < -90.0f) {
 			v = -90.0f;
-		u += (gpuPtrs.Izh_a[nid]*(gpuPtrs.Izh_b[nid]*v-u)/COND_INTEGRATION_SCALE);
+		}
+#if defined(WIN32) || defined(WIN64)
+				assert(!_isnan(v));
+				assert(_finite(v));
+#else
+				assert(!isnan(v));
+				assert(!isinf(v));
+#endif
+
+		if (gpuGrpInfo[grpId].withParamModel_9 == 0) {
+			u += (a * (b * v - u) / COND_INTEGRATION_SCALE);
+		} else {
+			u += (a * (b * (v - vr) - u) / COND_INTEGRATION_SCALE);
+		}
 	}
-	if(gpuNetInfo.sim_with_conductances) {
+
+	if (gpuNetInfo.sim_with_conductances) {
 		gpuPtrs.current[nid] = I_sum;
 	} else {
 		// current must be reset here for CUBA and not kernel_STPUpdateAndDecayConductances
@@ -1997,6 +2035,26 @@ void CpuSNN::copyNeuronParametersFromHostToDevice(network_ptr_t* dest, bool allo
 		length = grp_Info[grpId].SizeN;
 	}
 
+	if (allocateMem)
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->Izh_C, sizeof(float) * length));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->Izh_C[ptrPos], &Izh_C[ptrPos], sizeof(float) * length, kind));
+
+	if (allocateMem)
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->Izh_k, sizeof(float) * length));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->Izh_k[ptrPos], &Izh_k[ptrPos], sizeof(float) * length, kind));
+
+	if (allocateMem)
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->Izh_vr, sizeof(float) * length));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->Izh_vr[ptrPos], &Izh_vr[ptrPos], sizeof(float) * length, kind));
+
+	if (allocateMem)
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->Izh_vt, sizeof(float) * length));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->Izh_vt[ptrPos], &Izh_vt[ptrPos], sizeof(float) * length, kind));
+
+	if (allocateMem)
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->Izh_vpeak, sizeof(float) * length));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->Izh_vpeak[ptrPos], &Izh_vpeak[ptrPos], sizeof(float) * length, kind));
+
 	if(allocateMem)
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->Izh_a, sizeof(float) * length));
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->Izh_a[ptrPos], &Izh_a[ptrPos], sizeof(float) * length, kind));
@@ -2426,6 +2484,11 @@ void CpuSNN::deleteObjects_GPU() {
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.Izh_b) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.Izh_c) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.Izh_d) );
+	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.Izh_C));
+	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.Izh_vr));
+	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.Izh_vt));
+	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.Izh_k));
+	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.Izh_vpeak));
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.gAMPA) );
 	if (sim_with_NMDA_rise) {
 		CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.gNMDA_r) );

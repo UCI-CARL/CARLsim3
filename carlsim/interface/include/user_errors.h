@@ -41,9 +41,10 @@ public:
 		FILE_CANNOT_CREATE,		//!< could not create a file
 		FILE_CANNOT_OPEN,		//!< could not open file
 		IS_DEPRECATED,			//!< deprecated function
-		MUST_BE_LOGGER_CUSTOM,	//!< must be in custom logger mode
+		MUST_BE_CALLED,			//!< must be called
 		MUST_BE_IDENTICAL,      //!< parameters must be identical
 		MUST_BE_IN_RANGE,		//!< parameter must be in some range
+		MUST_BE_LOGGER_CUSTOM,	//!< must be in custom logger mode
 		MUST_BE_NEGATIVE,		//!< parameter must have negative value
 		MUST_BE_OFF,			//!< parameter must be off
 		MUST_BE_ON,				//!< parameter must be on

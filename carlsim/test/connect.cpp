@@ -196,7 +196,7 @@ TEST(CONNECT, connectRandom) {
 
 	// from CpuSNN::connect: estimate max number of connections needed using binomial distribution
 	// at 6.5 standard deviations
-	int errorMargin = 6.5*sqrt(prob*(1-prob)*grid.N)+0.5;
+	int errorMargin = ceil(6.5*sqrt(prob*(1-prob)*grid.N)) + 1;
 	EXPECT_NEAR(sim->getNumSynapticConnections(c0), prob * grid.N * grid.N, errorMargin);
 	EXPECT_NEAR(sim->getNumSynapticConnections(c1), prob * grid.N * grid.x, errorMargin);
 	EXPECT_NEAR(sim->getNumSynapticConnections(c2), prob * grid.N * grid.x * grid.z, errorMargin);

@@ -54,15 +54,9 @@ TEST(STP, firingRateSTDvsSTF) {
 	SpikeMonitor *spkMonG2 = NULL, *spkMonG3 = NULL;
 	PeriodicSpikeGenerator *spkGenG0 = NULL, *spkGenG1 = NULL;
 
-#ifdef __CPU_ONLY__
-	int numModes = 1;
-#else
-	int numModes = 2;
-#endif
-
 	for (int isRunLong=0; isRunLong<=1; isRunLong++) {
 		for (int hasCOBA=0; hasCOBA<=1; hasCOBA++) {
-			for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
+			for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
 				// compare
 				float rateG2noSTP = -1.0f;
 				float rateG3noSTP = -1.0f;
@@ -168,73 +162,81 @@ TEST(STP, spikeTimesCPUvsGPU) {
 #else
 	int numModes = 2;
 #endif
+		for (int hasIzh4=0; hasIzh4<=1; hasIzh4++) {
+			for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
+				sim = new CARLsim("STP.spikeTimesCPUvsGPU",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
+				int g2=sim->createGroup("STD", 1, EXCITATORY_NEURON);
+				int g3=sim->createGroup("STF", 1, EXCITATORY_NEURON);
+				if(hasIzh4)
+				{
+					sim->setNeuronParameters(g2, 0.02f, 0.2f, -65.0f, 8.0f);
+					sim->setNeuronParameters(g3, 0.02f, 0.2f, -65.0f, 8.0f);
+				}
+				else{
+					sim->setNeuronParameters(g2, 100.0f, 0.7f, -60.0f, -40.0f, 0.03f, -2.0f, 35.0f, -50.0f, 100.0f);//RS
+					sim->setNeuronParameters(g3, 100.0f, 0.7f, -60.0f, -40.0f, 0.03f, -2.0f, 35.0f, -50.0f, 100.0f);//RS
+				}
+				int g0=sim->createSpikeGeneratorGroup("input0", 1, EXCITATORY_NEURON);
+				int g1=sim->createSpikeGeneratorGroup("input1", 1, EXCITATORY_NEURON);
 
-		for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
-			sim = new CARLsim("STP.spikeTimesCPUvsGPU",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
-			int g2=sim->createGroup("STD", 1, EXCITATORY_NEURON);
-			int g3=sim->createGroup("STF", 1, EXCITATORY_NEURON);
-			sim->setNeuronParameters(g2, 0.02f, 0.2f, -65.0f, 8.0f);
-			sim->setNeuronParameters(g3, 0.02f, 0.2f, -65.0f, 8.0f);
-			int g0=sim->createSpikeGeneratorGroup("input0", 1, EXCITATORY_NEURON);
-			int g1=sim->createSpikeGeneratorGroup("input1", 1, EXCITATORY_NEURON);
+				float wt = hasCOBA ? 0.2f : 18.0f;
+				sim->connect(g0,g2,"one-to-one",RangeWeight(wt),1.0f,RangeDelay(1));
+				sim->connect(g1,g3,"one-to-one",RangeWeight(wt),1.0f,RangeDelay(1));
 
-			float wt = hasCOBA ? 0.2f : 18.0f;
-			sim->connect(g0,g2,"one-to-one",RangeWeight(wt),1.0f,RangeDelay(1));
-			sim->connect(g1,g3,"one-to-one",RangeWeight(wt),1.0f,RangeDelay(1));
+				if (hasCOBA)
+					sim->setConductances(true, 5, 0, 150, 6, 0, 150);
+				else
+					sim->setConductances(false);
 
-			if (hasCOBA)
-				sim->setConductances(true, 5, 0, 150, 6, 0, 150);
-			else
-				sim->setConductances(false);
+				sim->setSTP(g0, true, 0.45f, 50.0f, 750.0f); // depressive
+				sim->setSTP(g1, true, 0.15f, 750.0f, 50.0f); // facilitative
 
-			sim->setSTP(g0, true, 0.45f, 50.0f, 750.0f); // depressive
-			sim->setSTP(g1, true, 0.15f, 750.0f, 50.0f); // facilitative
+				bool spikeAtZero = true;
+				spkGenG0 = new PeriodicSpikeGenerator(10.0f,spikeAtZero); // periodic spiking @ 15 Hz
+				sim->setSpikeGenerator(g0, spkGenG0);
+				spkGenG1 = new PeriodicSpikeGenerator(10.0f,spikeAtZero); // periodic spiking @ 15 Hz
+				sim->setSpikeGenerator(g1, spkGenG1);
 
-			bool spikeAtZero = true;
-			spkGenG0 = new PeriodicSpikeGenerator(10.0f,spikeAtZero); // periodic spiking @ 15 Hz
-			sim->setSpikeGenerator(g0, spkGenG0);
-			spkGenG1 = new PeriodicSpikeGenerator(10.0f,spikeAtZero); // periodic spiking @ 15 Hz
-			sim->setSpikeGenerator(g1, spkGenG1);
+				sim->setupNetwork();
 
-			sim->setupNetwork();
+				spkMonG2 = sim->setSpikeMonitor(g2,"NULL");
+				spkMonG3 = sim->setSpikeMonitor(g3,"NULL");
+				spkMonG2->startRecording();
+				spkMonG3->startRecording();
+				sim->runNetwork(runTimeMs/1000, runTimeMs%1000);
+				spkMonG2->stopRecording();
+				spkMonG3->stopRecording();
 
-			spkMonG2 = sim->setSpikeMonitor(g2,"NULL");
-			spkMonG3 = sim->setSpikeMonitor(g3,"NULL");
-			spkMonG2->startRecording();
-			spkMonG3->startRecording();
-			sim->runNetwork(runTimeMs/1000, runTimeMs%1000);
-			spkMonG2->stopRecording();
-			spkMonG3->stopRecording();
+				if (!isGPUmode) {
+					// in CPU mode, record spike times, so that we can compare them with GPU mode later on
+					spkTG2CPU = spkMonG2->getSpikeVector2D();
+					spkTG3CPU = spkMonG3->getSpikeVector2D();
+				} else {
+					// in GPU mode, compare spike times to recorded ones from CPU mode
+					spkTG2GPU = spkMonG2->getSpikeVector2D();
+					spkTG3GPU = spkMonG3->getSpikeVector2D();
 
-			if (!isGPUmode) {
-				// in CPU mode, record spike times, so that we can compare them with GPU mode later on
-				spkTG2CPU = spkMonG2->getSpikeVector2D();
-				spkTG3CPU = spkMonG3->getSpikeVector2D();
-			} else {
-				// in GPU mode, compare spike times to recorded ones from CPU mode
-				spkTG2GPU = spkMonG2->getSpikeVector2D();
-				spkTG3GPU = spkMonG3->getSpikeVector2D();
+					// do not ASSERT_, otherwise CARLsim will not be correctly deallocated
+					// instead, use EXPECT_ and subsequent if-else condition
+					bool isSizeCorrectG2 = spkTG2CPU[0].size() == spkTG2GPU[0].size();
+					bool isSizeCorrectG3 = spkTG3CPU[0].size() == spkTG3GPU[0].size();
+					EXPECT_TRUE(isSizeCorrectG2);
+					EXPECT_TRUE(isSizeCorrectG3);
 
-				// do not ASSERT_, otherwise CARLsim will not be correctly deallocated
-				// instead, use EXPECT_ and subsequent if-else condition
-				bool isSizeCorrectG2 = spkTG2CPU[0].size() == spkTG2GPU[0].size();
-				bool isSizeCorrectG3 = spkTG3CPU[0].size() == spkTG3GPU[0].size();
-				EXPECT_TRUE(isSizeCorrectG2);
-				EXPECT_TRUE(isSizeCorrectG3);
+					if (isSizeCorrectG2) {
+						for (int i=0; i<spkTG2CPU[0].size(); i++)
+							EXPECT_EQ(spkTG2CPU[0][i], spkTG2GPU[0][i]);
+					}
 
-				if (isSizeCorrectG2) {
-					for (int i=0; i<spkTG2CPU[0].size(); i++)
-						EXPECT_EQ(spkTG2CPU[0][i], spkTG2GPU[0][i]);
+					if (isSizeCorrectG3) {
+						for (int i=0; i<spkTG3CPU[0].size(); i++)
+							EXPECT_EQ(spkTG3CPU[0][i], spkTG3GPU[0][i]);
+					}
 				}
 
-				if (isSizeCorrectG3) {
-					for (int i=0; i<spkTG3CPU[0].size(); i++)
-						EXPECT_EQ(spkTG3CPU[0][i], spkTG3GPU[0][i]);
-				}
+				delete spkGenG0, spkGenG1;
+				delete sim;
 			}
-
-			delete spkGenG0, spkGenG1;
-			delete sim;
 		}
 	}
 }
