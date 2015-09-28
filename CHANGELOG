@@ -11,6 +11,12 @@ Release 3.1
 Build 3.1.0
 ---------------------
 
+2015-09-28     Stanislav Listopad <slistopa@uci.edu>
+  + Add 9-parameter Izhikevich model.
+
+2015-09-21     Michael Beyeler <mbeyeler@uci.edu>
+  * Fail gracefully when CARLsim::setNeuronParameters is not called.
+
 2015-09-17     Michael Beyeler <mbeyeler@uci.edu>
   * Add CpuSNN::globalStateDecay, separate state var decay from step-increase.
 
