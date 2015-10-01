@@ -935,12 +935,10 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 		if (v < -90.0f) {
 			v = -90.0f;
 		}
-#if defined(WIN32) || defined(WIN64)
-				assert(!_isnan(v));
-				assert(_finite(v));
-#else
-				assert(!isnan(v));
-				assert(!isinf(v));
+
+#if !defined(WIN32) && !defined(WIN64)
+		assert(!isnan(v));
+		assert(!isinf(v));
 #endif
 
 		if (gpuGrpInfo[grpId].withParamModel_9 == 0) {
