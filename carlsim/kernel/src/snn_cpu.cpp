@@ -3604,16 +3604,16 @@ void  CpuSNN::globalStateUpdate() {
 									 + gGABAa[i] * (voltage[i] + 70.0f)
 									 + tmp_gGABAb * (voltage[i] + 90.0f)
 								   );
-
+					/*
 					#ifdef NEURON_NOISE
-					double noiseI = -intrinsicWeight[i]*log(drand48());
+					float noiseI = -intrinsicWeight[i]*log(drand48());
 					if (isnan(noiseI) || isinf(noiseI))
 						noiseI = 0.0f;
 					tmp_I += noiseI;
-					#endif
+					#endif*/
 
 					// keep track of total current
-					current[i] += tmp_I;
+					current[i] = tmp_I;
 				} else { // CUBA model
 					// do nothing, because current[i] is already set
 				}
@@ -3636,6 +3636,25 @@ void  CpuSNN::globalStateUpdate() {
 							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 						}
 					}
+					if (voltage[i] < -90.0f) {
+						voltage[i] = -90.0f;
+					}
+					#if defined(WIN32) || defined(WIN64)
+						assert(!_isnan(voltage[i]));
+						assert(_finite(voltage[i]));
+					#else
+						assert(!isnan(voltage[i]));
+						assert(!isinf(voltage[i]));
+					#endif
+
+					if (grp_Info[g].withParamModel_9 == 0) {
+						recovery[i] += dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep);
+					} else {
+						recovery[i] += dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep);
+					}
+
+					//printf("*CPU* Voltage: %f; Recovery %f; Current: %f;\n", voltage[i], recovery[i], current[i]);
+
 					break;
 				case RUNGE_KUTTA4:
 					// TODO for Stas
@@ -3646,15 +3665,78 @@ void  CpuSNN::globalStateUpdate() {
 
 						float k2 = dvdtIzhikevich4(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, current[i],
 							extCurrent[i], timeStep);
-						float l2 = dvdtIzhikevich4(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, a, b, timeStep);
+						float l2 = dudtIzhikevich4(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, a, b, timeStep);
+
+						float k3 = dvdtIzhikevich4(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, current[i],
+							extCurrent[i], timeStep);
+						float l3 = dudtIzhikevich4(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, a, b, timeStep);
+
+						float k4 = dvdtIzhikevich4(voltage[i] + k3, recovery[i] + l3, current[i],
+							extCurrent[i], timeStep);
+						float l4 = dudtIzhikevich4(voltage[i] + k3, recovery[i] + l3, a, b, timeStep);
+
+						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2 * k2 + 2 * k3 + k4);
+						if (voltage[i] > 30.0f) {
+							voltage[i] = 30.0f;
+							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+						}
+						if (voltage[i] < -90.0f) {
+							voltage[i] = -90.0f;
+						}
+						#if defined(WIN32) || defined(WIN64)
+								assert(!_isnan(voltage[i]));
+								assert(_finite(voltage[i]));
+						#else
+								assert(!isnan(voltage[i]));
+								assert(!isinf(voltage[i]));
+						#endif
+
+						recovery[i] = recovery[i] + (1.0f / 6.0f) * (l1 + 2 * l2 + 2 * l3 + l4);
 
 						// etc.
 					} else {
 						// 9-param Izhikevich
 
+						float k1 = dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, current[i],
+							extCurrent[i], timeStep);
+						float l1 = dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep);
+
+						float k2 = dvdtIzhikevich9(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, inverse_C, k, vr, vt, current[i],
+							extCurrent[i], timeStep);
+						float l2 = dudtIzhikevich9(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, vr, a, b, timeStep);
+
+						float k3 = dvdtIzhikevich9(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, inverse_C, k, vr, vt, current[i],
+							extCurrent[i], timeStep);
+						float l3 = dudtIzhikevich9(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, vr, a, b, timeStep);
+
+						float k4 = dvdtIzhikevich9(voltage[i] + k3, recovery[i] + l3, inverse_C, k, vr, vt, current[i],
+							extCurrent[i], timeStep);
+						float l4 = dudtIzhikevich9(voltage[i] + k3, recovery[i] + l3, vr, a, b, timeStep);
+
+						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2 * k2 + 2 * k3 + k4);
+
 						// etc.
+
+						if (voltage[i] > vpeak) {
+							voltage[i] = vpeak;
+							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+						}
+
+						if (voltage[i] < -90.0f) {
+							voltage[i] = -90.0f;
+						}
+						#if defined(WIN32) || defined(WIN64)
+								assert(!_isnan(voltage[i]));
+								assert(_finite(voltage[i]));
+						#else
+								assert(!isnan(voltage[i]));
+								assert(!isinf(voltage[i]));
+						#endif
+
+						recovery[i] = recovery[i] + (1.0f / 6.0f) * (l1 + 2 * l2 + 2 * l3 + l4);
 					}
-					KERNEL_ERROR("RK4 not yet implemented.");
+
+					//KERNEL_ERROR("RK4 not yet implemented.");
 					break;
 				case UNKNOWN_INTEGRATION:
 				default:
@@ -3662,22 +3744,7 @@ void  CpuSNN::globalStateUpdate() {
 					exitSimulation(1);
 				}
 
-				if (voltage[i] < -90.0f) {
-					voltage[i] = -90.0f;
-				}
-#if defined(WIN32) || defined(WIN64)
-				assert(!_isnan(voltage[i]));
-				assert(_finite(voltage[i]));
-#else
-				assert(!isnan(voltage[i]));
-				assert(!isinf(voltage[i]));
-#endif
-
-				if (grp_Info[g].withParamModel_9 == 0) {
-					recovery[i] += dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep);
-				} else {
-					recovery[i] += dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep);
-				}
+				
 			} // end simNumStepsPerMs_ loop
 		} // end StartN...EndN
 	} // end numGrp

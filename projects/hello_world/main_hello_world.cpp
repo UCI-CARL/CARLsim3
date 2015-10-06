@@ -57,17 +57,19 @@ int main() {
 	// create a network on GPU
 	int ithGPU = 0;
 	int randSeed = 42;
-	CARLsim sim("hello_world", CPU_MODE, USER, ithGPU, randSeed);
+	CARLsim sim("hello_world", GPU_MODE, USER, ithGPU, randSeed);
 
 	// configure the network
 	// set up a COBA two-layer network with gaussian connectivity
 	Grid3D gridIn(13,9,1); // pre is on a 13x9 grid
-	Grid3D gridOut(3,3,1); // post is on a 3x3 grid
+	//Grid3D gridOut(3,3,1); // post is on a 3x3 grid
+	Grid3D gridOut(1,1,1);
 	int gin=sim.createSpikeGeneratorGroup("input", gridIn, EXCITATORY_NEURON);
 	int gout=sim.createGroup("output", gridOut, EXCITATORY_NEURON);
 	sim.setNeuronParameters(gout, 0.02f, 0.2f, -65.0f, 8.0f);
 	sim.connect(gin, gout, "gaussian", RangeWeight(0.05), 1.0f, RangeDelay(1), RadiusRF(3,3,1));
 	sim.setConductances(true);
+	sim.setIntegrationMethod(FORWARD_EULER, 10);
 
 
 	// ---------------- SETUP STATE -------------------
@@ -82,8 +84,10 @@ int main() {
 
 	//setup some baseline input
 	PoissonRate in(gridIn.N);
-	in.setRates(30.0f);
+	in.setRates(0.0f);
 	sim.setSpikeRate(gin,&in);
+
+	sim.setExternalCurrent(gout, 70);
 
 
 	// ---------------- RUN STATE -------------------

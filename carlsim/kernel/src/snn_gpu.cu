@@ -937,6 +937,13 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 					   + gpuPtrs.gGABAa[nid] * (v + 70.0f)
 					   + gGABAb * (v + 90.0f)
 					 );
+			/*
+			#ifdef NEURON_NOISE
+			float noiseI = -gpuPtrs.intrinsicWeight[i]*log(drand48());
+			if (isnan(noiseI) || isinf(noiseI))
+				 noiseI = 0.0f;
+			I_sum += noiseI;
+			#endif */
 		}
 		else {
 			I_sum = gpuPtrs.current[nid];
@@ -961,6 +968,27 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 					c=gpuNetInfo.simNumStepsPerMs;
 				}
 			}
+
+			if (v < -90.0f) {
+			v = -90.0f;
+			}
+			#if defined(WIN32) || defined(WIN64)
+					assert(!_isnan(v));
+					assert(_finite(v));
+			#else
+					assert(!isnan(v));
+					assert(!isinf(v));
+			#endif
+
+			// recovery is always updated using forward-Euler
+			if (gpuGrpInfo[grpId].withParamModel_9 == 0) {
+				u += dudtIzhikevich4(v, u, a, b, timeStep);
+			} else {
+				u += dudtIzhikevich9(v, u, vr, a, b, timeStep);
+			}
+
+			//printf("*GPU* Voltage: %f; Recovery %f; Current: %f;\n", v, u, I_sum);
+
 			break;
 		case RUNGE_KUTTA4:
 			// TODO for Stas
@@ -970,15 +998,75 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 				float l1 = dudtIzhikevich4(v, u, a, b, timeStep);
 
 				float k2 = dvdtIzhikevich4(v + k1/2.0f, u + l1/2.0f, I_sum, I_ext, timeStep);
-				float l2 = dvdtIzhikevich4(v + k1/2.0f, u + l1/2.0f, a, b, timeStep);
+				float l2 = dudtIzhikevich4(v + k1/2.0f, u + l1/2.0f, a, b, timeStep);
+
+				float k3 = dvdtIzhikevich4(v + k2/2.0f, u + l2/2.0f, I_sum, I_ext, timeStep);
+				float l3 = dudtIzhikevich4(v + k2/2.0f, u + l2/2.0f, a, b, timeStep);
+
+				float k4 = dvdtIzhikevich4(v + k3, u + l3, I_sum, I_ext, timeStep);
+				float l4 = dudtIzhikevich4(v + k3, u + l3, a, b, timeStep);
+
+				const float one_sixth = 1.0f / 6.0f;
+				v = v + one_sixth * (k1 + 2 * k2 + 2 * k3 + k4);
+
+				if (v > 30.0f) { 
+					v = 30.0f; // break the loop but evaluate u[i]
+					c=gpuNetInfo.simNumStepsPerMs;
+				}
+
+				if (v < -90.0f) {
+					v = -90.0f;
+				}
+				#if defined(WIN32) || defined(WIN64)
+						assert(!_isnan(v));
+						assert(_finite(v));
+				#else
+						assert(!isnan(v));
+						assert(!isinf(v));
+				#endif
+
+				u = u + one_sixth * (l1 + 2 * l2 + 2 * l3 + l4);
 
 				// etc.
 			} else {
 				// 9-param Izhikevich
 
+				float k1 = dvdtIzhikevich9(v, u, invCapac, k, vr, vt, I_sum, I_ext, timeStep);
+				float l1 = dudtIzhikevich9(v, u, vr, a, b, timeStep);
+
+				float k2 = dvdtIzhikevich9(v + k1/2.0f, u + l1/2.0f, invCapac, k, vr, vt, I_sum, I_ext, timeStep);
+				float l2 = dudtIzhikevich9(v + k1/2.0f, u + l1/2.0f, vr, a, b, timeStep);
+
+				float k3 = dvdtIzhikevich9(v + k2/2.0f, u + l2/2.0f, invCapac, k, vr, vt, I_sum, I_ext, timeStep);
+				float l3 = dudtIzhikevich9(v + k2/2.0f, u + l2/2.0f, vr, a, b, timeStep);
+
+				float k4 = dvdtIzhikevich9(v + k3, u + l3, invCapac, k, vr, vt, I_sum, I_ext, timeStep);
+				float l4 = dudtIzhikevich9(v + k3, u + l3, vr, a, b, timeStep);
+
+				const float one_sixth = 1.0f / 6.0f;
+				v = v + one_sixth * (k1 + 2 * k2 + 2 * k3 + k4);
+
+				if (v > vpeak) { 
+					v = vpeak; // break the loop but evaluate u[i]
+					c=gpuNetInfo.simNumStepsPerMs;
+				}
+
+				if (v < -90.0f) {
+					v = -90.0f;
+				}
+				#if defined(WIN32) || defined(WIN64)
+						assert(!_isnan(v));
+						assert(_finite(v));
+				#else
+						assert(!isnan(v));
+						assert(!isinf(v));
+				#endif
+
+				u = u + one_sixth * (l1 + 2 * l2 + 2 * l3 + l4);
+
 				// etc.
 			}
-			assert(false);
+			//assert(false);
 			break;
 		case UNKNOWN_INTEGRATION:
 		default:
@@ -986,23 +1074,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 			assert(false);
 		}
 
-		if (v < -90.0f) {
-			v = -90.0f;
-		}
-#if defined(WIN32) || defined(WIN64)
-				assert(!_isnan(v));
-				assert(_finite(v));
-#else
-				assert(!isnan(v));
-				assert(!isinf(v));
-#endif
-
-		// recovery is always updated using forward-Euler
-		if (gpuGrpInfo[grpId].withParamModel_9 == 0) {
-			u += dudtIzhikevich4(v, u, a, b, timeStep);
-		} else {
-			u += dudtIzhikevich9(v, u, vr, a, b, timeStep);
-		}
+		
 	}
 
 	if (gpuNetInfo.sim_with_conductances) {
