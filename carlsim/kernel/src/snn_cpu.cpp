@@ -3653,7 +3653,7 @@ void  CpuSNN::globalStateUpdate() {
 						recovery[i] += dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep);
 					}
 
-					//printf("*CPU* Voltage: %f; Recovery %f; Current: %f;\n", voltage[i], recovery[i], current[i]);
+					//("*CPU* Voltage: %f; Recovery %f; Current: %f;\n", voltage[i], recovery[i], current[i]);
 
 					break;
 				case RUNGE_KUTTA4:
