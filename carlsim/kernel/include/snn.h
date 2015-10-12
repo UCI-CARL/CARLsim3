@@ -206,6 +206,8 @@ public:
 	//! Sets homeostatic target firing rate (enforced through homeostatic synaptic scaling)
 	void setHomeoBaseFiringRate(int groupId, float baseFiring, float baseFiringSD);
 
+	//! Sets the integration method and the number of integration steps per 1ms simulation time step
+	void setIntegrationMethod(integrationMethod_t method, int numStepsPerMs);
 
 	//! Sets the Izhikevich parameters a, b, c, and d of a neuron group.
 	/*!
@@ -955,6 +957,9 @@ private:
 	bool sim_with_homeostasis;
 	bool sim_with_stp;
 	bool sim_with_spikecounters; //!< flag will be true if there are any spike counters around
+
+	integrationMethod_t simIntegrationMethod_;	//!< integration method
+	int simNumStepsPerMs_;	//!< number of integration steps per 1ms simulation time step
 
 	// spiking neural network related information, including neurons, synapses and network parameters
 	int	        	numN;				//!< number of neurons in the spiking neural network

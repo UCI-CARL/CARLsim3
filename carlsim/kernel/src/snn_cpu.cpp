@@ -460,6 +460,11 @@ void CpuSNN::setHomeoBaseFiringRate(int grpId, float baseFiring, float baseFirin
 	}
 }
 
+void CpuSNN::setIntegrationMethod(integrationMethod_t method, int numStepsPerMs) {
+	assert(numStepsPerMs >= 1 && numStepsPerMs <= 100);
+	simIntegrationMethod_ = method;
+	simNumStepsPerMs_ = numStepsPerMs;
+}
 
 // set Izhikevich parameters for group
 void CpuSNN::setNeuronParameters(int grpId, float izh_a, float izh_a_sd, float izh_b, float izh_b_sd,
@@ -2058,6 +2063,9 @@ void CpuSNN::CpuSNNinit() {
 	dGABAb = 1.0-1.0/150.0;
 	sGABAb = 1.0;
 
+	// default integration method: Forward-Euler with 0.5ms integration step
+	setIntegrationMethod(FORWARD_EULER, 2);
+
 #ifndef __CPU_ONLY__
 	// each CpuSNN object hold its own random number object
 	gpuPoissonRand = NULL;
@@ -3530,6 +3538,31 @@ float CpuSNN::getWeights(int connProp, float initWt, float maxWt, unsigned int n
 	return actWts;
 }
 
+// single integration step for voltage equation of 4-param Izhikevich
+inline
+float dvdtIzhikevich4(float volt, float recov, float synCurr, float extCurr, float timeStep=1.0f) {
+	return ( ((0.04f * volt + 5.0f) * volt + 140.0f - recov + synCurr + extCurr) * timeStep );
+}
+
+// single integration step for recovery equation of 4-param Izhikevich
+inline
+float dudtIzhikevich4(float volt, float recov, float izhA, float izhB, float timeStep=1.0f) {
+	return ( izhA * (izhB * volt - recov) * timeStep );
+}
+
+// single integration step for voltage equation of 9-param Izhikevich
+inline
+float dvdtIzhikevich9(float volt, float recov, float invCapac, float izhK, float voltRest,
+	float voltInst, float synCurr, float extCurr, float timeStep=1.0f)
+{
+	return ( (izhK * (volt - voltRest) * (volt - voltInst) - recov + synCurr + extCurr) * invCapac * timeStep );
+}
+
+// single integration step for recovery equation of 9-param Izhikevich
+inline
+float dudtIzhikevich9(float volt, float recov, float voltRest, float izhA, float izhB, float timeStep=1.0f) {
+	return ( izhA * (izhB * (volt - voltRest) - recov) * timeStep );
+}
 
 void  CpuSNN::globalStateUpdate() {
 	double tmp_iNMDA, tmp_I;
@@ -3543,9 +3576,9 @@ void  CpuSNN::globalStateUpdate() {
 		// update dopamine
 		cpuNetPtrs.grpDABuffer[g][simTimeMs] = cpuNetPtrs.grpDA[g];
 
-		for(int i=grp_Info[g].StartN; i<=grp_Info[g].EndN; i++) {
-			assert(i < numNReg);
+		float timeStep = 1.0f / simNumStepsPerMs_;
 
+		for(int i=grp_Info[g].StartN; i<=grp_Info[g].EndN; i++) {
 			// pre-Load izhekevich variables to avoid unnecessary memory accesses + unclutter the code.
 			float k = Izh_k[i];
 			float vr = Izh_vr[i];
@@ -3555,7 +3588,7 @@ void  CpuSNN::globalStateUpdate() {
 			float b = Izh_b[i];
 			float vpeak = Izh_vpeak[i];
 
-			for (int j=0; j<COND_INTEGRATION_SCALE; j++) {
+			for (int j=0; j<simNumStepsPerMs_; j++) {
 				if (sim_with_conductances) { // COBA model
 					// all the tmpIs will be summed into current[i] in the following loop
 					current[i] = 0.0f;
@@ -3571,55 +3604,148 @@ void  CpuSNN::globalStateUpdate() {
 									 + gGABAa[i] * (voltage[i] + 70.0f)
 									 + tmp_gGABAb * (voltage[i] + 90.0f)
 								   );
-
+					/*
 					#ifdef NEURON_NOISE
-					double noiseI = -intrinsicWeight[i]*log(drand48());
+					float noiseI = -intrinsicWeight[i]*log(drand48());
 					if (isnan(noiseI) || isinf(noiseI))
 						noiseI = 0.0f;
 					tmp_I += noiseI;
-					#endif
+					#endif*/
 
 					// keep track of total current
-					current[i] += tmp_I;
+					current[i] = tmp_I;
 				} else { // CUBA model
 					// do nothing, because current[i] is already set
 				}
 
-				if (grp_Info[g].withParamModel_9 == 0) {
-					// 4-parameter model
-					voltage[i] += ((0.04f * voltage[i] + 5.0f) * voltage[i] + 140.0f - recovery[i] + current[i]
-					 + extCurrent[i]) / COND_INTEGRATION_SCALE;
-					if (voltage[i] > 30.0f) {
-						voltage[i] = 30.0f;
-						j = COND_INTEGRATION_SCALE; // break the loop, but evaluate recovery var
+				switch (simIntegrationMethod_) {
+				case FORWARD_EULER:
+					if (grp_Info[g].withParamModel_9 == 0) {
+						// 4-param Izhikevich
+						voltage[i] += dvdtIzhikevich4(voltage[i], recovery[i], current[i], extCurrent[i], timeStep);
+						if (voltage[i] > 30.0f) {
+							voltage[i] = 30.0f;
+							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+						}
+					} else {
+						// 9-param Izhikevich
+						voltage[i] += dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, current[i],
+							extCurrent[i], timeStep);
+						if (voltage[i] > vpeak) {
+							voltage[i] = vpeak;
+							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+						}
 					}
-				} else {
-					// 9-parameter model
-					voltage[i] += (k * (voltage[i] - vr) * (voltage[i] - vt) - recovery[i] + current[i]
-					 + extCurrent[i]) * inverse_C / COND_INTEGRATION_SCALE;
-					if (voltage[i] > vpeak) {
-						voltage[i] = vpeak;
-						j = COND_INTEGRATION_SCALE; // break the loop, but evaluate recovery var
+					if (voltage[i] < -90.0f) {
+						voltage[i] = -90.0f;
 					}
+					#if defined(WIN32) || defined(WIN64)
+						assert(!_isnan(voltage[i]));
+						assert(_finite(voltage[i]));
+					#else
+						assert(!isnan(voltage[i]));
+						assert(!isinf(voltage[i]));
+					#endif
+
+					if (grp_Info[g].withParamModel_9 == 0) {
+						recovery[i] += dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep);
+					} else {
+						recovery[i] += dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep);
+					}
+
+					//("*CPU* Voltage: %f; Recovery %f; Current: %f;\n", voltage[i], recovery[i], current[i]);
+
+					break;
+				case RUNGE_KUTTA4:
+					// TODO for Stas
+					if (grp_Info[g].withParamModel_9 == 0) {
+						// 4-param Izhikevich
+						float k1 = dvdtIzhikevich4(voltage[i], recovery[i], current[i], extCurrent[i], timeStep);
+						float l1 = dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep);
+
+						float k2 = dvdtIzhikevich4(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, current[i],
+							extCurrent[i], timeStep);
+						float l2 = dudtIzhikevich4(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, a, b, timeStep);
+
+						float k3 = dvdtIzhikevich4(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, current[i],
+							extCurrent[i], timeStep);
+						float l3 = dudtIzhikevich4(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, a, b, timeStep);
+
+						float k4 = dvdtIzhikevich4(voltage[i] + k3, recovery[i] + l3, current[i],
+							extCurrent[i], timeStep);
+						float l4 = dudtIzhikevich4(voltage[i] + k3, recovery[i] + l3, a, b, timeStep);
+
+						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2 * k2 + 2 * k3 + k4);
+						if (voltage[i] > 30.0f) {
+							voltage[i] = 30.0f;
+							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+						}
+						if (voltage[i] < -90.0f) {
+							voltage[i] = -90.0f;
+						}
+						#if defined(WIN32) || defined(WIN64)
+								assert(!_isnan(voltage[i]));
+								assert(_finite(voltage[i]));
+						#else
+								assert(!isnan(voltage[i]));
+								assert(!isinf(voltage[i]));
+						#endif
+
+						recovery[i] = recovery[i] + (1.0f / 6.0f) * (l1 + 2 * l2 + 2 * l3 + l4);
+
+						// etc.
+					} else {
+						// 9-param Izhikevich
+
+						float k1 = dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, current[i],
+							extCurrent[i], timeStep);
+						float l1 = dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep);
+
+						float k2 = dvdtIzhikevich9(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, inverse_C, k, vr, vt, current[i],
+							extCurrent[i], timeStep);
+						float l2 = dudtIzhikevich9(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, vr, a, b, timeStep);
+
+						float k3 = dvdtIzhikevich9(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, inverse_C, k, vr, vt, current[i],
+							extCurrent[i], timeStep);
+						float l3 = dudtIzhikevich9(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, vr, a, b, timeStep);
+
+						float k4 = dvdtIzhikevich9(voltage[i] + k3, recovery[i] + l3, inverse_C, k, vr, vt, current[i],
+							extCurrent[i], timeStep);
+						float l4 = dudtIzhikevich9(voltage[i] + k3, recovery[i] + l3, vr, a, b, timeStep);
+
+						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2 * k2 + 2 * k3 + k4);
+
+						// etc.
+
+						if (voltage[i] > vpeak) {
+							voltage[i] = vpeak;
+							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+						}
+
+						if (voltage[i] < -90.0f) {
+							voltage[i] = -90.0f;
+						}
+						#if defined(WIN32) || defined(WIN64)
+								assert(!_isnan(voltage[i]));
+								assert(_finite(voltage[i]));
+						#else
+								assert(!isnan(voltage[i]));
+								assert(!isinf(voltage[i]));
+						#endif
+
+						recovery[i] = recovery[i] + (1.0f / 6.0f) * (l1 + 2 * l2 + 2 * l3 + l4);
+					}
+
+					//KERNEL_ERROR("RK4 not yet implemented.");
+					break;
+				case UNKNOWN_INTEGRATION:
+				default:
+					KERNEL_ERROR("Unknown integration method.");
+					exitSimulation(1);
 				}
 
-				if (voltage[i] < -90.0f) {
-					voltage[i] = -90.0f;
-				}
-#if defined(WIN32) || defined(WIN64)
-				assert(!_isnan(voltage[i]));
-				assert(_finite(voltage[i]));
-#else
-				assert(!isnan(voltage[i]));
-				assert(!isinf(voltage[i]));
-#endif
-
-				if (grp_Info[g].withParamModel_9 == 0) {
-					recovery[i] += a * (b * voltage[i] - recovery[i]) / COND_INTEGRATION_SCALE;
-				} else {
-					recovery[i] += a * (b * (voltage[i] - vr) - recovery[i]) / COND_INTEGRATION_SCALE;
-				}
-			} // end COND_INTEGRATION_SCALE loop
+				
+			} // end simNumStepsPerMs_ loop
 		} // end StartN...EndN
 	} // end numGrp
 }
@@ -3664,6 +3790,18 @@ bool CpuSNN::isGroupWithHomeostasis(int grpId) {
 
 // performs various verification checkups before building the network
 void CpuSNN::verifyNetwork() {
+	// make sure simulation mode is valid
+	if (simMode_ == UNKNOWN_SIM) {
+		KERNEL_ERROR("Simulation mode cannot be UNKNOWN_SIM");
+		exitSimulation(1);
+	}
+
+	// make sure integration method is valid
+	if (simIntegrationMethod_ == UNKNOWN_INTEGRATION) {
+		KERNEL_ERROR("Integration method cannot be UNKNOWN_INTEGRATION");
+		exitSimulation(1);
+	}
+
 	// make sure number of neuron parameters have been accumulated correctly
 	// NOTE: this used to be updateParameters
 	verifyNumNeurons();

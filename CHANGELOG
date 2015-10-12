@@ -11,6 +11,9 @@ Release 3.1
 Build 3.1.0
 ---------------------
 
+2015-10-12     Stanislav Listopad <slistopa@uci.edu>
+  + Add 4-th order Runge-Kutta.
+
 2015-09-28     Stanislav Listopad <slistopa@uci.edu>
   + Add 9-parameter Izhikevich model.
 

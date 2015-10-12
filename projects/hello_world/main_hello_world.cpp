@@ -57,7 +57,7 @@ int main() {
 	// create a network on GPU
 	int ithGPU = 0;
 	int randSeed = 42;
-	CARLsim sim("hello_world", CPU_MODE, USER, ithGPU, randSeed);
+	CARLsim sim("hello_world", GPU_MODE, USER, ithGPU, randSeed);
 
 	// configure the network
 	// set up a COBA two-layer network with gaussian connectivity
@@ -68,6 +68,7 @@ int main() {
 	sim.setNeuronParameters(gout, 0.02f, 0.2f, -65.0f, 8.0f);
 	sim.connect(gin, gout, "gaussian", RangeWeight(0.05), 1.0f, RangeDelay(1), RadiusRF(3,3,1));
 	sim.setConductances(true);
+	sim.setIntegrationMethod(FORWARD_EULER, 2);
 
 
 	// ---------------- SETUP STATE -------------------

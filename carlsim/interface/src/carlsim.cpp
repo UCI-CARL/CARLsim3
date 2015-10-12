@@ -477,6 +477,17 @@ void CARLsim::setHomeoBaseFiringRate(int grpId, float baseFiring, float baseFiri
 	snn_->setHomeoBaseFiringRate(grpId, baseFiring, baseFiringSD);
 }
 
+// sets integration method (FORWARD_EULER, RUNGE_KUTTA4, etc.) and integration step
+void CARLsim::setIntegrationMethod(integrationMethod_t method, int numStepsPerMs) {
+	std::string funcName = "setIntegrationMethod()";
+	UserErrors::assertTrue(carlsimState_==CONFIG_STATE, UserErrors::CAN_ONLY_BE_CALLED_IN_STATE, funcName, funcName,
+		"CONFIG.");
+	UserErrors::assertTrue((numStepsPerMs >= 1) && (numStepsPerMs <= 100), UserErrors::MUST_BE_IN_RANGE, funcName,
+		"numStepsPerMs", "[1, 100]");
+
+	snn_->setIntegrationMethod(method, numStepsPerMs);	
+}
+
 // set neuron parameters for Izhikevich neuron, with standard deviations
 void CARLsim::setNeuronParameters(int grpId, float izh_a, float izh_a_sd, float izh_b, float izh_b_sd,
 							 		float izh_c, float izh_c_sd, float izh_d, float izh_d_sd) {

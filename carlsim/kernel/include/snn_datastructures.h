@@ -95,6 +95,9 @@ typedef struct network_info_s  {
 	float 			stdpScaleFactor;
 	float 			wtChangeDecay; //!< the wtChange decay
 
+	integrationMethod_t simIntegrationMethod;
+	int simNumStepsPerMs;
+
 	bool 			sim_with_NMDA_rise;	//!< a flag to inform whether to compute NMDA rise time
 	bool 			sim_with_GABAb_rise;	//!< a flag to inform whether to compute GABAb rise time
 	double 			dAMPA;				//!< multiplication factor for decay time of AMPA conductance (gAMPA[i] *= dAMPA)

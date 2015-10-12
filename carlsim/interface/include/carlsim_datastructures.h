@@ -114,6 +114,25 @@ static const char* simMode_string[] = {
 	"CPU mode","GPU mode","Unknown mode"
 };
 
+/*!
+ * \brief Integration methods
+ *
+ * CARLsim supports different integration methods. Currently available:
+ *
+ * FORWARD_EULER: Forward-Euler (aka Euler method). Most basic explicit method for numerical integration of ODEs.
+ *                Suggest time step of 0.5ms or lower for stability.
+ * RUNGE_KUTTA4:  Fourth-order Runge-Kutta (aka classical Runge-Kutta, aka RK4). 
+ *                Suggest time step of 0.1ms or lower.
+ */
+enum integrationMethod_t {
+	FORWARD_EULER,
+	RUNGE_KUTTA4,
+	UNKNOWN_INTEGRATION
+};
+static const char* integrationMethod_string[] = {
+	"Forward-Euler", "4-th order Runge-Kutta", "Unknown integration method"
+};
+
 // \TODO: extend documentation, add relevant references
 /*!
  * \brief STDP flavors
