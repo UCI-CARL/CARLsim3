@@ -255,3 +255,62 @@ TEST(CUBA, firingRateVsData9Param) {
 
 }
 
+TEST(CUBA, firingRateVsData9Param_RK4) {
+        ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+	#ifdef __CPU_ONLY__
+        int numModes = 1;
+	#else
+        int numModes = 2;
+	#endif
+
+
+        for (int isGPUmode=0; isGPUmode<numModes; isGPUmode++) {
+        	CARLsim* sim = new CARLsim("CUBA.firingRateVsData9Param",isGPUmode?GPU_MODE:CPU_MODE,SILENT,0,42);
+                int g1=sim->createGroup("excit", 1, EXCITATORY_NEURON);
+		sim->setNeuronParameters(g1, 100.0f, 3.0f, -60.0f, -50.0f, 0.01f, 5.0f, 50.0f, -60.0f, 400.0f);
+               	int g0=sim->createSpikeGeneratorGroup("input", 1 , EXCITATORY_NEURON);
+
+                sim->setConductances(false); // make CUBA explicit
+
+		sim->connect(g0, g1, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
+		sim->setIntegrationMethod(RUNGE_KUTTA4, 20);
+		
+                sim->setupNetwork();
+
+		PoissonRate in(1);
+                in.setRates(0.0f);
+                sim->setSpikeRate(g0, &in);
+
+                SpikeMonitor *spkMonG1 = sim->setSpikeMonitor(g1,"NULL");
+
+                spkMonG1->startRecording();
+		sim->setExternalCurrent(g1, 0);
+        	sim->runNetwork(0, 100);
+        	sim->setExternalCurrent(g1, 300);
+        	sim->runNetwork(0, 500);
+        	sim->setExternalCurrent(g1, 0);
+        	sim->runNetwork(0, 400);
+                spkMonG1->stopRecording();
+
+		//Data is taken from page 275 of Dynamical Systems in Neuroscience The Geometry of Excitability and Bursting
+		//by Eugene M. Izhikevich
+                EXPECT_FLOAT_EQ(spkMonG1->getPopMeanFiringRate(), 5.0f);
+		std::vector<std::vector<int> > spikeTimes = spkMonG1->getSpikeVector2D();
+		EXPECT_GT(spikeTimes[0][0], 100);
+		EXPECT_LT(spikeTimes[0][0], 115);
+		EXPECT_GT(spikeTimes[0][1], 192);
+        EXPECT_LT(spikeTimes[0][1], 207);
+		EXPECT_GT(spikeTimes[0][2], 315);
+        EXPECT_LT(spikeTimes[0][2], 330);
+		EXPECT_GT(spikeTimes[0][3], 435);
+        EXPECT_LT(spikeTimes[0][3], 450);
+		EXPECT_GT(spikeTimes[0][4], 555);
+        EXPECT_LT(spikeTimes[0][4], 570);		
+
+                delete sim;
+        	
+        }
+
+}
+
