@@ -164,6 +164,13 @@ public:
 	short int connect(int gIDpre, int gIDpost, ConnectionGeneratorCore* conn, float mulSynFast, float mulSynSlow,
 		bool synWtType,	int maxM, int maxPreM);
 
+	/* Creates synaptic projections using a callback mechanism.
+	*
+	* \param _grpId1:ID lower layer group
+	* \param _grpId2 ID upper level group
+	*/
+	void compConnect(int grpId1, int grpId2);
+
 	//! Creates a group of Izhikevich spiking neurons
 	/*!
 	 * \param name the symbolic name of a group
@@ -254,6 +261,14 @@ public:
 								float izh_a, float izh_a_sd, float izh_b, float izh_b_sd,
 								float izh_vpeak, float izh_vpeak_sd, float izh_c, float izh_c_sd,
 								float izh_d, float izh_d_sd);
+
+	/*!
+	* \brief Coupling constants for the compartment are set using this method.
+	* \param _grpId the symbolic name of a group
+	* \param _G_u the coupling constant for upper connections
+	* \param _G_d the coupling constant for lower connections
+	*/
+	void setCompartmentParameters(int grpId, float G_u, float G_d);
 
 	//! Sets baseline concentration and decay time constant of neuromodulators (DP, 5HT, ACh, NE) for a neuron group.
 	/*!
@@ -782,6 +797,8 @@ private:
 	//void updateStateAndFiringTable();
 	bool updateTime(); //!< updates simTime, returns true when a new second is started
 
+	float updateTotalCurrent(bool cEval, int cId, int I, int G, float* COUPL_CONSTANTS, int* cNeighbors, int nNeighbors, float const_1, float const_2);
+
 	void updateWeights();
 
 
@@ -928,7 +945,10 @@ private:
 	unsigned int	allocatedN;
 	unsigned int	allocatedPre;
 	unsigned int	allocatedPost;
+	//! keeps track of allocated compartmentalNeurons
+	unsigned int    allocatedComp;
 
+	compConnectInfo_t* compConnectBegin;
 	grpConnectInfo_t* connectBegin;
 	short int 	*cumConnIdPre;		//!< connId, per synapse, presynaptic cumulative indexing
 	float 		*mulSynFast;	//!< scaling factor for fast synaptic currents, per connection
@@ -967,12 +987,13 @@ private:
 	int				numPreSynapses_;		//!< maximum number of pre-syanptic connections in groups
 	int				maxDelay_;					//!< maximum axonal delay in groups
 	int				numNReg;			//!< number of regular (spking) neurons
+	int				numComp;			//!< number of compartmental neurons
 	int				numNExcReg;			//!< number of regular excitatory neurons
 	int				numNInhReg;			//!< number of regular inhibitory neurons
 	int   			numNExcPois;		//!< number of excitatory poisson neurons
 	int				numNInhPois;		//!< number of inhibitory poisson neurons
 	int				numNPois;			//!< number of poisson neurons
-	float       	*voltage, *recovery, *Izh_C, *Izh_k, *Izh_vr, *Izh_vt, *Izh_vpeak, *Izh_a, *Izh_b, *Izh_c, *Izh_d, *current, *extCurrent;
+	float       	*voltage, *compVoltage, *prevCompVoltage, *recovery, *Izh_C, *Izh_k, *Izh_vr, *Izh_vt, *Izh_vpeak, *Izh_a, *Izh_b, *Izh_c, *Izh_d, *G_u, *G_d, *current, *compCurrent, *extCurrent;
 	bool			*curSpike;
 	int         	*nSpikeCnt;     //!< spike counts per neuron
 	unsigned short       	*Npre;			//!< stores the number of input connections to the neuron

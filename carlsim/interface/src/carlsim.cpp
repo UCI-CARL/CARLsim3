@@ -224,6 +224,24 @@ void CARLsim::CARLsimInit() {
 // Connects a presynaptic to a postsynaptic group using one of the primitive types
 short int CARLsim::connect(int grpId1, int grpId2, const std::string& connType, const RangeWeight& wt, float connProb,
 		const RangeDelay& delay, const RadiusRF& radRF, bool synWtType, float mulSynFast, float mulSynSlow) {
+	
+	bool errorI = false; //Error I represents an attempt to establish a synaptic and compartmental connection on identical 2 groups.
+	//check for Error I
+	if (compConnections.find(grpId1) != compConnections.end())
+		if (compConnections.find(grpId1)->second == grpId2)
+			errorI = true;
+	if (compConnections.find(grpId2) != compConnections.end())
+		if (compConnections.find(grpId2)->second == grpId1)
+			errorI = true;
+	
+	std::stringstream funcName_; funcName_ << "connect(" << grpId1 << "," << grpId2 << ")";
+
+	//check for errorI
+	UserErrors::assertTrue(!errorI, UserErrors::SYNAPSE_COMP_CONNECTION, funcName_.str());
+
+	//Store the connection in the synapConnections map.
+	synapConnections[grpId1] = grpId2;
+
 	std::string funcName = "connect(\""+getGroupName(grpId1)+"\",\""+getGroupName(grpId2)+"\")";
 	std::stringstream grpId1str; grpId1str << "Group Id " << grpId1;
 	std::stringstream grpId2str; grpId2str << "Group Id " << grpId2;
@@ -269,6 +287,24 @@ short int CARLsim::connect(int grpId1, int grpId2, const std::string& connType, 
 
 // custom connectivity profile
 short int CARLsim::connect(int grpId1, int grpId2, ConnectionGenerator* conn, bool synWtType, int maxM, int maxPreM) {
+	
+	bool errorI = false; //Error I represents an attempt to establish a synaptic and compartmental connection on identical 2 groups.
+	//check for Error I
+	if (compConnections.find(grpId1) != compConnections.end())
+		if (compConnections.find(grpId1)->second == grpId2)
+			errorI = true;
+	if (compConnections.find(grpId2) != compConnections.end())
+		if (compConnections.find(grpId2)->second == grpId1)
+			errorI = true;
+	
+	std::stringstream funcName_; funcName_ << "connect(" << grpId1 << "," << grpId2 << ")";
+
+	//check for errorI
+	UserErrors::assertTrue(!errorI, UserErrors::SYNAPSE_COMP_CONNECTION, funcName_.str());
+
+	//Store the connection in the synapConnections map.
+	synapConnections[grpId1] = grpId2;
+
 	std::string funcName = "connect(\""+getGroupName(grpId1)+"\",\""+getGroupName(grpId2)+"\")";
 	std::stringstream grpId1str; grpId1str << ". Group Id " << grpId1;
 	std::stringstream grpId2str; grpId2str << ". Group Id " << grpId2;
@@ -292,6 +328,24 @@ short int CARLsim::connect(int grpId1, int grpId2, ConnectionGenerator* conn, bo
 // custom connectivity profile
 short int CARLsim::connect(int grpId1, int grpId2, ConnectionGenerator* conn, float mulSynFast, float mulSynSlow,
 						bool synWtType, int maxM, int maxPreM) {
+
+	bool errorI = false; //Error I represents an attempt to establish a synaptic and compartmental connection on identical 2 groups.
+	//check for Error I
+	if (compConnections.find(grpId1) != compConnections.end())
+		if (compConnections.find(grpId1)->second == grpId2)
+			errorI = true;
+	if (compConnections.find(grpId2) != compConnections.end())
+		if (compConnections.find(grpId2)->second == grpId1)
+			errorI = true;
+	
+	std::stringstream funcName_; funcName_ << "connect(" << grpId1 << "," << grpId2 << ")";
+	
+	//check for errorI
+	UserErrors::assertTrue(!errorI, UserErrors::SYNAPSE_COMP_CONNECTION, funcName_.str());
+
+	//Store the connection in the synapConnections map.
+	synapConnections[grpId1] = grpId2;
+
 	std::string funcName = "connect(\""+getGroupName(grpId1)+"\",\""+getGroupName(grpId2)+"\")";
 	std::stringstream grpId1str; grpId1str << ". Group Id " << grpId1;
 	std::stringstream grpId2str; grpId2str << ". Group Id " << grpId2;
@@ -312,6 +366,88 @@ short int CARLsim::connect(int grpId1, int grpId2, ConnectionGenerator* conn, fl
 	connGen_.push_back(CGC);
 	return snn_->connect(grpId1, grpId2, CGC, mulSynFast, mulSynSlow, synWtType,
 		maxM, maxPreM);
+}
+
+void CARLsim::compConnect(int grpId1, int grpId2)
+{
+	bool errorI = false; //Error I is synap and comp connection on same 2 groups
+	bool errorII = false; //Error II is the identical or reverse comp connection
+	bool errorIII = false; //Error III is more than 4 compartmental connections per group
+	//check for Error I
+	if (synapConnections.find(grpId1) != synapConnections.end())
+		if (synapConnections.find(grpId1)->second == grpId2)
+			errorI = true;
+	if (synapConnections.find(grpId2) != synapConnections.end())
+		if (synapConnections.find(grpId2)->second == grpId1)
+			errorI = true;
+	//check for Error II
+	if (compConnections.find(grpId1) != compConnections.end())
+		if (compConnections.find(grpId1)->second == grpId2)
+			errorII = true;
+	if (compConnections.find(grpId2) != compConnections.end())
+		if (compConnections.find(grpId2)->second == grpId1)
+			errorII = true;
+
+	std::stringstream funcName; funcName << "compConnect(" << grpId1 << "," << grpId2 << ")";
+
+	//check for errorI
+	UserErrors::assertTrue(!errorI, UserErrors::SYNAPSE_COMP_CONNECTION, funcName.str());
+
+	//check for errorII
+	UserErrors::assertTrue(!errorII, UserErrors::REPEATED_COMP_CONNNECTION, funcName.str());
+
+	bool exists = false;;//Check whether grpId1 is a value for some other groupId within the map.
+	for (std::map<int, int>::iterator it = compConnections.begin(); it != compConnections.end(); ++it)
+		if (it->second == grpId1)
+		{
+			exists = true;
+			break;
+		}
+
+	if (compConnections.find(grpId1) == compConnections.end() && !exists)//GroupId1 is neither a value or a key in this map, this is it's first comp connection.
+	{
+		numOfConnectionsComp[grpId1] = 1;
+		//printf("Group %d has %d comp connections.\n", grpId1, numOfConnectionsComp[grpId1]);
+	}
+	else
+		if (numOfConnectionsComp[grpId1] == 4)//This group already has 4 connections.
+			errorIII = true;
+		else//This group has more than 0, but less than 4 connections.
+		{
+			numOfConnectionsComp[grpId1] = numOfConnectionsComp[grpId1] + 1;
+			//printf("Group %d has %d comp connections.\n", grpId1, numOfConnectionsComp[grpId1]);
+		}
+	
+	//Now do the above errorIII related checks for group2
+	exists = false;
+	for (std::map<int, int>::iterator it = compConnections.begin(); it != compConnections.end(); ++it)
+		if (it->second == grpId2)
+		{
+			exists = true;
+			break;
+		}
+
+	if (compConnections.find(grpId2) == compConnections.end() && !exists)
+	{
+		numOfConnectionsComp[grpId2] = 1;
+		//printf("Group %d has %d comp connections.\n", grpId2, numOfConnectionsComp[grpId2]);
+	}
+	else
+		if (numOfConnectionsComp[grpId2] == 4)
+			errorIII = true;
+		else
+		{
+			numOfConnectionsComp[grpId2] = numOfConnectionsComp[grpId2] + 1;
+			//printf("Group %d has %d comp connections.\n", grpId2, numOfConnectionsComp[grpId2]);
+		}
+	
+	//check for errorIII
+	UserErrors::assertTrue(!errorIII, UserErrors::EXCEED_COMP_CONNECTION_LIMIT, funcName.str());
+	
+	//Store the connection in the compConnections map.
+	compConnections[grpId1] = grpId2;
+
+	return snn_->compConnect(grpId1, grpId2);
 }
 
 // create group of Izhikevich spiking neurons on 1D grid
@@ -553,6 +689,14 @@ void CARLsim::setNeuronParameters(int grpId, float izh_C, float izh_C_sd, float 
 	if (grpIds_[grpId] < grpNeurParams_.size()) {
 		grpNeurParams_[grpIds_[grpId]] = true;
 	}
+}
+
+void CARLsim::setCompartmentParameters(int grpId, float G_u, float G_d)
+{
+	std::string funcName = "setCompartmentParameters(\"" + getGroupName(grpId) + "\")";
+	UserErrors::assertTrue(carlsimState_ == CONFIG_STATE, UserErrors::CAN_ONLY_BE_CALLED_IN_STATE, funcName, funcName, "CONFIG.");
+
+	snn_->setCompartmentParameters(grpId, G_u, G_d);
 }
 
 // set parameters for each neuronmodulator

@@ -38,6 +38,7 @@ public:
 		CANNOT_BE_SET_TO,		//!< parameter cannot be set to
 		CANNOT_BE_UNKNOWN, 		//!< parameter cannot be of type UNKNOWN
 		CANNOT_BE_ZERO,			//!< parameter cannot be zero
+		EXCEED_COMP_CONNECTION_LIMIT,	//!< this compartmental connection exceeds the group's limit for compartmental connections
 		FILE_CANNOT_CREATE,		//!< could not create a file
 		FILE_CANNOT_OPEN,		//!< could not open file
 		IS_DEPRECATED,			//!< deprecated function
@@ -55,6 +56,8 @@ public:
 		MUST_BE_ZERO,           //!< parameter must be 0
 		MUST_HAVE_SAME_SIGN,	//!< some parameters must have the same sign
 		NETWORK_ALREADY_RUN,	//!< function cannot be called because network has already bun run
+		REPEATED_COMP_CONNNECTION,	//!< this compartmental connection is either identical or a reverse of an existing compartmental connection
+		SYNAPSE_COMP_CONNECTION,	//!< cannot create a synaptic and compartmental connection between two groups
 		UNKNOWN_GROUP_ID,		//!< the specified group id is unknown
 		UNKNOWN,				//!< an unknown error
 		WRONG_NEURON_TYPE		//!< function cannot be applied to neuron type

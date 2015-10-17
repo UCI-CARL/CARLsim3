@@ -57,7 +57,7 @@ int main() {
 	// create a network on GPU
 	int ithGPU = 0;
 	int randSeed = 42;
-	CARLsim sim("hello_world", GPU_MODE, USER, ithGPU, randSeed);
+	CARLsim sim("hello_world", CPU_MODE, USER, ithGPU, randSeed);
 
 	// configure the network
 	// set up a COBA two-layer network with gaussian connectivity
@@ -75,7 +75,8 @@ int main() {
 	// build the network
 	watch.lap("setupNetwork");
 	sim.setupNetwork();
-
+	
+	printf("Network setup successfully!");
 	// set some monitors
 	sim.setSpikeMonitor(gin,"DEFAULT");
 	sim.setSpikeMonitor(gout,"DEFAULT");

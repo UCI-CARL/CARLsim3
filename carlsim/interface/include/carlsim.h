@@ -45,6 +45,7 @@
 #include <stdint.h>		// uint64_t, uint32_t, etc.
 #include <string>		// std::string
 #include <vector>		// std::vector
+#include <map> 			// Used to keep track of compartmental and synaptic connections.
 
 #include <callback.h>
 #include <carlsim_definitions.h>
@@ -271,6 +272,14 @@ public:
 	short int connect(int grpId1, int grpId2, ConnectionGenerator* conn, float mulSynFast, float mulSynSlow,
 						bool synWtType=SYN_FIXED, int maxM=0,int maxPreM=0);
 
+
+	/*!
+	 * \brief make a compartmental connection between two compartmentally enabled groups
+	 * \first group is in the lower layer; second group is in the upper layer
+	 * \TODO finish docu
+     * \STATE CONFIG	
+	*/ 
+	void compConnect(int grpId1, int grpId2);
 
 	/*!
 	 * \brief creates a group of Izhikevich spiking neurons
@@ -538,6 +547,17 @@ public:
 		float izh_a, float izh_a_sd, float izh_b, float izh_b_sd,
 		float izh_vpeak, float izh_vpeak_sd, float izh_c, float izh_c_sd,
 		float izh_d, float izh_d_sd);
+
+	/*!
+	* \brief Sets coupling constants G_u and G_d for hte compartment
+	*
+	* \TODO finish docu
+	* \STATE ::CONFIG_STATE
+	* \param[in] G_u			Coupling constant for "up" compartmental connection
+	* \param[in] G_d			Coupling constant for "down" compartmental connection
+	*/
+
+	void setCompartmentParameters(int grpId, float G_u, float G_d);
 
 	/*!
 	 * \brief Sets baseline concentration and decay time constant of neuromodulators (DP, 5HT, ACh, NE) for a neuron
@@ -1770,6 +1790,10 @@ private:
 	int ithGPU_;					//!< on which device to establish a context
 	bool enablePrint_;
 	bool copyState_;
+
+	std::map<int, int> synapConnections;	// Store synaptic connections here.
+	std::map<int, int> compConnections;		// Store compartmental connections here.
+	std::map<int, int> numOfConnectionsComp;// Store number of connections per each compartmental group here.
 
 	unsigned int numConnections_;	//!< keep track of number of allocated connections
 	std::vector<std::string> userWarnings_; // !< an accumulated list of user warnings

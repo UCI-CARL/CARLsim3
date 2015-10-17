@@ -135,8 +135,15 @@ typedef struct connectData_s {
 	struct connectData_s*    next;
 } grpConnectInfo_t;
 
+typedef struct compConnectData_s {
+	int						grpSrc, grpDest;
+	struct					compConnectData_s*    next;
+}compConnectInfo_t;
+
 typedef struct network_ptr_s {
 	float*	voltage;
+	float*  compVoltage;
+	float*  prevCompVoltage;
 	float*	recovery;
 	float* 	Izh_C;
 	float* 	Izh_k;
@@ -148,7 +155,16 @@ typedef struct network_ptr_s {
 	float*	Izh_c;
 	float*	Izh_d;
 	float*	current;
+	float*  compCurrent;
 	float*  extCurrent;
+
+	int*		StartComp;
+	int*		CompartmentalNeighbors[4];
+	bool*		compNeighborDirec[4];
+	short*		numOfNeighbors;
+	float*		G_u;
+	float*		G_d;
+	bool*		withCompartments;
 
 	// conductances and stp values
 	float*	gNMDA;					//!< conductance of gNMDA
@@ -314,6 +330,18 @@ typedef struct group_info_s {
 	SpikeGeneratorCore*	spikeGen;
 	bool		newUpdates;  //!< FIXME this flag has mixed meaning and is not rechecked after the simulation is started
 	bool		withParamModel_9;//Value of 0 represents 4 param model, and value of 1 represents 9 param model.
+
+	//Start Id for compartmental group.
+	int			StartComp;
+	//Contains Group Ids of neurons from compartmentally connected groups, can have at most 4 neighboring groups.
+	int			CompartmentalNeighbors[4];
+	bool		compNeighborDirec[4];//True stands for neighbor being upward of current neuron, false stands for neighbor being downward of current neuron
+	//Defines number of Neighboring Groups, can at most be 4 (up to 1 parent and up to 3 children)
+	short		numOfNeighbors;
+	//Compartmental Coupling Constants
+	float		G_u;
+	float		G_d;
+	bool		withCompartments;
 
 } group_info_t;
 
