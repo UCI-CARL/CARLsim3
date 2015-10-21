@@ -104,7 +104,7 @@ void run(const ParameterInstances &parameters, std::ostream &outputStream) const
 ...
 \endcode
 
-Notice we can user the parameters object to query how many instances/individuals we have defined in
+Notice we can use the parameters object to query how many instances/individuals we have defined in
 the ECJ parameter file. Now that we have that value, we manually create arrays neuron groups of size
 <tt>indiNum</tt>. In our case we have defined 10 individuals per generation.
 
@@ -184,5 +184,7 @@ This results in an ECJ out.stat file that we talk about in the next section.
 The output.stat file generated contains the best fitness for that generation along with the four
 parameter values associated with that individual. CARLsim users can then use these parameters for
 their tuned SNN models.
+
+\see \ref ch10_ecj
 
 */
