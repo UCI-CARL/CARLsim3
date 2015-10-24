@@ -2117,6 +2117,7 @@ void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpy
 
 	if(grpId == -1) {
 		ptrPos  = 0;
+		ptrPos2 = 0;
 		length  = numNReg;
 		length2 = numN;
 		length3 = numComp;

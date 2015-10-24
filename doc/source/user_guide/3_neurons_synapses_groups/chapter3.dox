@@ -330,13 +330,26 @@ int gOut = sim.createGroup("output", Grid3D(N,1,1), EXCITATORY_NEURON); // are e
 \see \ref ch4s1s8_gaussian
 \since v3.0
 
+\section ch3s4_compart 3.4 Compartmental Model
 
-\section ch3s4_refs 3.4 References
+//Fil in the compartment notes.
+
+\since v3.1
+
+\section ch3s5_refs 3.5 References
 
 Izhikevich E.M. (2003) Simple Model of Spiking Neurons. IEEE Transactions on Neural Networks,
 14:1569-1572.
 
 Izhikevich E.M. (2004) Which Model to Use for Cortical Spiking Neurons? IEEE Transactions on Neural
 Networks, 15:1063-1070.
+
+
+
+
+
+
+
+
 
 */
