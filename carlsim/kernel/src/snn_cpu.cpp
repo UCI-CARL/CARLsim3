@@ -3215,8 +3215,8 @@ void CpuSNN::findFiring() {
 			{process = true;}
 			if (process == true)
 			{
-
-				voltage[i] = Izh_c[i];
+				int compId = (i - grp_Info[g].StartN) + grp_Info[g].StartComp;//Calculate Comp ID of this neuron
+				compVoltage[compId] = voltage[i] = Izh_c[i];
 				recovery[i] += Izh_d[i];
 
 				// if flag hasSpkMonRT is set, we want to keep track of how many spikes per neuron in the group
@@ -3723,14 +3723,14 @@ void  CpuSNN::globalStateUpdate() {
 						// 4-param Izhikevich
 						voltage[i] += dvdtIzhikevich4(voltage[i], recovery[i], totalCurrent, timeStep);
 						if (voltage[i] > 30.0f) {
-							voltage[i] = 30.0f;
+							prevCompVoltage[compId] = voltage[i] = 30.0f;
 							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 						}
 					} else {
 						// 9-param Izhikevich
 						voltage[i] += dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, totalCurrent, timeStep);
 						if (voltage[i] > vpeak) {
-							voltage[i] = vpeak;
+							prevCompVoltage[compId] = voltage[i] = vpeak;
 							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 						}
 					}
@@ -3778,7 +3778,7 @@ void  CpuSNN::globalStateUpdate() {
 
 						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2 * k2 + 2 * k3 + k4);
 						if (voltage[i] > 30.0f) {
-							voltage[i] = 30.0f;
+							prevCompVoltage[compId] = voltage[i] = 30.0f;
 							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 						}
 						if (voltage[i] < -90.0f) {
@@ -3821,7 +3821,7 @@ void  CpuSNN::globalStateUpdate() {
 						// etc.
 
 						if (voltage[i] > vpeak) {
-							voltage[i] = vpeak;
+							prevCompVoltage[compId] = voltage[i] = vpeak;
 							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 						}
 

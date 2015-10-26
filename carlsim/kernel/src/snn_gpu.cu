@@ -355,7 +355,8 @@ __device__ void resetFiredNeuron(unsigned int& nid, short int & grpId, int& simT
 	// \FIXME \TODO: convert this to use coalesced access by grouping into a
 	// single 16 byte access. This might improve bandwidth performance
 	// This is fully uncoalsced access...need to convert to coalsced access..
-	gpuPtrs.voltage[nid] = gpuPtrs.Izh_c[nid];
+	int compId = (nid - gpuGrpInfo[grpId].StartN) + gpuGrpInfo[grpId].StartComp;//Calculate Comp ID of this neuron
+	gpuPtrs.compVoltage[compId] = gpuPtrs.voltage[nid] = gpuPtrs.Izh_c[nid];
 	gpuPtrs.recovery[nid] += gpuPtrs.Izh_d[nid];
 	if (gpuGrpInfo[grpId].WithSTDP)
 		gpuPtrs.lastSpikeTime[nid] = simTime;
@@ -985,7 +986,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 				v += dvdtIzhikevich4(v, u, totalCurrent, timeStep);
 //				v += ((0.04f * v + 5.0f) * v + 140.0f - u + I_sum + gpuPtrs.extCurrent[nid]) / gpuNetInfo.simNumStepsPerMs;
 				if (v > 30.0f) { 
-					v = 30.0f; // break the loop but evaluate u[i]
+					gpuPtrs.prevCompVoltage[compId] = v = 30.0f; // break the loop but evaluate u[i]
 					c=gpuNetInfo.simNumStepsPerMs;
 				}
 			} else {
@@ -993,7 +994,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 				v += dvdtIzhikevich9(v, u, invCapac, k, vr, vt, totalCurrent, timeStep);
 //				v += ((k * (v - vr) * (v - vt) - u + I_sum + gpuPtrs.extCurrent[nid]) * inverse_C) / gpuNetInfo.simNumStepsPerMs;
 				if (v > vpeak) { 
-					v = vpeak; // break the loop but evaluate u[i]
+					gpuPtrs.prevCompVoltage[compId] = v = vpeak; // break the loop but evaluate u[i]
 					c=gpuNetInfo.simNumStepsPerMs;
 				}
 			}
@@ -1066,7 +1067,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 				v = v + one_sixth * (k1 + 2 * k2 + 2 * k3 + k4);
 
 				if (v > 30.0f) { 
-					v = 30.0f; // break the loop but evaluate u[i]
+					gpuPtrs.prevCompVoltage[compId] = v = 30.0f; // break the loop but evaluate u[i]
 					c=gpuNetInfo.simNumStepsPerMs;
 				}
 
@@ -1130,7 +1131,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 				v = v + one_sixth * (k1 + 2 * k2 + 2 * k3 + k4);
 
 				if (v > vpeak) { 
-					v = vpeak; // break the loop but evaluate u[i]
+					gpuPtrs.prevCompVoltage[compId] = v = vpeak; // break the loop but evaluate u[i]
 					c=gpuNetInfo.simNumStepsPerMs;
 				}
 
