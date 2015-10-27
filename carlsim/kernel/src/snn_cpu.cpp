@@ -3651,38 +3651,39 @@ void  CpuSNN::globalStateUpdate() {
 	float totalCurrent = 0;
 	float tempCurrent = 0;
 
-	for(int g=0; g<numGrp; g++) {
-		if (grp_Info[g].Type & POISSON_NEURON) {
-			continue;
-		}
+	for (int j=0; j<simNumStepsPerMs_; j++) {
 
-		// update dopamine
-		cpuNetPtrs.grpDABuffer[g][simTimeMs] = cpuNetPtrs.grpDA[g];
-
-		float timeStep = 1.0f / simNumStepsPerMs_;
-
-		for(int i=grp_Info[g].StartN; i<=grp_Info[g].EndN; i++) {
-			// pre-Load izhekevich variables to avoid unnecessary memory accesses + unclutter the code.
-			float k = Izh_k[i];
-			float vr = Izh_vr[i];
-			float vt = Izh_vt[i];
-			float inverse_C = 1.0f / Izh_C[i];
-			float a = Izh_a[i];
-			float b = Izh_b[i];
-			float vpeak = Izh_vpeak[i];
-
-			int numNeighbors = grp_Info[g].numOfNeighbors;
-			int* compNeighbors = grp_Info[g].CompartmentalNeighbors;
-			bool* compNeighborsDirec = grp_Info[g].compNeighborDirec;
-			float COUPLING_CONSTANTS[4];
-
-			for (int j = 0; j < numNeighbors; j++)//Get the coupling constants from neighboring neurons
-			{
-				int compId_neighbor = (i - grp_Info[g].StartN) + grp_Info[compNeighbors[j]].StartComp;
-				COUPLING_CONSTANTS[j] = (compNeighborsDirec[j] == true) ? G_d[compId_neighbor] : G_u[compId_neighbor];
+		for(int g=0; g<numGrp; g++) {
+			if (grp_Info[g].Type & POISSON_NEURON) {
+				continue;
 			}
 
-			for (int j=0; j<simNumStepsPerMs_; j++) {
+			// update dopamine
+			cpuNetPtrs.grpDABuffer[g][simTimeMs] = cpuNetPtrs.grpDA[g];
+
+			float timeStep = 1.0f / simNumStepsPerMs_;
+
+			for(int i=grp_Info[g].StartN; i<=grp_Info[g].EndN; i++) {
+				// pre-Load izhekevich variables to avoid unnecessary memory accesses + unclutter the code.
+				float k = Izh_k[i];
+				float vr = Izh_vr[i];
+				float vt = Izh_vt[i];
+				float inverse_C = 1.0f / Izh_C[i];
+				float a = Izh_a[i];
+				float b = Izh_b[i];
+				float vpeak = Izh_vpeak[i];
+
+				int numNeighbors = grp_Info[g].numOfNeighbors;
+				int* compNeighbors = grp_Info[g].CompartmentalNeighbors;
+				bool* compNeighborsDirec = grp_Info[g].compNeighborDirec;
+				float COUPLING_CONSTANTS[4];
+
+				for (int j = 0; j < numNeighbors; j++)//Get the coupling constants from neighboring neurons
+				{
+					int compId_neighbor = (i - grp_Info[g].StartN) + grp_Info[compNeighbors[j]].StartComp;
+					COUPLING_CONSTANTS[j] = (compNeighborsDirec[j] == true) ? G_d[compId_neighbor] : G_u[compId_neighbor];
+				}
+
 				if (sim_with_conductances) { // COBA model
 					// all the tmpIs will be summed into current[i] in the following loop
 					current[i] = 0.0f;
@@ -3847,16 +3848,16 @@ void  CpuSNN::globalStateUpdate() {
 					exitSimulation(1);
 				}
 
-				printf("*CPU* Voltage: %f; Recovery %f; TotalCurrent: %f; Neuron Id: %i\n", voltage[i], recovery[i], totalCurrent, i);
+				//printf("*CPU* Voltage: %f; Recovery %f; TotalCurrent: %f; Neuron Id: %i\n", voltage[i], recovery[i], totalCurrent, i);
 
 				if (compEval)//Update compVoltage and prevCompVoltage if necessary.
 				{
 					prevCompVoltage[compId] = compVoltage[compId];
 					compVoltage[compId] = voltage[i];
 				}
-			} // end simNumStepsPerMs_ loop
-		} // end StartN...EndN
-	} // end numGrp
+			}  // end StartN...EndN
+		}  // end numGrp
+	}  // end simNumStepsPerMs_ loop
 }
 
 // initialize all the synaptic weights to appropriate values..
