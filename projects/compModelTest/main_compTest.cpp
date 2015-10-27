@@ -70,7 +70,7 @@ int main() {
 	//CARLsim sim("hello_world");//For small networks CARLsim performs best in CPU mode. 
 
 	// simulation details
-	int N = 2; //number of neurons
+	int N = 1; //number of neurons
 
 	//Each of these groups represents a layer. Together these 4 groups represent N 4-compartment neurons. Ex: If N is 5, there are 5 4-compartment neurons in this simulation.
 	int s = sim.createGroup("soma", N, EXCITATORY_NEURON);
@@ -135,15 +135,15 @@ int main() {
 	SM_2->startRecording();//Record spikes within layer (group) d2
 	SM_3->startRecording();//Record spikes within layer (group) d3
 
-	sim.setExternalCurrent(d3, 0);//Set external current of 0 into layer (group) s 
-	sim.runNetwork(0, 100);//Run network for 100ms
-	sim.setExternalCurrent(d3, 1600);//Set external current of 592 into layer (group) s 
-	sim.runNetwork(0, 250);//Run network for 400ms
+	//sim.setExternalCurrent(s, 0);//Set external current of 0 into layer (group) s 
+	//sim.runNetwork(0, 100);//Run network for 100ms
+	sim.setExternalCurrent(s, 592);//Set external current of 592 into layer (group) s 
+	sim.runNetwork(0, 10);//Run network for 400ms
 
-	sim.setExternalCurrent(d3, 1600);//Set external current of 592 into layer (group) s 
-	sim.runNetwork(0, 250);//Run network for 400ms
-	sim.setExternalCurrent(d3, 0);//Set external current of 0 into layer (group) s 
-	sim.runNetwork(0, 400);//Run network for 100ms
+	//sim.setExternalCurrent(s, 592);//Set external current of 592 into layer (group) s 
+	//sim.runNetwork(0, 400);//Run network for 400ms
+	//sim.setExternalCurrent(s, 0);//Set external current of 0 into layer (group) s 
+	//sim.runNetwork(0, 100);//Run network for 100ms
 
 	SM->stopRecording();//Stop recording layer (group) s
 	SM_1->stopRecording();//Stop recording layer (group) d1

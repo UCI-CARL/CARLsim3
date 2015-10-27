@@ -3751,7 +3751,7 @@ void  CpuSNN::globalStateUpdate() {
 						recovery[i] += dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep);
 					}
 
-					//("*CPU* Voltage: %f; Recovery %f; Current: %f;\n", voltage[i], recovery[i], current[i]);
+					//printf("*CPU* Voltage: %f; Recovery %f; Current: %f;\n", voltage[i], recovery[i], current[i]);
 
 					break;
 				case RUNGE_KUTTA4:
@@ -3761,17 +3761,17 @@ void  CpuSNN::globalStateUpdate() {
 						float k1 = dvdtIzhikevich4(voltage[i], recovery[i], totalCurrent, timeStep);
 						float l1 = dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep);
 
-						totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k1/2.0f, k1/2.0f);
+						//totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k1/2.0f, k1/2.0f);
 
 						float k2 = dvdtIzhikevich4(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, totalCurrent, timeStep);
 						float l2 = dudtIzhikevich4(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, a, b, timeStep);
 
-						totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k2/2.0f, k2/2.0f);
+						//totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k2/2.0f, k2/2.0f);
 
 						float k3 = dvdtIzhikevich4(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, totalCurrent, timeStep);
 						float l3 = dudtIzhikevich4(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, a, b, timeStep);
 
-						totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k3, k3);
+						//totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k3, k3);
 
 						float k4 = dvdtIzhikevich4(voltage[i] + k3, recovery[i] + l3, totalCurrent, timeStep);
 						float l4 = dudtIzhikevich4(voltage[i] + k3, recovery[i] + l3, a, b, timeStep);
@@ -3801,17 +3801,17 @@ void  CpuSNN::globalStateUpdate() {
 						float k1 = dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, totalCurrent, timeStep);
 						float l1 = dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep);
 
-						totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k1/2.0f, k1/2.0f);
+						//totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k1/2.0f, k1/2.0f);
 
 						float k2 = dvdtIzhikevich9(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, inverse_C, k, vr, vt, totalCurrent, timeStep);
 						float l2 = dudtIzhikevich9(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, vr, a, b, timeStep);
 
-						totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k2/2.0f, k2/2.0f);
+						//totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k2/2.0f, k2/2.0f);
 
 						float k3 = dvdtIzhikevich9(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, inverse_C, k, vr, vt, totalCurrent, timeStep);
 						float l3 = dudtIzhikevich9(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, vr, a, b, timeStep);
 
-						totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k3, k3);
+						//totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, k3, k3);
 
 						float k4 = dvdtIzhikevich9(voltage[i] + k3, recovery[i] + l3, inverse_C, k, vr, vt, totalCurrent, timeStep);
 						float l4 = dudtIzhikevich9(voltage[i] + k3, recovery[i] + l3, vr, a, b, timeStep);
@@ -3846,6 +3846,8 @@ void  CpuSNN::globalStateUpdate() {
 					KERNEL_ERROR("Unknown integration method.");
 					exitSimulation(1);
 				}
+
+				printf("*CPU* Voltage: %f; Recovery %f; TotalCurrent: %f; Neuron Id: %i\n", voltage[i], recovery[i], totalCurrent, i);
 
 				if (compEval)//Update compVoltage and prevCompVoltage if necessary.
 				{
