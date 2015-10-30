@@ -1156,7 +1156,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 	
 	if (compEval)
 	{
-		gpuPtrs.prevCompVoltage[compId] = gpuPtrs.compVoltage[compId];
+		//gpuPtrs.prevCompVoltage[compId] = gpuPtrs.compVoltage[compId];
 		gpuPtrs.compVoltage[compId] = v;
 	}
 
@@ -1177,6 +1177,8 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
  */
 __global__ void kernel_globalStateUpdate (int t, int sec, int simTime) {
 	const int totBuffers = loadBufferCount;
+
+	printf("!BUZZ BUZZ BUZZ!");
 
 	// update neuron state
 	for (int bufPos = blockIdx.x; bufPos < totBuffers; bufPos += gridDim.x) {
@@ -2776,10 +2778,13 @@ void CpuSNN::globalStateUpdate_GPU() {
 	kernel_globalConductanceUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
 	CUDA_GET_LAST_ERROR("kernel_globalConductanceUpdate failed");
 
+	printf("!WARNING!");
+
 	for(int i = 0; i < gpuNetInfo.simNumStepsPerMs; i++)
 	{
 		// update all neuron state (i.e., voltage and recovery)
 		kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
+		CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.prevCompVoltage, cpu_gpuNetPtrs.compVoltage, sizeof(float) * numComp, cudaMemcpyDeviceToDevice));
 		CUDA_GET_LAST_ERROR("kernel_globalStateUpdate failed");
 	}
 

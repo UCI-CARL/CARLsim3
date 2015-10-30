@@ -3678,10 +3678,10 @@ void  CpuSNN::globalStateUpdate() {
 				bool* compNeighborsDirec = grp_Info[g].compNeighborDirec;
 				float COUPLING_CONSTANTS[4];
 
-				for (int j = 0; j < numNeighbors; j++)//Get the coupling constants from neighboring neurons
+				for (int r = 0; r < numNeighbors; r++)//Get the coupling constants from neighboring neurons
 				{
-					int compId_neighbor = (i - grp_Info[g].StartN) + grp_Info[compNeighbors[j]].StartComp;
-					COUPLING_CONSTANTS[j] = (compNeighborsDirec[j] == true) ? G_d[compId_neighbor] : G_u[compId_neighbor];
+					int compId_neighbor = (i - grp_Info[g].StartN) + grp_Info[compNeighbors[r]].StartComp;
+					COUPLING_CONSTANTS[r] = (compNeighborsDirec[r] == true) ? G_d[compId_neighbor] : G_u[compId_neighbor];
 				}
 
 				if (sim_with_conductances) { // COBA model

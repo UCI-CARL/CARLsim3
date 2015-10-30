@@ -64,7 +64,7 @@ int main() {
 	int randSeed = 42;// A random seed.
 
 	//GPU Mode:
-	CARLsim sim("random", CPU_MODE, USER, ithGPU, 42);//For large networks CARLSim performs best in GPU mode.
+	CARLsim sim("random", GPU_MODE, USER, ithGPU, 42);//For large networks CARLSim performs best in GPU mode.
 
 	//CPU Mode:
 	//CARLsim sim("hello_world");//For small networks CARLsim performs best in CPU mode. 
