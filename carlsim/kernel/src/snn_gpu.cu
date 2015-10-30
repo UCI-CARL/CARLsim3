@@ -355,8 +355,7 @@ __device__ void resetFiredNeuron(unsigned int& nid, short int & grpId, int& simT
 	// \FIXME \TODO: convert this to use coalesced access by grouping into a
 	// single 16 byte access. This might improve bandwidth performance
 	// This is fully uncoalsced access...need to convert to coalsced access..
-	int compId = (nid - gpuGrpInfo[grpId].StartN) + gpuGrpInfo[grpId].StartComp;//Calculate Comp ID of this neuron
-	gpuPtrs.compVoltage[compId] = gpuPtrs.voltage[nid] = gpuPtrs.Izh_c[nid];
+	gpuPtrs.voltage[nid] = gpuPtrs.Izh_c[nid];
 	gpuPtrs.recovery[nid] += gpuPtrs.Izh_d[nid];
 	if (gpuGrpInfo[grpId].WithSTDP)
 		gpuPtrs.lastSpikeTime[nid] = simTime;
@@ -887,8 +886,8 @@ __global__ void kernel_globalConductanceUpdate (int t, int sec, int simTime) {
 //************************ UPDATE GLOBAL STATE EVERY TIME STEP *******************************************************//
 
 // single integration step for voltage equation of 4-param Izhikevich
-__device__ float dvdtIzhikevich4(float volt, float recov, float totCurrent, float timeStep=1.0f) {
-	return ( ((0.04f * volt + 5.0f) * volt + 140.0f - recov + totCurrent) * timeStep );
+__device__ float dvdtIzhikevich4(float volt, float recov, float synCurr, float extCurr, float timeStep=1.0f) {
+	return ( ((0.04f * volt + 5.0f) * volt + 140.0f - recov + synCurr + extCurr) * timeStep );
 }
 
 // single integration step for recovery equation of 4-param Izhikevich
@@ -898,9 +897,9 @@ __device__ float dudtIzhikevich4(float volt, float recov, float izhA, float izhB
 
 // single integration step for voltage equation of 9-param Izhikevich
 __device__ float dvdtIzhikevich9(float volt, float recov, float invCapac, float izhK, float voltRest,
-	float voltInst, float totCurrent, float timeStep=1.0f)
+	float voltInst, float synCurr, float extCurr, float timeStep=1.0f)
 {
-	return ( (izhK * (volt - voltRest) * (volt - voltInst) - recov + totCurrent) * invCapac * timeStep );
+	return ( (izhK * (volt - voltRest) * (volt - voltInst) - recov + synCurr + extCurr) * invCapac * timeStep );
 }
 
 // single integration step for recovery equation of 9-param Izhikevich
@@ -926,148 +925,52 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 	float timeStep = 1.0f / gpuNetInfo.simNumStepsPerMs;
 	float I_ext = gpuPtrs.extCurrent[nid];
 
-	float totalCurrent = 0.0f;
-	int compId = 0.0f;
-	double comCurrent = 0.0f;
+	// loop that allows smaller integration time step for v's and u's
+	for (int c=0; c<gpuNetInfo.simNumStepsPerMs; c++) {
+		I_sum = 0.0f;
+		if (gpuNetInfo.sim_with_conductances) {
+			NMDAtmp = (v + 80.0f) * (v + 80.0f) / 60.0f / 60.0f;
+			gNMDA = (gpuNetInfo.sim_with_NMDA_rise) ? (gpuPtrs.gNMDA_d[nid]-gpuPtrs.gNMDA_r[nid]) : gpuPtrs.gNMDA[nid];
+			gGABAb = (gpuNetInfo.sim_with_GABAb_rise) ? (gpuPtrs.gGABAb_d[nid]-gpuPtrs.gGABAb_r[nid]) : gpuPtrs.gGABAb[nid];
+			I_sum = -(   gpuPtrs.gAMPA[nid] * (v - 0.0f)
+					   + gNMDA * NMDAtmp / (1.0f + NMDAtmp) * (v - 0.0f)
+					   + gpuPtrs.gGABAa[nid] * (v + 70.0f)
+					   + gGABAb * (v + 90.0f)
+					 );
+			/*
+			#ifdef NEURON_NOISE
+			float noiseI = -gpuPtrs.intrinsicWeight[i]*log(drand48());
+			if (isnan(noiseI) || isinf(noiseI))
+				 noiseI = 0.0f;
+			I_sum += noiseI;
+			#endif */
+		}
+		else {
+			I_sum = gpuPtrs.current[nid];
+		}
 
-	int numNeighbors = gpuGrpInfo[grpId].numOfNeighbors;
-	int* compNeighbors = gpuGrpInfo[grpId].CompartmentalNeighbors;
-	bool* compNeighborsDirec = gpuGrpInfo[grpId].compNeighborDirec;
-	float* prevCompartVoltage = gpuPtrs.prevCompVoltage;
-	float COUPLING_CONSTANTS[4];
-
-	for (int j = 0; j < numNeighbors; j++)//Get the coupling constants per neighboring neuron
-	{
-		int compId_neighbor = (nid - gpuGrpInfo[grpId].StartN) + gpuGrpInfo[compNeighbors[j]].StartComp;
-		COUPLING_CONSTANTS[j] = (compNeighborsDirec[j] == true) ? gpuPtrs.G_d[compId_neighbor] : gpuPtrs.G_u[compId_neighbor];
-	}
-
-	I_sum = 0.0f;
-	if (gpuNetInfo.sim_with_conductances) {
-		NMDAtmp = (v + 80.0f) * (v + 80.0f) / 60.0f / 60.0f;
-		gNMDA = (gpuNetInfo.sim_with_NMDA_rise) ? (gpuPtrs.gNMDA_d[nid]-gpuPtrs.gNMDA_r[nid]) : gpuPtrs.gNMDA[nid];
-		gGABAb = (gpuNetInfo.sim_with_GABAb_rise) ? (gpuPtrs.gGABAb_d[nid]-gpuPtrs.gGABAb_r[nid]) : gpuPtrs.gGABAb[nid];
-		I_sum = -(   gpuPtrs.gAMPA[nid] * (v - 0.0f)
-				   + gNMDA * NMDAtmp / (1.0f + NMDAtmp) * (v - 0.0f)
-				   + gpuPtrs.gGABAa[nid] * (v + 70.0f)
-				   + gGABAb * (v + 90.0f)
-				 );
-		/*
-		#ifdef NEURON_NOISE
-		float noiseI = -gpuPtrs.intrinsicWeight[i]*log(drand48());
-		if (isnan(noiseI) || isinf(noiseI))
-			 noiseI = 0.0f;
-		I_sum += noiseI;
-		#endif */
-	}
-	else {
-		I_sum = gpuPtrs.current[nid];
-	}
-
-	compId = (nid - gpuGrpInfo[grpId].StartN) + gpuGrpInfo[grpId].StartComp;
-	bool compEval = (gpuGrpInfo[grpId].withCompartments == 1) && (numNeighbors > 0); //this is a comp group connected to at least one other comp group
-
-	if (compEval)
-	{
-		for (int j = numNeighbors; j--;)
-			comCurrent += COUPLING_CONSTANTS[j] * (prevCompartVoltage[compId] - prevCompartVoltage[gpuGrpInfo[compNeighbors[j]].StartComp + (nid - gpuGrpInfo[grpId].StartN)]);
-		gpuPtrs.compCurrent[compId] = comCurrent;
-		totalCurrent = I_sum + I_ext - comCurrent;
-	}
-	else
-		totalCurrent = I_sum + I_ext;
-
-	switch (gpuNetInfo.simIntegrationMethod) {
-	case FORWARD_EULER:
-		if (gpuGrpInfo[grpId].withParamModel_9 == 0) {
-			// 4-param Izhikevich
-			v += dvdtIzhikevich4(v, u, totalCurrent, timeStep);
+		switch (gpuNetInfo.simIntegrationMethod) {
+		case FORWARD_EULER:
+			if (gpuGrpInfo[grpId].withParamModel_9 == 0) {
+				// 4-param Izhikevich
+				v += dvdtIzhikevich4(v, u, I_sum, I_ext, timeStep);
 //				v += ((0.04f * v + 5.0f) * v + 140.0f - u + I_sum + gpuPtrs.extCurrent[nid]) / gpuNetInfo.simNumStepsPerMs;
-			if (v > 30.0f) { 
-				gpuPtrs.prevCompVoltage[compId] = v = 30.0f; // break the loop but evaluate u[i]
-			}
-		} else {
-			// 9-param Izhikevich
-			v += dvdtIzhikevich9(v, u, invCapac, k, vr, vt, totalCurrent, timeStep);
+				if (v > 30.0f) { 
+					v = 30.0f; // break the loop but evaluate u[i]
+					c=gpuNetInfo.simNumStepsPerMs;
+				}
+			} else {
+				// 9-param Izhikevich
+				v += dvdtIzhikevich9(v, u, invCapac, k, vr, vt, I_sum, I_ext, timeStep);
 //				v += ((k * (v - vr) * (v - vt) - u + I_sum + gpuPtrs.extCurrent[nid]) * inverse_C) / gpuNetInfo.simNumStepsPerMs;
-			if (v > vpeak) { 
-				gpuPtrs.prevCompVoltage[compId] = v = vpeak; // break the loop but evaluate u[i]
-			}
-		}
-
-		if (v < -90.0f) {
-		v = -90.0f;
-		}
-		#if defined(WIN32) || defined(WIN64)
-				assert(!_isnan(v));
-				assert(_finite(v));
-		#else
-				assert(!isnan(v));
-				assert(!isinf(v));
-		#endif
-
-		// recovery is always updated using forward-Euler
-		if (gpuGrpInfo[grpId].withParamModel_9 == 0) {
-			u += dudtIzhikevich4(v, u, a, b, timeStep);
-		} else {
-			u += dudtIzhikevich9(v, u, vr, a, b, timeStep);
-		}
-
-		//printf("*GPU* Voltage: %f; Recovery %f; Current: %f;\n", v, u, I_sum);
-
-		break;
-	case RUNGE_KUTTA4:
-		// TODO for Stas
-		if (gpuGrpInfo[grpId].withParamModel_9 == 0) {
-			// 4-param Izhikevich
-			float k1 = dvdtIzhikevich4(v, u, totalCurrent, timeStep);
-			float l1 = dudtIzhikevich4(v, u, a, b, timeStep);
-
-			/*if (compEval)
-			{
-				comCurrent = 0.0f;
-				for (int j = numNeighbors; j--;)
-					comCurrent += COUPLING_CONSTANTS[j] * ((prevCompartVoltage[compId] + k1 * 0.5f) - (prevCompartVoltage[gpuGrpInfo[compNeighbors[j]].StartComp + (nid - gpuGrpInfo[grpId].StartN)] + k1 * 0.5f));
-				gpuPtrs.compCurrent[compId] = comCurrent;
-				totalCurrent = I_sum + I_ext - comCurrent;
-			}*/
-
-			float k2 = dvdtIzhikevich4(v + k1/2.0f, u + l1/2.0f, totalCurrent, timeStep);
-			float l2 = dudtIzhikevich4(v + k1/2.0f, u + l1/2.0f, a, b, timeStep);
-
-			/*if (compEval)
-			{
-				comCurrent = 0.0f;
-				for (int j = numNeighbors; j--;)
-					comCurrent += COUPLING_CONSTANTS[j] * ((prevCompartVoltage[compId] + k2 * 0.5f) - (prevCompartVoltage[gpuGrpInfo[compNeighbors[j]].StartComp + (nid - gpuGrpInfo[grpId].StartN)] + k2 * 0.5f));
-				gpuPtrs.compCurrent[compId] = comCurrent;
-				totalCurrent = I_sum + I_ext - comCurrent;
-			}*/
-
-			float k3 = dvdtIzhikevich4(v + k2/2.0f, u + l2/2.0f, totalCurrent, timeStep);
-			float l3 = dudtIzhikevich4(v + k2/2.0f, u + l2/2.0f, a, b, timeStep);
-
-			/*if (compEval)
-			{
-				comCurrent = 0.0f;
-				for (int j = numNeighbors; j--;)
-					comCurrent += COUPLING_CONSTANTS[j] * ((prevCompartVoltage[compId] + k3) - (prevCompartVoltage[gpuGrpInfo[compNeighbors[j]].StartComp + (nid - gpuGrpInfo[grpId].StartN)] + k3));
-				gpuPtrs.compCurrent[compId] = comCurrent;
-				totalCurrent = I_sum + I_ext - comCurrent;
-			}*/
-
-			float k4 = dvdtIzhikevich4(v + k3, u + l3, totalCurrent, timeStep);
-			float l4 = dudtIzhikevich4(v + k3, u + l3, a, b, timeStep);
-
-			const float one_sixth = 1.0f / 6.0f;
-			v = v + one_sixth * (k1 + 2 * k2 + 2 * k3 + k4);
-
-			if (v > 30.0f) { 
-				gpuPtrs.prevCompVoltage[compId] = v = 30.0f; // break the loop but evaluate u[i]
+				if (v > vpeak) { 
+					v = vpeak; // break the loop but evaluate u[i]
+					c=gpuNetInfo.simNumStepsPerMs;
+				}
 			}
 
 			if (v < -90.0f) {
-				v = -90.0f;
+			v = -90.0f;
 			}
 			#if defined(WIN32) || defined(WIN64)
 					assert(!_isnan(v));
@@ -1077,87 +980,101 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 					assert(!isinf(v));
 			#endif
 
-			u = u + one_sixth * (l1 + 2 * l2 + 2 * l3 + l4);
-
-			// etc.
-		} else {
-			// 9-param Izhikevich
-
-			float k1 = dvdtIzhikevich9(v, u, invCapac, k, vr, vt, totalCurrent, timeStep);
-			float l1 = dudtIzhikevich9(v, u, vr, a, b, timeStep);
-
-			if (compEval)
-			{
-				comCurrent = 0.0f;
-				for (int j = numNeighbors; j--;)
-					comCurrent += COUPLING_CONSTANTS[j] * ((prevCompartVoltage[compId] + k1 * 0.5f) - (prevCompartVoltage[gpuGrpInfo[compNeighbors[j]].StartComp + (nid - gpuGrpInfo[grpId].StartN)] + k1 * 0.5f));
-				gpuPtrs.compCurrent[compId] = comCurrent;
-				totalCurrent = I_sum + I_ext - comCurrent;
+			// recovery is always updated using forward-Euler
+			if (gpuGrpInfo[grpId].withParamModel_9 == 0) {
+				u += dudtIzhikevich4(v, u, a, b, timeStep);
+			} else {
+				u += dudtIzhikevich9(v, u, vr, a, b, timeStep);
 			}
 
-			float k2 = dvdtIzhikevich9(v + k1/2.0f, u + l1/2.0f, invCapac, k, vr, vt, totalCurrent, timeStep);
-			float l2 = dudtIzhikevich9(v + k1/2.0f, u + l1/2.0f, vr, a, b, timeStep);
+			//printf("*GPU* Voltage: %f; Recovery %f; Current: %f;\n", v, u, I_sum);
 
-			if (compEval)
-			{
-				comCurrent = 0.0f;
-				for (int j = numNeighbors; j--;)
-					comCurrent += COUPLING_CONSTANTS[j] * ((prevCompartVoltage[compId] + k2 * 0.5f) - (prevCompartVoltage[gpuGrpInfo[compNeighbors[j]].StartComp + (nid - gpuGrpInfo[grpId].StartN)] + k2 * 0.5f));
-				gpuPtrs.compCurrent[compId] = comCurrent;
-				totalCurrent = I_sum + I_ext - comCurrent;
+			break;
+		case RUNGE_KUTTA4:
+			// TODO for Stas
+			if (gpuGrpInfo[grpId].withParamModel_9 == 0) {
+				// 4-param Izhikevich
+				float k1 = dvdtIzhikevich4(v, u, I_sum, I_ext, timeStep);
+				float l1 = dudtIzhikevich4(v, u, a, b, timeStep);
+
+				float k2 = dvdtIzhikevich4(v + k1/2.0f, u + l1/2.0f, I_sum, I_ext, timeStep);
+				float l2 = dudtIzhikevich4(v + k1/2.0f, u + l1/2.0f, a, b, timeStep);
+
+				float k3 = dvdtIzhikevich4(v + k2/2.0f, u + l2/2.0f, I_sum, I_ext, timeStep);
+				float l3 = dudtIzhikevich4(v + k2/2.0f, u + l2/2.0f, a, b, timeStep);
+
+				float k4 = dvdtIzhikevich4(v + k3, u + l3, I_sum, I_ext, timeStep);
+				float l4 = dudtIzhikevich4(v + k3, u + l3, a, b, timeStep);
+
+				const float one_sixth = 1.0f / 6.0f;
+				v = v + one_sixth * (k1 + 2 * k2 + 2 * k3 + k4);
+
+				if (v > 30.0f) { 
+					v = 30.0f; // break the loop but evaluate u[i]
+					c=gpuNetInfo.simNumStepsPerMs;
+				}
+
+				if (v < -90.0f) {
+					v = -90.0f;
+				}
+				#if defined(WIN32) || defined(WIN64)
+						assert(!_isnan(v));
+						assert(_finite(v));
+				#else
+						assert(!isnan(v));
+						assert(!isinf(v));
+				#endif
+
+				u = u + one_sixth * (l1 + 2 * l2 + 2 * l3 + l4);
+
+				// etc.
+			} else {
+				// 9-param Izhikevich
+
+				float k1 = dvdtIzhikevich9(v, u, invCapac, k, vr, vt, I_sum, I_ext, timeStep);
+				float l1 = dudtIzhikevich9(v, u, vr, a, b, timeStep);
+
+				float k2 = dvdtIzhikevich9(v + k1/2.0f, u + l1/2.0f, invCapac, k, vr, vt, I_sum, I_ext, timeStep);
+				float l2 = dudtIzhikevich9(v + k1/2.0f, u + l1/2.0f, vr, a, b, timeStep);
+
+				float k3 = dvdtIzhikevich9(v + k2/2.0f, u + l2/2.0f, invCapac, k, vr, vt, I_sum, I_ext, timeStep);
+				float l3 = dudtIzhikevich9(v + k2/2.0f, u + l2/2.0f, vr, a, b, timeStep);
+
+				float k4 = dvdtIzhikevich9(v + k3, u + l3, invCapac, k, vr, vt, I_sum, I_ext, timeStep);
+				float l4 = dudtIzhikevich9(v + k3, u + l3, vr, a, b, timeStep);
+
+				const float one_sixth = 1.0f / 6.0f;
+				v = v + one_sixth * (k1 + 2 * k2 + 2 * k3 + k4);
+
+				if (v > vpeak) { 
+					v = vpeak; // break the loop but evaluate u[i]
+					c=gpuNetInfo.simNumStepsPerMs;
+				}
+
+				if (v < -90.0f) {
+					v = -90.0f;
+				}
+				#if defined(WIN32) || defined(WIN64)
+						assert(!_isnan(v));
+						assert(_finite(v));
+				#else
+						assert(!isnan(v));
+						assert(!isinf(v));
+				#endif
+
+				u = u + one_sixth * (l1 + 2 * l2 + 2 * l3 + l4);
+
+				// etc.
 			}
-
-			float k3 = dvdtIzhikevich9(v + k2/2.0f, u + l2/2.0f, invCapac, k, vr, vt, totalCurrent, timeStep);
-			float l3 = dudtIzhikevich9(v + k2/2.0f, u + l2/2.0f, vr, a, b, timeStep);
-
-			if (compEval)
-			{
-				comCurrent = 0.0f;
-				for (int j = numNeighbors; j--;)
-					comCurrent += COUPLING_CONSTANTS[j] * ((prevCompartVoltage[compId] + k3) - (prevCompartVoltage[gpuGrpInfo[compNeighbors[j]].StartComp + (nid - gpuGrpInfo[grpId].StartN)] + k3));
-				gpuPtrs.compCurrent[compId] = comCurrent;
-				totalCurrent = I_sum + I_ext - comCurrent;
-			}
-
-			float k4 = dvdtIzhikevich9(v + k3, u + l3, invCapac, k, vr, vt, totalCurrent, timeStep);
-			float l4 = dudtIzhikevich9(v + k3, u + l3, vr, a, b, timeStep);
-
-			const float one_sixth = 1.0f / 6.0f;
-			v = v + one_sixth * (k1 + 2 * k2 + 2 * k3 + k4);
-
-			if (v > vpeak) { 
-				gpuPtrs.prevCompVoltage[compId] = v = vpeak; // break the loop but evaluate u[i]
-			}
-
-			if (v < -90.0f) {
-				v = -90.0f;
-			}
-			#if defined(WIN32) || defined(WIN64)
-					assert(!_isnan(v));
-					assert(_finite(v));
-			#else
-					assert(!isnan(v));
-					assert(!isinf(v));
-			#endif
-
-			u = u + one_sixth * (l1 + 2 * l2 + 2 * l3 + l4);
-
-			// etc.
+			//assert(false);
+			break;
+		case UNKNOWN_INTEGRATION:
+		default:
+			// unknown integration method
+			assert(false);
 		}
-		//assert(false);
-		break;
-	case UNKNOWN_INTEGRATION:
-	default:
-		// unknown integration method
-		assert(false);
-	}
 
-	printf("*GPU* Voltage: %f; Recovery %f; Current: %f; nId: %i\n", v, u, totalCurrent, nid);
-	
-	if (compEval)
-	{
-		//gpuPtrs.prevCompVoltage[compId] = gpuPtrs.compVoltage[compId];
-		gpuPtrs.compVoltage[compId] = v;
+		
 	}
 
 	if (gpuNetInfo.sim_with_conductances) {
@@ -1177,8 +1094,6 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
  */
 __global__ void kernel_globalStateUpdate (int t, int sec, int simTime) {
 	const int totBuffers = loadBufferCount;
-
-	printf("!BUZZ BUZZ BUZZ!");
 
 	// update neuron state
 	for (int bufPos = blockIdx.x; bufPos < totBuffers; bufPos += gridDim.x) {
@@ -2107,24 +2022,20 @@ void CpuSNN::copyConductanceState(network_ptr_t* dest, network_ptr_t* src, cudaM
 void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpyKind kind, bool allocateMem, int grpId) {
 	checkAndSetGPUDevice();
 
-	int ptrPos, ptrPos2, length, length2, length3;
+	int ptrPos, length, length2;
 
 	// check that the destination pointer is properly allocated..
 	checkDestSrcPtrs(dest, src, kind, allocateMem, grpId);
 
 	if(grpId == -1) {
 		ptrPos  = 0;
-		ptrPos2 = 0;
 		length  = numNReg;
 		length2 = numN;
-		length3 = numComp;
 	}
 	else {
 		ptrPos  = grp_Info[grpId].StartN;
-		ptrPos2 = grp_Info[grpId].StartComp;
 		length  = grp_Info[grpId].SizeN;
 		length2 = length;
-		length3 = length;
 	}
 
 	assert(length  <= numNReg);
@@ -2151,18 +2062,6 @@ void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpy
 	if(allocateMem)
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->voltage, sizeof(float) * length));
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->voltage[ptrPos], &src->voltage[ptrPos], sizeof(float) * length, kind));
-
-	if (allocateMem)
-		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compVoltage, sizeof(float) * length3));
-	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compVoltage[ptrPos2], &src->compVoltage[ptrPos2], sizeof(float) * length3, kind));
-
-	if (allocateMem)
-		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->prevCompVoltage, sizeof(float) * length3));
-	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->prevCompVoltage[ptrPos2], &src->prevCompVoltage[ptrPos2], sizeof(float) * length3, kind));
-
-	if (allocateMem)
-		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compCurrent, sizeof(float) * length3));
-	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compCurrent[ptrPos2], &src->compCurrent[ptrPos2], sizeof(float) * length3, kind));
 
 	if (sim_with_conductances) {
 	    //conductance information
@@ -2298,14 +2197,6 @@ void CpuSNN::copyNeuronParametersFromHostToDevice(network_ptr_t* dest, bool allo
 	if(allocateMem)
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->Izh_d, sizeof(float) * length));
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->Izh_d[ptrPos], &Izh_d[ptrPos], sizeof(float) * length, kind));
-
-	if (allocateMem)
-		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->G_u, sizeof(float) * length));
-	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->G_u[ptrPos], &G_u[ptrPos], sizeof(float) * length, kind));
-
-	if (allocateMem)
-		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->G_d, sizeof(float) * length));
-	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->G_d[ptrPos], &G_d[ptrPos], sizeof(float) * length, kind));
 
 	if (sim_with_homeostasis) {
 		//Included to enable homeostatic plasticity in GPU_MODE. 
@@ -2680,9 +2571,6 @@ void CpuSNN::deleteObjects_GPU() {
 
 	// cudaFree all device pointers
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.voltage) );
-	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.compVoltage));
-	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.compCurrent));
-	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.prevCompVoltage));
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.recovery) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.current) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.extCurrent) );
@@ -2728,8 +2616,6 @@ void CpuSNN::deleteObjects_GPU() {
 	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.Izh_vt));
 	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.Izh_k));
 	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.Izh_vpeak));
-	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.G_u));
-	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.G_d));
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.gAMPA) );
 	if (sim_with_NMDA_rise) {
 		CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.gNMDA_r) );
@@ -2778,15 +2664,9 @@ void CpuSNN::globalStateUpdate_GPU() {
 	kernel_globalConductanceUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
 	CUDA_GET_LAST_ERROR("kernel_globalConductanceUpdate failed");
 
-	printf("!WARNING!");
-
-	for(int i = 0; i < gpuNetInfo.simNumStepsPerMs; i++)
-	{
-		// update all neuron state (i.e., voltage and recovery)
-		kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
-		CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.prevCompVoltage, cpu_gpuNetPtrs.compVoltage, sizeof(float) * numComp, cudaMemcpyDeviceToDevice));
-		CUDA_GET_LAST_ERROR("kernel_globalStateUpdate failed");
-	}
+	// update all neuron state (i.e., voltage and recovery)
+	kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
+	CUDA_GET_LAST_ERROR("kernel_globalStateUpdate failed");
 
 	kernel_globalGroupStateUpdate <<<4, blkSize>>> (simTimeMs);
 	CUDA_GET_LAST_ERROR("kernel_globalGroupStateUpdate  failed");
@@ -3056,7 +2936,6 @@ void CpuSNN::copyWeightsGPU(unsigned int nid, int src_grp) {
 
 // Allocates required memory and then initialize the GPU
 void CpuSNN::allocateSNN_GPU() {
-
 	checkAndSetGPUDevice();
 	// \FIXME why is this even here? shouldn't this be checked way earlier? and then in CPU_MODE, too...
 	if (maxDelay_ > MAX_SynapticDelay) {
