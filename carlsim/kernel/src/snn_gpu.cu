@@ -355,6 +355,9 @@ __device__ void resetFiredNeuron(unsigned int& nid, short int & grpId, int& simT
 	// \FIXME \TODO: convert this to use coalesced access by grouping into a
 	// single 16 byte access. This might improve bandwidth performance
 	// This is fully uncoalsced access...need to convert to coalsced access..
+
+	//int compId = (nid - gpuGrpInfo[grpId].StartN) + gpuGrpInfo[grpId].StartComp;
+	//gpuPtrs.compVoltage[compId] = 
 	gpuPtrs.voltage[nid] = gpuPtrs.Izh_c[nid];
 	gpuPtrs.recovery[nid] += gpuPtrs.Izh_d[nid];
 	if (gpuGrpInfo[grpId].WithSTDP)
@@ -913,6 +916,11 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 	float I_sum, NMDAtmp;
 	float gNMDA, gGABAb;
 
+	float totalCurrent = 0.0f;
+	int compId = 0.0f;
+	double comCurrent = 0.0f;
+	float couplingConstant;
+
 	// pre-Load izhekevich variables to avoid unnecessary memory accesses.
 	float k = gpuPtrs.Izh_k[nid];
 	float vr = gpuPtrs.Izh_vr[nid];
@@ -924,6 +932,18 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 
 	float timeStep = 1.0f / gpuNetInfo.simNumStepsPerMs;
 	float I_ext = gpuPtrs.extCurrent[nid];
+
+	int numNeighbors = gpuGrpInfo[grpId].numOfNeighbors;
+	int* compNeighbors = gpuGrpInfo[grpId].CompartmentalNeighbors;
+	bool* compNeighborsDirec = gpuGrpInfo[grpId].compNeighborDirec;
+	float* prevCompartVoltage = gpuPtrs.prevCompVoltage;
+	float COUPLING_CONSTANTS[4];
+
+	for (int j = 0; j < numNeighbors; j++)//Get the coupling constants per neighboring neuron
+	{
+		int compId_neighbor = (nid - gpuGrpInfo[grpId].StartN) + gpuGrpInfo[compNeighbors[j]].StartComp;
+		COUPLING_CONSTANTS[j] = (compNeighborsDirec[j] == true) ? gpuPtrs.G_d[compId_neighbor] : gpuPtrs.G_u[compId_neighbor];
+	}
 
 	// loop that allows smaller integration time step for v's and u's
 	for (int c=0; c<gpuNetInfo.simNumStepsPerMs; c++) {
@@ -948,6 +968,19 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 		else {
 			I_sum = gpuPtrs.current[nid];
 		}
+
+		compId = (nid - gpuGrpInfo[grpId].StartN) + gpuGrpInfo[grpId].StartComp;
+		bool compEval = (gpuGrpInfo[grpId].withCompartments == 1) && (numNeighbors > 0); //this is a comp group connected to at least one other comp group
+
+		/*if (compEval)
+		{
+			for (int j = numNeighbors; j--;)
+				comCurrent += COUPLING_CONSTANTS[j] * (prevCompartVoltage[compId] - prevCompartVoltage[gpuGrpInfo[compNeighbors[j]].StartComp + (nid - gpuGrpInfo[grpId].StartN)]);
+			gpuPtrs.compCurrent[compId] = comCurrent;
+			totalCurrent = I_sum + I_ext - comCurrent;
+		}
+		else
+			totalCurrent = I_sum + I_ext;*/
 
 		switch (gpuNetInfo.simIntegrationMethod) {
 		case FORWARD_EULER:
@@ -1074,6 +1107,11 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 			assert(false);
 		}
 
+	//if (compEval)
+	//{
+		//gpuPtrs.prevCompVoltage[compId] = gpuPtrs.compVoltage[compId];
+	//	gpuPtrs.compVoltage[compId] = v;
+	//}
 		
 	}
 
@@ -2022,20 +2060,23 @@ void CpuSNN::copyConductanceState(network_ptr_t* dest, network_ptr_t* src, cudaM
 void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpyKind kind, bool allocateMem, int grpId) {
 	checkAndSetGPUDevice();
 
-	int ptrPos, length, length2;
+	int ptrPos, ptrPos2, length, length2, length3;
 
 	// check that the destination pointer is properly allocated..
 	checkDestSrcPtrs(dest, src, kind, allocateMem, grpId);
 
 	if(grpId == -1) {
 		ptrPos  = 0;
+		ptrPos2 = 0;
 		length  = numNReg;
 		length2 = numN;
+		length3 = numComp;
 	}
 	else {
 		ptrPos  = grp_Info[grpId].StartN;
+		ptrPos2 = grp_Info[grpId].StartComp;
 		length  = grp_Info[grpId].SizeN;
-		length2 = length;
+		length3 = length2 = length;
 	}
 
 	assert(length  <= numNReg);
@@ -2062,6 +2103,18 @@ void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpy
 	if(allocateMem)
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->voltage, sizeof(float) * length));
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->voltage[ptrPos], &src->voltage[ptrPos], sizeof(float) * length, kind));
+
+	if (allocateMem)
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compVoltage, sizeof(float) * length3));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compVoltage[ptrPos2], &src->compVoltage[ptrPos2], sizeof(float) * length3, kind));
+
+	if (allocateMem)
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->prevCompVoltage, sizeof(float) * length3));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->prevCompVoltage[ptrPos2], &src->prevCompVoltage[ptrPos2], sizeof(float) * length3, kind));
+
+	if (allocateMem)
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compCurrent, sizeof(float) * length3));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compCurrent[ptrPos2], &src->compCurrent[ptrPos2], sizeof(float) * length3, kind));
 
 	if (sim_with_conductances) {
 	    //conductance information
@@ -2571,6 +2624,9 @@ void CpuSNN::deleteObjects_GPU() {
 
 	// cudaFree all device pointers
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.voltage) );
+	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.compVoltage));
+	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.compCurrent));
+	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.prevCompVoltage));
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.recovery) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.current) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.extCurrent) );
@@ -2664,9 +2720,14 @@ void CpuSNN::globalStateUpdate_GPU() {
 	kernel_globalConductanceUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
 	CUDA_GET_LAST_ERROR("kernel_globalConductanceUpdate failed");
 
-	// update all neuron state (i.e., voltage and recovery)
-	kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
-	CUDA_GET_LAST_ERROR("kernel_globalStateUpdate failed");
+	//for(int i = net_Info.simNumStepsPerMs; i > 0; i--)
+	//{
+		// update all neuron state (i.e., voltage and recovery)
+		kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
+		CUDA_GET_LAST_ERROR("kernel_globalStateUpdate failed");
+		//copy comp voltages into previous comp voltages
+		//CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.prevCompVoltage, cpu_gpuNetPtrs.compVoltage, sizeof(float) * numComp, cudaMemcpyDeviceToDevice));
+	//}
 
 	kernel_globalGroupStateUpdate <<<4, blkSize>>> (simTimeMs);
 	CUDA_GET_LAST_ERROR("kernel_globalGroupStateUpdate  failed");
