@@ -610,6 +610,7 @@ public:
 	double getRFDist3D(const RadiusRF& radius, const Point3D& pre, const Point3D& post);
 	bool isPoint3DinRF(const RadiusRF& radius, const Point3D& pre, const Point3D& post);
 
+	bool isSimulationWithCompartments() { return sim_with_compartments; }
 	bool isSimulationWithCOBA() { return sim_with_conductances; }
 	bool isSimulationWithCUBA() { return !sim_with_conductances; }
 	bool isSimulationWithNMDARise() { return sim_with_NMDA_rise; }
@@ -971,6 +972,7 @@ private:
 	double dGABAb;				//!< multiplication factor for decay time of GABAb
 	double sGABAb;				//!< scaling factor for GABAb amplitude
 
+	bool sim_with_compartments;
 	bool sim_with_fixedwts;
 	bool sim_with_stdp;
 	bool sim_with_modulated_stdp;
