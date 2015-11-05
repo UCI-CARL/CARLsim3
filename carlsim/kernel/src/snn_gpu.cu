@@ -665,13 +665,8 @@ __global__ 	void kernel_findFiring (int t, int sec, int simTime) {
 				}
 			}
 			else {
-				bool process = false;
-				if ((gpuPtrs.voltage[nid] >= gpuPtrs.Izh_vpeak[nid]) && gpuGrpInfo[grpId].withParamModel_9 == 1) 
-				{ process = true;}
-				else if ((gpuPtrs.voltage[nid] >= 30.0) && gpuGrpInfo[grpId].withParamModel_9 == 0)
-				{process = true;}
-				if (process == true)
-				{
+				float vpeak = (gpuGrpInfo[grpId].withParamModel_9) ? gpuPtrs.Izh_vpeak[nid] : 30.0f;
+				if (gpuPtrs.voltage[nid] >= vpeak) {
 					needToWrite = true;
 					if (gpuGrpInfo[grpId].withSpikeCounter) {
 						int bufPos = gpuGrpInfo[grpId].spkCntBufPos;
@@ -2941,6 +2936,7 @@ void CpuSNN::allocateNetworkParameters() {
 	assert(numNPois == (numNExcPois + numNInhPois));
 	net_Info.maxSpikesD2 = maxSpikesD2;
 	net_Info.maxSpikesD1 = maxSpikesD1;
+	net_Info.sim_with_compartments = sim_with_compartments;
 	net_Info.sim_with_fixedwts = sim_with_fixedwts;
 	net_Info.sim_with_conductances = sim_with_conductances;
 	net_Info.sim_with_homeostasis = sim_with_homeostasis;
