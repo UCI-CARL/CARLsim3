@@ -85,6 +85,7 @@ typedef struct network_info_s  {
 	unsigned int	numNPois;
 	unsigned int	numGrp;
 	int             numConnections;
+	bool            sim_with_compartments;
 	bool 			sim_with_fixedwts;
 	bool 			sim_with_conductances;
 	bool 			sim_with_stdp;
