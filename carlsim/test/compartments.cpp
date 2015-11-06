@@ -98,7 +98,7 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 			spikeSLM->stopRecording();
 			spikeSO->stopRecording();
 
-			// SP soma: expect 8 spikes at specific times
+			// SP (somatic): expect 8 spikes at specific times
 			EXPECT_EQ(spikeSP->getPopNumSpikes(), 8*N);
 			if (spikeSP->getPopNumSpikes() == 8*N) {
 				// only execute if #spikes matches, otherwise we'll segfault
@@ -116,7 +116,7 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 			// SLM: expect silent
 			EXPECT_EQ(spikeSLM->getPopNumSpikes(), 0);
 
-			// SO: expect 8 spikes at specific times
+			// SO (d3 dendritic): expect 8 spikes at specific times
 			EXPECT_EQ(spikeSO->getPopNumSpikes(), 8*N);
 			if (spikeSO->getPopNumSpikes() == 8*N) {
 				// only execute if #spikes matches, otherwise we'll segfault

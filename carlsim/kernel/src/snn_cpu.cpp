@@ -545,16 +545,14 @@ void CpuSNN::setNeuronParameters(int grpId, float izh_C, float izh_C_sd, float i
 	}
 }
 
-void CpuSNN::setCompartmentParameters(int grpId, float G_u, float G_d)
-{
+void CpuSNN::setCompartmentParameters(int grpId, float G_u, float G_d) {
 	if (grpId == ALL) { // shortcut for all groups
 		for (int grpId1 = 0; grpId1<numGrp; grpId1++) {
 			setCompartmentParameters(grpId1, G_u, G_d);
 		}
-	}
-	else {
+	} else {
 		sim_with_compartments = true;
-		grp_Info[grpId].withCompartments = 1;
+		grp_Info[grpId].withCompartments = true;
 		grp_Info[grpId].G_u = G_u; 
 		grp_Info[grpId].G_d = G_d;
 		grp_Info[grpId].numOfNeighbors = 0;
@@ -563,8 +561,8 @@ void CpuSNN::setCompartmentParameters(int grpId, float G_u, float G_d)
 }
 
 void CpuSNN::setNeuromodulator(int grpId, float baseDP, float tauDP, float base5HT, float tau5HT, float baseACh,
-	float tauACh, float baseNE, float tauNE) {
-
+	float tauACh, float baseNE, float tauNE)
+{
 	grp_Info[grpId].baseDP	= baseDP;
 	grp_Info[grpId].decayDP = 1.0 - (1.0 / tauDP);
 	grp_Info[grpId].base5HT = base5HT;
@@ -576,7 +574,9 @@ void CpuSNN::setNeuromodulator(int grpId, float baseDP, float tauDP, float base5
 }
 
 // set ESTDP params
-void CpuSNN::setESTDP(int grpId, bool isSet, stdpType_t type, stdpCurve_t curve, float alphaPlus, float tauPlus, float alphaMinus, float tauMinus, float gamma) {
+void CpuSNN::setESTDP(int grpId, bool isSet, stdpType_t type, stdpCurve_t curve, float alphaPlus, float tauPlus, 
+	float alphaMinus, float tauMinus, float gamma)
+{
 	assert(grpId>=-1);
 	if (isSet) {
 		assert(type!=UNKNOWN_STDP);
@@ -3630,21 +3630,24 @@ float dudtIzhikevich9(float volt, float recov, float voltRest, float izhA, float
 }
 
 // update total current
-inline
-float  CpuSNN::updateTotalCurrent(bool cEval, int cId, int I, int G, float* COUPL_CONSTANTS, int* cNeighbors, int nNeighbors, float const_1, float const_2)
+float  CpuSNN::updateTotalCurrent(bool cEval, int cId, int neurId, int grpId, float* COUPL_CONSTANTS, int* cNeighbors,
+	int nNeighbors, float const_1, float const_2)
 {
-		float totalCurrent = 0;
-		if (cEval)
-		{
-			float tempCurrent = 0;
-			for (int k = 0; k < nNeighbors; k++)//Go through all the neighbors and calculate total compartmental current.
-				tempCurrent = tempCurrent + COUPL_CONSTANTS[k] * ((prevCompVoltage[cId] + const_1) - (prevCompVoltage[grp_Info[cNeighbors[k]].StartComp + (I - grp_Info[G].StartN)] + const_2));
-			compCurrent[cId] = tempCurrent;
-			totalCurrent = current[I] + extCurrent[I] - compCurrent[cId];//Compile total current depending on whether this a compartmental or non-compartmental group.
+	float totalCurrent = 0.0f;
+	if (cEval) {
+		// go through all the neighbors and calculate total compartmental current
+		float tempCurrent = 0.0f;
+		for (int k=0; k<nNeighbors; k++) {
+			tempCurrent = tempCurrent + COUPL_CONSTANTS[k] * ((prevCompVoltage[cId] + const_1) - 
+				(prevCompVoltage[grp_Info[cNeighbors[k]].StartComp + (neurId - grp_Info[grpId].StartN)] + const_2));
 		}
-        else
-			totalCurrent = current[I] + extCurrent[I];
-		return totalCurrent;
+		compCurrent[cId] = tempCurrent;
+		// compile total current depending on whether this a compartmental or non-compartmental group.
+		totalCurrent = current[neurId] + extCurrent[neurId] - compCurrent[cId];
+	} else {
+		totalCurrent = current[neurId] + extCurrent[neurId];
+	}
+	return totalCurrent;
 }
 
 void  CpuSNN::globalStateUpdate() {
