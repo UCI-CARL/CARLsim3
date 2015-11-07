@@ -135,15 +135,15 @@ int main() {
 	SM_2->startRecording();//Record spikes within layer (group) d2
 	SM_3->startRecording();//Record spikes within layer (group) d3
 
-	sim.setExternalCurrent(s, 0);//Set external current of 0 into layer (group) s 
+	sim.setExternalCurrent(d2, 0);//Set external current of 0 into layer (group) s 
 	sim.runNetwork(0, 100);//Run network for 100ms
-	sim.setExternalCurrent(s, 592);//Set external current of 592 into layer (group) s 
-	sim.runNetwork(0, 400);//Run network for 400ms
+	sim.setExternalCurrent(d2, 900);//Set external current of 592 into layer (group) s 
+	sim.runNetwork(0, 250);//Run network for 400ms
 
-	sim.setExternalCurrent(s, 592);//Set external current of 592 into layer (group) s 
-	sim.runNetwork(0, 400);//Run network for 400ms
-	sim.setExternalCurrent(s, 0);//Set external current of 0 into layer (group) s 
-	sim.runNetwork(0, 100);//Run network for 100ms
+	sim.setExternalCurrent(d2, 900);//Set external current of 592 into layer (group) s 
+	sim.runNetwork(0, 250);//Run network for 400ms
+	sim.setExternalCurrent(d2, 0);//Set external current of 0 into layer (group) s 
+	sim.runNetwork(0, 400);//Run network for 100ms
 
 	SM->stopRecording();//Stop recording layer (group) s
 	SM_1->stopRecording();//Stop recording layer (group) d1

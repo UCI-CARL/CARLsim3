@@ -2221,6 +2221,8 @@ void CpuSNN::buildNetworkInit() {
 	current	   = new float[numNReg];
 	extCurrent = new float[numNReg];
 	memset(extCurrent, 0, sizeof(extCurrent[0])*numNReg);
+	spkTime = new bool[numNReg];
+	memset(spkTime, 0, sizeof(spkTime[0])*numNReg);
 
 	if (sim_with_compartments) {
 		compVoltage = new float[numComp];
@@ -3212,15 +3214,18 @@ void CpuSNN::findFiring() {
 			assert(i < numNReg);
 
 			// 9-param model can set vpeak, but it's hardcoded in 4-param model
-			float vpeak = (grp_Info[g].withParamModel_9) ? Izh_vpeak[i] : 30.0f;
-			if (voltage[i] >= vpeak) {
-				if (grp_Info[g].withCompartments) {
-					int compId = (i - grp_Info[g].StartN) + grp_Info[g].StartComp;//Calculate Comp ID of this neuron
-					compVoltage[compId] = Izh_c[i];
-				}
+			//float vpeak = (grp_Info[g].withParamModel_9) ? Izh_vpeak[i] : 30.0f;
+			//if (voltage[i] >= vpeak) {
+			if(spkTime[i])
+			{
+				spkTime[i] = 0;
+				//if (grp_Info[g].withCompartments) {
+				//	int compId = (i - grp_Info[g].StartN) + grp_Info[g].StartComp;//Calculate Comp ID of this neuron
+				//	compVoltage[compId] = Izh_c[i];
+				//}
 
-				voltage[i] = Izh_c[i];
-				recovery[i] += Izh_d[i];
+				//voltage[i] = Izh_c[i];
+				//recovery[i] += Izh_d[i];
 
 				// if flag hasSpkMonRT is set, we want to keep track of how many spikes per neuron in the group
 				if (grp_Info[g].withSpikeCounter) {// put the condition for runNetwork
@@ -3739,7 +3744,10 @@ void  CpuSNN::globalStateUpdate() {
 							if (grp_Info[g].withCompartments) {
 								prevCompVoltage[compId] = 30.0f;
 							}
-							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+							spkTime[i] = 1;
+							voltage[i] = Izh_c[i];
+							recovery[i] += Izh_d[i];
 						}
 					} else {
 						// 9-param Izhikevich
@@ -3749,7 +3757,10 @@ void  CpuSNN::globalStateUpdate() {
 							if (grp_Info[g].withCompartments) {
 								prevCompVoltage[compId] = vpeak;
 							}
-							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+							spkTime[i] = 1;
+							voltage[i] = Izh_c[i];
+							recovery[i] += Izh_d[i];
 						}
 					}
 					if (voltage[i] < -90.0f) {
@@ -3800,7 +3811,10 @@ void  CpuSNN::globalStateUpdate() {
 							if (grp_Info[g].withCompartments) {
 								prevCompVoltage[compId] = 30.0f;
 							}
-							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+							spkTime[i] = 1;
+							voltage[i] = Izh_c[i];
+							recovery[i] += Izh_d[i];
 						}
 						if (voltage[i] < -90.0f) {
 							voltage[i] = -90.0f;
@@ -3846,7 +3860,10 @@ void  CpuSNN::globalStateUpdate() {
 							if (grp_Info[g].withCompartments) {
 								prevCompVoltage[compId] = vpeak;
 							}
-							j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
+							spkTime[i] = 1;
+							voltage[i] = Izh_c[i];
+							recovery[i] += Izh_d[i];
 						}
 
 						if (voltage[i] < -90.0f) {
@@ -4076,6 +4093,7 @@ void CpuSNN::makePtrInfo() {
 	cpuNetPtrs.current			= current;
 	cpuNetPtrs.compCurrent		= compCurrent;
 	cpuNetPtrs.extCurrent       = extCurrent;
+	cpuNetPtrs.spkTime          = spkTime;
 	cpuNetPtrs.Npre				= Npre;
 	cpuNetPtrs.Npost			= Npost;
 	cpuNetPtrs.cumulativePost 	= cumulativePost;
@@ -4757,7 +4775,8 @@ void CpuSNN::resetPointers(bool deallocate) {
 	if (recovery!=NULL && deallocate) delete[] recovery;
 	if (current!=NULL && deallocate) delete[] current;
 	if (extCurrent!=NULL && deallocate) delete[] extCurrent;
-	voltage=NULL; recovery=NULL; current=NULL; extCurrent=NULL;
+	if (spkTime!=NULL && deallocate) delete[] spkTime;
+	voltage=NULL; recovery=NULL; current=NULL; extCurrent=NULL; spkTime = NULL;
 
 	if (sim_with_compartments && deallocate) {
 		if (compVoltage != NULL) delete[] compVoltage;

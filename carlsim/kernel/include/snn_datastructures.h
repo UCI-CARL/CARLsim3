@@ -158,6 +158,7 @@ typedef struct network_ptr_s {
 	float*	current;
 	float*  compCurrent;
 	float*  extCurrent;
+	bool* spkTime;
 
 	int*		StartComp;
 	int*		CompartmentalNeighbors[4];
