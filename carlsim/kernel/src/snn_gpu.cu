@@ -904,7 +904,7 @@ __device__ float dudtIzhikevich9(float volt, float recov, float voltRest, float 
 	return ( izhA * (izhB * (volt - voltRest) - recov) * timeStep );
 }
 
-__device__ void updateNeuronState(unsigned int& nid, int& grpId) {
+__device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) {
 	float v = gpuPtrs.voltage[nid];
 	float u = gpuPtrs.recovery[nid];
 	float I_sum, NMDAtmp;
@@ -1135,7 +1135,8 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
 		gpuPtrs.current[nid] = I_sum;
 	} else {
 		// current must be reset here for CUBA and not kernel_STPUpdateAndDecayConductances
-		gpuPtrs.current[nid] = 0.0f;
+		if(lastIter)
+			gpuPtrs.current[nid] = 0.0f;
 	}
 	gpuPtrs.voltage[nid] = v;
 	gpuPtrs.recovery[nid] = u;
@@ -1146,7 +1147,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId) {
  *  \brief update neuron state
  *  change this with selective upgrading technique used for firing neurons
  */
-__global__ void kernel_globalStateUpdate (int t, int sec, int simTime) {
+__global__ void kernel_globalStateUpdate (int t, int sec, int simTime, bool lastIter) {
 	const int totBuffers = loadBufferCount;
 
 	// update neuron state
@@ -1163,7 +1164,7 @@ __global__ void kernel_globalStateUpdate (int t, int sec, int simTime) {
 
 			if (IS_REGULAR_NEURON(nid, gpuNetInfo.numNReg, gpuNetInfo.numNPois)) {
 				// update neuron state here....
-				updateNeuronState(nid, grpId);
+				updateNeuronState(nid, grpId, lastIter);
 			}
 		}
 	}
@@ -2750,21 +2751,25 @@ void CpuSNN::globalStateUpdate_GPU() {
 
 	int blkSize  = 128;
 	int gridSize = 64;
+	bool lastIter = 0;
 
 	kernel_globalConductanceUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
 	CUDA_GET_LAST_ERROR("kernel_globalConductanceUpdate failed");
 
-	//for(int i = net_Info.simNumStepsPerMs; i--;)
-	//{
+	for(int i = net_Info.simNumStepsPerMs; i--;)
+	{
+		if(!i)
+			lastIter = 1;
 		// update all neuron state (i.e., voltage and recovery)
-		kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
+		kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime, lastIter);
 		CUDA_GET_LAST_ERROR("kernel_globalStateUpdate failed");
 		//copy comp voltages into previous comp voltages
 		//CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.prevCompVoltage, cpu_gpuNetPtrs.compVoltage, sizeof(float) * numComp, cudaMemcpyDeviceToDevice));
-	//}
+	}
 
 	kernel_globalGroupStateUpdate <<<4, blkSize>>> (simTimeMs);
 	CUDA_GET_LAST_ERROR("kernel_globalGroupStateUpdate  failed");
+	
 }
 
 void CpuSNN::assignPoissonFiringRate_GPU() {
@@ -2819,10 +2824,10 @@ void CpuSNN::doGPUSim() {
 
 	doCurrentUpdate_GPU();
 
-	for(int i = net_Info.simNumStepsPerMs; i--;)
-	{
+	//for(int i = net_Info.simNumStepsPerMs; i--;)
+	//{
 		globalStateUpdate_GPU();
-	}
+	//}
 }
 
 void CpuSNN::updateFiringTable_GPU() {

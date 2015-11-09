@@ -70,7 +70,7 @@ TEST(CUBA, firingRateVsData) {
 			float outputRate = hasHighFiring ? 13.0f : 1.0f; // from Matlab script
 
 			sim->connect(g0, g1, "full", RangeWeight(wt), 1.0f);
-
+			
 			bool spikeAtZero = true;
 			PeriodicSpikeGenerator *spkGenG0 = new PeriodicSpikeGenerator(inputRate,spikeAtZero);
 			sim->setSpikeGenerator(g0, spkGenG0);
