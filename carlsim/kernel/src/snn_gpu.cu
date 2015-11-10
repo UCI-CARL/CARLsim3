@@ -1129,14 +1129,14 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 	//printf("*GPU* Voltage: %f; Recovery %f; TotalCurrent: %f; NID: %i\n", v, u, totalCurrent, nid);
 		
 	//}
-
-
-	if (gpuNetInfo.sim_with_conductances) {
-		gpuPtrs.current[nid] = I_sum;
-	} else {
-		// current must be reset here for CUBA and not kernel_STPUpdateAndDecayConductances
-		if(lastIter)
+	if(lastIter)
+	{
+		if (gpuNetInfo.sim_with_conductances) {
+			gpuPtrs.current[nid] = I_sum;
+		} else {
+			// current must be reset here for CUBA and not kernel_STPUpdateAndDecayConductances
 			gpuPtrs.current[nid] = 0.0f;
+		}
 	}
 	gpuPtrs.voltage[nid] = v;
 	gpuPtrs.recovery[nid] = u;

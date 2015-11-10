@@ -64,13 +64,13 @@ int main() {
 	int randSeed = 42;// A random seed.
 
 	//GPU Mode:
-	CARLsim sim("random", GPU_MODE, USER, ithGPU, 42);//For large networks CARLSim performs best in GPU mode.
+	CARLsim sim("random", CPU_MODE, USER, ithGPU, 42);//For large networks CARLSim performs best in GPU mode.
 
 	//CPU Mode:
 	//CARLsim sim("hello_world");//For small networks CARLsim performs best in CPU mode. 
 
 	// simulation details
-	int N = 1; //number of neurons
+	int N = 5; //number of neurons
 
 	//Each of these groups represents a layer. Together these 4 groups represent N 4-compartment neurons. Ex: If N is 5, there are 5 4-compartment neurons in this simulation.
 	int s = sim.createGroup("soma", N, EXCITATORY_NEURON);

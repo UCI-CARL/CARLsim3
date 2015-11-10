@@ -539,6 +539,8 @@ TEST(STDP, ISTDPPulseCurve) {
 			for (int offset = -15; offset <= 15; offset += 10) {
 				// create a network
 				CARLsim* sim = new CARLsim("STDP.ISTDPPulseCurve", mode?GPU_MODE:CPU_MODE, SILENT, 0, 42);
+				
+				sim->setIntegrationMethod(FORWARD_EULER, 2);
 
 				g1 = sim->createGroup("excit", 1, EXCITATORY_NEURON);
 				sim->setNeuronParameters(g1, 0.02f, 0.2f, -65.0f, 8.0f);

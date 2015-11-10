@@ -25,17 +25,17 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 #endif
 
 	// expected spike times for soma
-	int expectSpikeTimeSP[5][8] = {	{48, 90, 144, 234, 401, 571, 747, 915},
-						 			{48, 88, 141, 225, 392, 564, 737, 906},
-									{48, 88, 141, 224, 394, 564, 735, 906},
-									{48, 87, 139, 221, 388, 561, 731, 903},
-									{48, 88, 140, 222, 390, 560, 731, 900} };
+	int expectSpikeTimeSO[5][7] = {	{148, 188, 243, 339, 514, 690, 866},
+						 			{148, 189, 242, 328, 508, 681, 855},
+									{148, 188, 240, 328, 506, 679, 853},
+									{148, 187, 240, 326, 504, 677, 851},
+									{148, 187, 240, 326, 505, 677, 851}};
 
-	// int expectSpikeTimeSO[5][8] = {	{47 89 143 233 400 570 746 914},
-	// 					 			{48, 88, 141, 225, 392, 564, 737, 906},
-	// 								{48, 88, 141, 224, 394, 564, 735, 906},
-	// 								{48, 87, 139, 221, 388, 561, 731, 903},
-	// 								{48, 88, 140, 222, 390, 560, 731, 900} };
+	int expectSpikeTimeSP[5][7] = {	{148, 188, 243, 339, 515, 691, 866},
+	 					 			{148, 189, 243, 329, 509, 681, 856},
+	 								{148, 188, 241, 328, 507, 679, 853},
+	 								{148, 188, 240, 327, 505, 678, 852},
+	 								{148, 188, 240, 326, 506, 677, 852} };
 
 	// \FIXME: GPU side not implemented yet
 	numModes = 0;
@@ -91,16 +91,23 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 			spikeSR->startRecording();
 			spikeSLM->startRecording();
 			spikeSO->startRecording();
-			sim->setExternalCurrent(s, 600);
-			sim->runNetwork(1, 0);
+			sim->setExternalCurrent(s, 0);
+			sim->runNetwork(0, 100);
+			sim->setExternalCurrent(s, 592);
+                        sim->runNetwork(0, 400);
+			sim->setExternalCurrent(s, 592);
+                        sim->runNetwork(0, 400);
+			sim->setExternalCurrent(s, 0);
+                        sim->runNetwork(0, 100);
+
 			spikeSP->stopRecording();
 			spikeSR->stopRecording();
 			spikeSLM->stopRecording();
 			spikeSO->stopRecording();
 
 			// SP (somatic): expect 8 spikes at specific times
-			EXPECT_EQ(spikeSP->getPopNumSpikes(), 8*N);
-			if (spikeSP->getPopNumSpikes() == 8*N) {
+			EXPECT_EQ(spikeSP->getPopNumSpikes(), 7*N);
+			if (spikeSP->getPopNumSpikes() == 7*N) {
 				// only execute if #spikes matches, otherwise we'll segfault
 				std::vector<std::vector<int> > spikeTimeSP = spikeSP->getSpikeVector2D();
 				for (int neurId=0; neurId<spikeTimeSP.size(); neurId++) {
@@ -117,14 +124,14 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 			EXPECT_EQ(spikeSLM->getPopNumSpikes(), 0);
 
 			// SO (d3 dendritic): expect 8 spikes at specific times
-			EXPECT_EQ(spikeSO->getPopNumSpikes(), 8*N);
-			if (spikeSO->getPopNumSpikes() == 8*N) {
+			EXPECT_EQ(spikeSO->getPopNumSpikes(), 7*N);
+			if (spikeSO->getPopNumSpikes() == 7*N) {
 				// only execute if #spikes matches, otherwise we'll segfault
 				std::vector<std::vector<int> > spikeTimeSO = spikeSO->getSpikeVector2D();
 				for (int neurId=0; neurId<spikeTimeSO.size(); neurId++) {
 					for (int spkT=0; spkT<spikeTimeSO[neurId].size(); spkT++) {
 						// spike times such precede SP by 1 ms
-						EXPECT_EQ(spikeTimeSO[neurId][spkT], expectSpikeTimeSP[inver_timestep/10-1][spkT]-1);
+						EXPECT_EQ(spikeTimeSO[neurId][spkT], expectSpikeTimeSO[inver_timestep/10-1][spkT]);
 					}
 				}
 			}
