@@ -540,7 +540,7 @@ TEST(STDP, ISTDPPulseCurve) {
 				// create a network
 				CARLsim* sim = new CARLsim("STDP.ISTDPPulseCurve", mode?GPU_MODE:CPU_MODE, SILENT, 0, 42);
 				
-				sim->setIntegrationMethod(FORWARD_EULER, 2);
+				sim->setIntegrationMethod(FORWARD_EULER, 1);
 
 				g1 = sim->createGroup("excit", 1, EXCITATORY_NEURON);
 				sim->setNeuronParameters(g1, 0.02f, 0.2f, -65.0f, 8.0f);
@@ -584,13 +584,13 @@ TEST(STDP, ISTDPPulseCurve) {
 				std::vector< std::vector<float> > weights = CM->takeSnapshot();
 				if (offset == -5 || offset == 5) { // I-STDP LTP
 					if (coba) {
-						EXPECT_NEAR(maxInhWeight/100, weights[0][0], 0.005f);
+						EXPECT_NEAR(maxInhWeight/100, weights[0][0], 0.0075f);
 					} else {
 						EXPECT_NEAR(maxInhWeight, weights[0][0], 0.5f);
 					}
 				} else { // I-STDP LTD
 					if (coba) {
-						EXPECT_NEAR(minInhWeight/100, weights[0][0], 0.005f);
+						EXPECT_NEAR(minInhWeight/100, weights[0][0], 0.0075f);
 					} else {
 						EXPECT_NEAR(minInhWeight, weights[0][0], 0.5f);
 					}

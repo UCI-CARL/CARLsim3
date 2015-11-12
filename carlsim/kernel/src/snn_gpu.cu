@@ -941,9 +941,6 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 		COUPLING_CONSTANTS[j] = (compNeighborsDirec[j] == true) ? gpuPtrs.G_d[compId_neighbor] : gpuPtrs.G_u[compId_neighbor];
 		//printf("Coupling Constant of group #%i is: %f;\n", grpId, COUPLING_CONSTANTS[j]);
 	}
-
-	// loop that allows smaller integration time step for v's and u's
-	//for (int c=0; c<gpuNetInfo.simNumStepsPerMs; c++) {
 		I_sum = 0.0f;
 		if (gpuNetInfo.sim_with_conductances) {
 			NMDAtmp = (v + 80.0f) * (v + 80.0f) / 60.0f / 60.0f;
@@ -1128,7 +1125,6 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 
 	//printf("*GPU* Voltage: %f; Recovery %f; TotalCurrent: %f; NID: %i\n", v, u, totalCurrent, nid);
 		
-	//}
 	if(lastIter)
 	{
 		if (gpuNetInfo.sim_with_conductances) {
