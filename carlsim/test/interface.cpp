@@ -57,6 +57,51 @@ TEST(Interface, connectDeath) {
 	delete sim;
 }
 
+
+
+//! trigger all UserErrors
+// TODO: add more error checking
+TEST(Interface, compConnectDeath) {
+	::testing::FLAGS_gtest_death_test_style = "threadsafe";
+	
+	CARLsim* sim = new CARLsim("Interface.compConnectDeath",CPU_MODE,SILENT,0,42);
+
+	int N = 5; //number of neurons
+
+	int s = sim->createGroup("soma", N, EXCITATORY_NEURON);
+	int d1 = sim->createGroup("d1", N, EXCITATORY_NEURON);
+	int d2 = sim->createGroup("d2", N, EXCITATORY_NEURON);
+	int d3 = sim->createGroup("d3", N, EXCITATORY_NEURON);
+	int d4 = sim->createGroup("d4", N, EXCITATORY_NEURON);
+	int d5 = sim->createGroup("d5", N, EXCITATORY_NEURON);
+
+	sim->setNeuronParameters(s, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);
+	sim->setNeuronParameters(d1, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);
+	sim->setNeuronParameters(d2, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);
+	sim->setNeuronParameters(d3, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);
+	sim->setNeuronParameters(d4, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);
+	sim->setNeuronParameters(d5, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);
+
+	int gin = sim->createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
+
+	sim->setConductances(false);
+
+	sim->connect(gin, s, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
+
+	sim->compConnect(d1, s);
+	sim->compConnect(s, d2);
+	sim->compConnect(s, d3);
+	sim->compConnect(s, d4);
+
+	EXPECT_DEATH(sim->compConnect(s, d5); ,"");//Not allowed to have > 4 compartment connections
+	EXPECT_DEATH(sim->compConnect(s, d1); ,"");//Not allowed to have reverse comp connections.
+	EXPECT_DEATH(sim->compConnect(d1, s); ,"");//Not allowed to have identical comp connections.
+	EXPECT_DEATH(sim->compConnect(gin, s);, "");//Not allowed to have synaptic and comp connections on same pair of groups.
+	
+	delete sim;
+}
+
+
 //! Death tests for createGroup (test all possible silly values)
 // \FIXME this should be interface-level
 TEST(Interface, createGroupDeath) {
