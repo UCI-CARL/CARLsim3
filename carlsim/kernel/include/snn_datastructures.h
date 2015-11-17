@@ -340,7 +340,7 @@ typedef struct group_info_s {
 	int			StartComp;
 	//Contains Group Ids of neurons from compartmentally connected groups, can have at most 4 neighboring groups.
 	int         compNeighbors[4];
-	int         compCoupling[4];
+	float       compCoupling[4];
 	short       numCompNeighbors;
 
 	int			CompartmentalNeighbors[4];

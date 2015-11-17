@@ -2157,6 +2157,10 @@ void CpuSNN::CpuSNNinit() {
 
 		grp_Info[i].spikeGen = NULL;
 
+		grp_Info[i].numCompNeighbors = 0;
+		memset(&grp_Info[i].compNeighbors, 0, sizeof(grp_Info[i].compNeighbors[0])*MAX_NUM_COMP_CONN);
+		memset(&grp_Info[i].compCoupling, 0, sizeof(grp_Info[i].compCoupling[0])*MAX_NUM_COMP_CONN);
+
 		grp_Info[i].withSpikeCounter = false;
 		grp_Info[i].spkCntRecordDur = -1;
 		grp_Info[i].spkCntRecordDurHelper = 0;
@@ -2175,6 +2179,7 @@ void CpuSNN::CpuSNNinit() {
 		grp_Info2[i].maxPreConn  = 0;
 		grp_Info2[i].sumPostConn = 0;
 		grp_Info2[i].sumPreConn  = 0;
+
 
 	}
 
@@ -2233,10 +2238,10 @@ void CpuSNN::buildNetworkInit() {
 		// G_d = new float[numComp];
 		// compCurrent = new float[numComp];
 		// memset(compCurrent, 0, sizeof(compCurrent[0])*numComp);
-		compVoltage = new float[numNReg];
+		// compVoltage = new float[numNReg];
 		prevCompVoltage = new float[numNReg];
-		G_u = new float[numNReg];
-		G_d = new float[numNReg];
+		// G_u = new float[numNReg];
+		// G_d = new float[numNReg];
 		compCurrent = new float[numNReg];
 		memset(compCurrent, 0, sizeof(compCurrent[0])*numNReg);
 	}
@@ -2602,6 +2607,19 @@ void CpuSNN::buildNetwork() {
 			// grp_Info[newInfo2->grpDest].numOfNeighbors++;
 			
 			newInfo2 = newInfo2->next;
+		}
+
+		for (int g=0; g<numGrp; g++) {
+			if (grp_Info[g].withCompartments) {
+				fprintf(stderr,"\ngrp=%d (%s)\n",g,grp_Info2[g].Name.c_str());
+				fprintf(stderr,"numNeighbors=%d\n", grp_Info[g].numCompNeighbors);
+				fprintf(stderr,"neighbors=[\t%s\t%s\t%s\t%s\n", grp_Info2[grp_Info[g].compNeighbors[0]].Name.c_str(), 
+					grp_Info2[grp_Info[g].compNeighbors[1]].Name.c_str(), 
+					grp_Info2[grp_Info[g].compNeighbors[2]].Name.c_str(), 
+					grp_Info2[grp_Info[g].compNeighbors[3]].Name.c_str());
+				fprintf(stderr,"coupling=[\t%.3f\t%.3f\t%.3f\t%.3f\n", grp_Info[g].compCoupling[0], 
+					grp_Info[g].compCoupling[1], grp_Info[g].compCoupling[2], grp_Info[g].compCoupling[3]);
+			}
 		}
 
 		// build all the connections here...
@@ -3244,8 +3262,10 @@ void CpuSNN::findFiring() {
 			// 9-param model can set vpeak, but it's hardcoded in 4-param model
 			//float vpeak = (grp_Info[g].withParamModel_9) ? Izh_vpeak[i] : 30.0f;
 			//if (voltage[i] >= vpeak) {
-			if(curSpike[i]) {
+			if (curSpike[i]) {
 				curSpike[i] = false;
+				if (i==0)
+					fprintf(stderr,"%d: grpId=%d, neurId=%d, spike!\n",simTime,g,i);
 				//if (grp_Info[g].withCompartments) {
 				//	int compId = (i - grp_Info[g].StartN) + grp_Info[g].StartComp;//Calculate Comp ID of this neuron
 				//	compVoltage[compId] = Izh_c[i];
@@ -3661,37 +3681,39 @@ float dudtIzhikevich9(float volt, float recov, float voltRest, float izhA, float
 	return ( izhA * (izhB * (volt - voltRest) - recov) * timeStep );
 }
 
-// update total current
-float  CpuSNN::updateTotalCurrent(bool cEval, int cId, int neurId, int grpId, float* COUPL_CONSTANTS, int* cNeighbors,
-	int nNeighbors, float const_1, float const_2)
-{
-	float totalCurrent = 0.0f;
-	if (cEval) {
-		// go through all the neighbors and calculate total compartmental current
-		float tempCurrent = 0.0f;
-		for (int k=0; k<nNeighbors; k++) {
-			tempCurrent = tempCurrent + COUPL_CONSTANTS[k] * ((prevCompVoltage[cId] + const_1) - 
-				(prevCompVoltage[grp_Info[cNeighbors[k]].StartComp + (neurId - grp_Info[grpId].StartN)] + const_2));
-		}
-		compCurrent[cId] = tempCurrent;
-		// compile total current depending on whether this a compartmental or non-compartmental group.
-		totalCurrent = current[neurId] + extCurrent[neurId] - compCurrent[cId];
-	} else {
-		totalCurrent = current[neurId] + extCurrent[neurId];
-	}
-	return totalCurrent;
-}
+// // update total current
+// float  CpuSNN::updateTotalCurrent(bool cEval, int cId, int neurId, int grpId, float* COUPL_CONSTANTS, int* cNeighbors,
+// 	int nNeighbors, float const_1, float const_2)
+// {
+// 	float totalCurrent = 0.0f;
+// 	if (cEval) {
+// 		// go through all the neighbors and calculate total compartmental current
+// 		float tempCurrent = 0.0f;
+// 		for (int k=0; k<nNeighbors; k++) {
+// 			tempCurrent = tempCurrent + COUPL_CONSTANTS[k] * ((prevCompVoltage[cId] + const_1) - 
+// 				(prevCompVoltage[grp_Info[cNeighbors[k]].StartComp + (neurId - grp_Info[grpId].StartN)] + const_2));
+// 		}
+// 		compCurrent[cId] = tempCurrent;
+// 		// compile total current depending on whether this a compartmental or non-compartmental group.
+// 		totalCurrent = current[neurId] + extCurrent[neurId] - compCurrent[cId];
+// 	} else {
+// 		totalCurrent = current[neurId] + extCurrent[neurId];
+// 	}
+// 	return totalCurrent;
+// }
 
-float CpuSNN::getCompCurrent(int grpId, int neurIdRel, float const0, float const1) {
-	float tmpCurrent = 0.0f;
+float CpuSNN::getCompCurrent(int grpId, int neurId, float const0, float const1) {
+	float compCurrent = 0.0f;
 	for (int k=0; k<grp_Info[grpId].numCompNeighbors; k++) {
+		// compartment connections are always one-to-one, which means that the i-th neuron in grpId connects
+		// to the i-th neuron in grpIdOther
 		int grpIdOther = grp_Info[grpId].compNeighbors[k];
-		int neurIdOther = grp_Info[grpIdOther].StartN + neurIdRel;
-		tmpCurrent += grp_Info[grpId].compCoupling[k] * (prevCompVoltage[neurIdOther] + const0)
-			- (prevCompVoltage[neurIdOther] + const1);
+		int neurIdOther = neurId - grp_Info[grpId].StartN + grp_Info[grpIdOther].StartN;
+		compCurrent += grp_Info[grpId].compCoupling[k] * ((prevCompVoltage[neurId] + const0)
+			- (prevCompVoltage[neurIdOther] + const1));
 	}
 
-	return tmpCurrent;
+	return compCurrent;
 }
 
 void  CpuSNN::globalStateUpdate() {
@@ -3711,6 +3733,8 @@ void  CpuSNN::globalStateUpdate() {
 			cpuNetPtrs.grpDABuffer[g][simTimeMs] = cpuNetPtrs.grpDA[g];
 
 			float timeStep = 1.0f / simNumStepsPerMs_;
+
+			bool compEval = grp_Info[g].withCompartments && grp_Info[g].numCompNeighbors > 0;
 
 			for(int i=grp_Info[g].StartN; i<=grp_Info[g].EndN; i++) {
 				// pre-Load izhekevich variables to avoid unnecessary memory accesses + unclutter the code.
@@ -3737,13 +3761,6 @@ void  CpuSNN::globalStateUpdate() {
 									 + gGABAa[i] * (voltage[i] + 70.0f)
 									 + tmp_gGABAb * (voltage[i] + 90.0f)
 								   );
-					/*
-					#ifdef NEURON_NOISE
-					float noiseI = -intrinsicWeight[i]*log(drand48());
-					if (isnan(noiseI) || isinf(noiseI))
-						noiseI = 0.0f;
-					tmp_I += noiseI;
-					#endif*/
 
 					// keep track of total current
 					current[i] = tmp_I;
@@ -3753,13 +3770,13 @@ void  CpuSNN::globalStateUpdate() {
 
 				// float COUPLING_CONSTANTS[4];
 				// int* compNeighbors = NULL;
-				bool compEval = false;
+				// bool compEval = false;
 				// int compId = 0;
 				// int numNeighbors = 0;
 				float compCurrent = 0.0f;
 				if (grp_Info[g].withCompartments && grp_Info[g].numCompNeighbors > 0) {
-					compEval = true;
-					compCurrent = getCompCurrent(g, i - grp_Info[g].StartN);
+					// compEval = true;
+					compCurrent = getCompCurrent(g, i);
 				}
 
 				totalCurrent = current[i] + extCurrent[i] - compCurrent;
@@ -3787,10 +3804,10 @@ void  CpuSNN::globalStateUpdate() {
 						voltage[i] += dvdtIzhikevich4(voltage[i], recovery[i], totalCurrent, timeStep);
 						if (voltage[i] > 30.0f) {
 							voltage[i] = 30.0f;
-							if (grp_Info[g].withCompartments) {
-								// prevCompVoltage[compId] = 30.0f;
-								prevCompVoltage[i] = 30.0f;
-							}
+							// if (grp_Info[g].withCompartments) {
+							// 	// prevCompVoltage[compId] = 30.0f;
+							// 	prevCompVoltage[i] = 30.0f;
+							// }
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
@@ -3801,10 +3818,10 @@ void  CpuSNN::globalStateUpdate() {
 						voltage[i] += dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, totalCurrent, timeStep);
 						if (voltage[i] > vpeak) {
 							voltage[i] = vpeak;
-							if (grp_Info[g].withCompartments) {
-								// prevCompVoltage[compId] = vpeak;
-								prevCompVoltage[i] = vpeak;
-							}
+							// if (grp_Info[g].withCompartments) {
+							// 	// prevCompVoltage[compId] = vpeak;
+							// 	prevCompVoltage[i] = vpeak;
+							// }
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
@@ -3856,10 +3873,10 @@ void  CpuSNN::globalStateUpdate() {
 						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2 * k2 + 2 * k3 + k4);
 						if (voltage[i] > 30.0f) {
 							voltage[i] = 30.0f;
-							if (grp_Info[g].withCompartments) {
-								// prevCompVoltage[compId] = 30.0f;
-								prevCompVoltage[i] = 30.0f;
-							}
+							// if (grp_Info[g].withCompartments) {
+							// 	// prevCompVoltage[compId] = 30.0f;
+							// 	prevCompVoltage[i] = 30.0f;
+							// }
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
@@ -3869,11 +3886,11 @@ void  CpuSNN::globalStateUpdate() {
 							voltage[i] = -90.0f;
 						}
 						#if defined(WIN32) || defined(WIN64)
-								assert(!_isnan(voltage[i]));
-								assert(_finite(voltage[i]));
+						assert(!_isnan(voltage[i]));
+						assert(_finite(voltage[i]));
 						#else
-								assert(!isnan(voltage[i]));
-								assert(!isinf(voltage[i]));
+						assert(!isnan(voltage[i]));
+						assert(!isinf(voltage[i]));
 						#endif
 
 						recovery[i] = recovery[i] + (1.0f / 6.0f) * (l1 + 2 * l2 + 2 * l3 + l4);
@@ -3906,10 +3923,10 @@ void  CpuSNN::globalStateUpdate() {
 
 						if (voltage[i] > vpeak) {
 							voltage[i] = vpeak;
-							if (grp_Info[g].withCompartments) {
-								// prevCompVoltage[compId] = vpeak;
-								prevCompVoltage[i] = vpeak;
-							}
+							// if (grp_Info[g].withCompartments) {
+							// 	// prevCompVoltage[compId] = vpeak;
+							// 	prevCompVoltage[i] = vpeak;
+							// }
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
@@ -3944,8 +3961,7 @@ void  CpuSNN::globalStateUpdate() {
 				if (compEval) {
 					// prevCompVoltage[compId] = compVoltage[compId];
 					// compVoltage[compId] = voltage[i];
-					prevCompVoltage[i] = compVoltage[i];
-					compVoltage[i] = voltage[i];
+					prevCompVoltage[i] = voltage[i];
 				}
 			}  // end StartN...EndN
 		}  // end numGrp
@@ -4139,7 +4155,7 @@ double CpuSNN::getRFDist3D(const RadiusRF& radius, const Point3D& pre, const Poi
 // don't forget to cudaFree the device pointers if you make cpu_gpuNetPtrs
 void CpuSNN::makePtrInfo() {
 	cpuNetPtrs.voltage			= voltage;
-	cpuNetPtrs.compVoltage		= compVoltage;
+	// cpuNetPtrs.compVoltage		= compVoltage;
 	cpuNetPtrs.prevCompVoltage  = prevCompVoltage;
 	cpuNetPtrs.recovery			= recovery;
 	cpuNetPtrs.current			= current;
@@ -4673,16 +4689,16 @@ void CpuSNN::resetNeuron(unsigned int neurId, int grpId) {
 		//printf("Generated compId is: %d\n", compId);
 		if (!grp_Info[grpId].withParamModel_9) {
 			// prevCompVoltage[compId] = compVoltage[compId] = Izh_c[neurId];
-			prevCompVoltage[neurId] = compVoltage[neurId] = Izh_c[neurId];
+			prevCompVoltage[neurId] = Izh_c[neurId];
 		} else {
 			// prevCompVoltage[compId] = compVoltage[compId] = Izh_vr[neurId];
-			prevCompVoltage[neurId] = compVoltage[neurId] = Izh_vr[neurId];
+			prevCompVoltage[neurId] = Izh_vr[neurId];
 		}
 		//Initially all neurons within a group share the same coupling constants.
 		// G_u[compId] = grp_Info[grpId].G_u;
 		// G_d[compId] = grp_Info[grpId].G_d;
-		G_u[neurId] = grp_Info[grpId].G_u;
-		G_d[neurId] = grp_Info[grpId].G_d;
+		// G_u[neurId] = grp_Info[grpId].G_u;
+		// G_d[neurId] = grp_Info[grpId].G_d;
 	}
 
 	if (!grp_Info[grpId].withParamModel_9)//Initial values for 4 parameter model.
@@ -4826,11 +4842,11 @@ void CpuSNN::resetPointers(bool deallocate) {
 	voltage=NULL; recovery=NULL; current=NULL; extCurrent=NULL; curSpike = NULL;
 
 	if (sim_with_compartments && deallocate) {
-		if (compVoltage != NULL) delete[] compVoltage;
+		// if (compVoltage != NULL) delete[] compVoltage;
 		if (prevCompVoltage != NULL) delete[] prevCompVoltage;
 		if (compCurrent != NULL) delete[] compCurrent;
 	}
-	compVoltage = NULL; prevCompVoltage = NULL; compCurrent = NULL;
+	prevCompVoltage = NULL; compCurrent = NULL;
 
 	if (Izh_C != NULL && deallocate) delete[] Izh_C;
 	if (Izh_k != NULL && deallocate) delete[] Izh_k;
@@ -4841,10 +4857,10 @@ void CpuSNN::resetPointers(bool deallocate) {
 	if (Izh_vpeak != NULL && deallocate) delete[] Izh_vpeak;
 	if (Izh_c!=NULL && deallocate) delete[] Izh_c;
 	if (Izh_d!=NULL && deallocate) delete[] Izh_d;
-	if (G_u != NULL && deallocate) delete[] G_u;
-	if (G_d != NULL && deallocate) delete[] G_d;
+	// if (G_u != NULL && deallocate) delete[] G_u;
+	// if (G_d != NULL && deallocate) delete[] G_d;
 	Izh_C = NULL; Izh_k = NULL; Izh_vr = NULL; Izh_vt = NULL; Izh_a = NULL; Izh_b = NULL; Izh_vpeak = NULL;
-	Izh_c = NULL; Izh_d = NULL; G_u = NULL; G_d = NULL;
+	Izh_c = NULL; Izh_d = NULL; // G_u = NULL; G_d = NULL;
 
 	if (Npre!=NULL && deallocate) delete[] Npre;
 	if (Npre_plastic!=NULL && deallocate) delete[] Npre_plastic;

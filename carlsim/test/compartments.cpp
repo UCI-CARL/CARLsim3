@@ -40,7 +40,7 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 	// \FIXME: GPU side not implemented yet
 	numModes = 0;
 
-	for (int inver_timestep = 10; inver_timestep <= 50; inver_timestep += 10) {
+	for (int inver_timestep = 10; inver_timestep <= 50; inver_timestep += 100) {
 
 		for (int isGPUmode = 0; isGPUmode <= numModes; isGPUmode++) {
 			CARLsim* sim = new CARLsim("CUBA.firingRateVsData", isGPUmode ? GPU_MODE : CPU_MODE, SILENT, 0, 42);
@@ -48,39 +48,47 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 
 			int N = 5;
 
-			int s = sim->createGroup("SP soma", N, EXCITATORY_NEURON);
-			int d1 = sim->createGroup("SR", N, EXCITATORY_NEURON);
-			int d2 = sim->createGroup("SLM", N, EXCITATORY_NEURON);
-			int d3 = sim->createGroup("SO", N, EXCITATORY_NEURON);
+			int grpSP = sim->createGroup("SP soma", N, EXCITATORY_NEURON); // s
+			int grpSR = sim->createGroup("SR d1", N, EXCITATORY_NEURON); // d1
+			int grpSLM = sim->createGroup("SLM d2", N, EXCITATORY_NEURON); // d2
+			int grpSO = sim->createGroup("SO d3", N, EXCITATORY_NEURON); // d3
 
-			sim->setNeuronParameters(s, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
-			sim->setNeuronParameters(d1, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(d2, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(d3, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSP, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
+			sim->setNeuronParameters(grpSR, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSLM, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSO, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
 
-			sim->setCompartmentParameters(d1, 28.396f, 5.526f);//SR 28 and 5
-			sim->setCompartmentParameters(d2, 50.474f, 0.0f);//SLM 50 and 0
-			sim->setCompartmentParameters(d3, 0.0f, 49.14f);//SO 0 and 49
-			sim->setCompartmentParameters(s, 116.861f, 4.60f);// SP (somatic) 116 and 4
+			sim->setCompartmentParameters(grpSR, 28.396f, 5.526f);//SR 28 and 5
+			sim->setCompartmentParameters(grpSLM, 50.474f, 0.0f);//SLM 50 and 0
+			sim->setCompartmentParameters(grpSO, 0.0f, 49.14f);//SO 0 and 49
+			sim->setCompartmentParameters(grpSP, 116.861f, 4.60f);// SP (somatic) 116 and 4
 
 			int gin = sim->createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
-			sim->connect(gin, s, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
+			sim->connect(gin, grpSP, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
 
 			sim->setConductances(false);//This forces use of CUBA model.
 
-			sim->compConnect(d2, d1);
-			sim->compConnect(d1, s);
-			sim->compConnect(s, d3);
+			// Establish compartmental connections in order to form the following configuration:
+			//	d3    SO
+			//	|     |
+			//	s     SP
+			//	|     |
+			//	d1    SR
+			//	|     |
+			//	d2    SLM
+			sim->compConnect(grpSLM, grpSR);
+			sim->compConnect(grpSR, grpSP);
+			sim->compConnect(grpSP, grpSO);
 
 			sim->setESTDP(ALL, false);
 			sim->setISTDP(ALL, false);
 
 			sim->setupNetwork();
 
-			SpikeMonitor* spikeSP = sim->setSpikeMonitor(s, "DEFAULT"); // put spike times into file
-			SpikeMonitor* spikeSR = sim->setSpikeMonitor(d1, "DEFAULT"); // put spike times into file
-			SpikeMonitor* spikeSLM = sim->setSpikeMonitor(d2, "DEFAULT"); // put spike times into file
-			SpikeMonitor* spikeSO = sim->setSpikeMonitor(d3, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spikeSP = sim->setSpikeMonitor(grpSP, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spikeSR = sim->setSpikeMonitor(grpSR, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spikeSLM = sim->setSpikeMonitor(grpSLM, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spikeSO = sim->setSpikeMonitor(grpSO, "DEFAULT"); // put spike times into file
 
 			PoissonRate in(N);
 
@@ -91,13 +99,13 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 			spikeSR->startRecording();
 			spikeSLM->startRecording();
 			spikeSO->startRecording();
-			sim->setExternalCurrent(s, 0);
-			sim->runNetwork(0, 100);
-			sim->setExternalCurrent(s, 592);
+			sim->setExternalCurrent(grpSP, 0);
+			sim->runNetwork(0, 10);
+			sim->setExternalCurrent(grpSP, 592);
                         sim->runNetwork(0, 400);
-			sim->setExternalCurrent(s, 592);
+			sim->setExternalCurrent(grpSP, 592);
                         sim->runNetwork(0, 400);
-			sim->setExternalCurrent(s, 0);
+			sim->setExternalCurrent(grpSP, 0);
                         sim->runNetwork(0, 100);
 
 			spikeSP->stopRecording();
@@ -123,7 +131,7 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 			// SLM: expect silent
 			EXPECT_EQ(spikeSLM->getPopNumSpikes(), 0);
 
-			// SO (d3 dendritic): expect 8 spikes at specific times
+			// SO (grpSO dendritic): expect 8 spikes at specific times
 			EXPECT_EQ(spikeSO->getPopNumSpikes(), 7*N);
 			if (spikeSO->getPopNumSpikes() == 7*N) {
 				// only execute if #spikes matches, otherwise we'll segfault
@@ -160,41 +168,41 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_CUBA) {
 
 			int N = 5;
 
-			int s = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int d1 = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int d2 = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int d3 = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSP = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSR = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSLM = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSO = sim->createGroup("excit", N, EXCITATORY_NEURON);
 
-			sim->setNeuronParameters(s, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
-			sim->setNeuronParameters(d1, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(d2, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(d3, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSP, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
+			sim->setNeuronParameters(grpSR, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSLM, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSO, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
 
-			sim->setCompartmentParameters(d1, 28.396f, 5.526f);//SR 28 and 5
-			sim->setCompartmentParameters(d2, 50.474f, 0.0f);//SLM 50 and 0
-			sim->setCompartmentParameters(d3, 0.0f, 49.14f);//SO 0 and 49
-			sim->setCompartmentParameters(s, 116.861f, 4.60f);// SP (somatic) 116 and 4
+			sim->setCompartmentParameters(grpSR, 28.396f, 5.526f);//SR 28 and 5
+			sim->setCompartmentParameters(grpSLM, 50.474f, 0.0f);//SLM 50 and 0
+			sim->setCompartmentParameters(grpSO, 0.0f, 49.14f);//SO 0 and 49
+			sim->setCompartmentParameters(grpSP, 116.861f, 4.60f);// SP (somatic) 116 and 4
 
 			int gin = sim->createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
-			sim->connect(gin, s, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
+			sim->connect(gin, grpSP, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
 
 			sim->setConductances(false);//This forces use of CUBA model.
 
-			sim->compConnect(d2, d1);
-			sim->compConnect(d1, s);
-			sim->compConnect(s, d3);
+			sim->compConnect(grpSLM, grpSR);
+			sim->compConnect(grpSR, grpSP);
+			sim->compConnect(grpSP, grpSO);
 
-			sim->setSTDP(d1, false);
-			sim->setSTDP(d2, false);
-			sim->setSTDP(d3, false);
-			sim->setSTDP(s, false);
+			sim->setSTDP(grpSR, false);
+			sim->setSTDP(grpSLM, false);
+			sim->setSTDP(grpSO, false);
+			sim->setSTDP(grpSP, false);
 
 			sim->setupNetwork();
 
-			SpikeMonitor* SM = sim->setSpikeMonitor(s, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_1 = sim->setSpikeMonitor(d1, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_2 = sim->setSpikeMonitor(d2, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_3 = sim->setSpikeMonitor(d3, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM = sim->setSpikeMonitor(grpSP, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM_1 = sim->setSpikeMonitor(grpSR, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM_2 = sim->setSpikeMonitor(grpSLM, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM_3 = sim->setSpikeMonitor(grpSO, "DEFAULT"); // put spike times into file
 
 			PoissonRate in(N);
 
@@ -205,7 +213,7 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_CUBA) {
 			SM_1->startRecording();
 			SM_2->startRecording();
 			SM_3->startRecording();
-			sim->setExternalCurrent(s, 600);
+			sim->setExternalCurrent(grpSP, 600);
 			sim->runNetwork(1, 0);
 			SM->stopRecording();
 			SM_1->stopRecording();
@@ -247,41 +255,41 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_COBA) {
 
 			int N = 5;
 
-			int s = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int d1 = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int d2 = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int d3 = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSP = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSR = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSLM = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSO = sim->createGroup("excit", N, EXCITATORY_NEURON);
 
-			sim->setNeuronParameters(s, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
-			sim->setNeuronParameters(d1, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(d2, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(d3, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSP, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
+			sim->setNeuronParameters(grpSR, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSLM, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSO, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
 
-			sim->setCompartmentParameters(d1, 28.396f, 5.526f);//SR 28 and 5
-			sim->setCompartmentParameters(d2, 50.474f, 0.0f);//SLM 50 and 0
-			sim->setCompartmentParameters(d3, 0.0f, 49.14f);//SO 0 and 49
-			sim->setCompartmentParameters(s, 116.861f, 4.60f);// SP (somatic) 116 and 4
+			sim->setCompartmentParameters(grpSR, 28.396f, 5.526f);//SR 28 and 5
+			sim->setCompartmentParameters(grpSLM, 50.474f, 0.0f);//SLM 50 and 0
+			sim->setCompartmentParameters(grpSO, 0.0f, 49.14f);//SO 0 and 49
+			sim->setCompartmentParameters(grpSP, 116.861f, 4.60f);// SP (somatic) 116 and 4
 
 			int gin = sim->createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
-			sim->connect(gin, s, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
+			sim->connect(gin, grpSP, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
 
 			sim->setConductances(true);//This forces use of COBA model.
 
-			sim->compConnect(d2, d1);
-			sim->compConnect(d1, s);
-			sim->compConnect(s, d3);
+			sim->compConnect(grpSLM, grpSR);
+			sim->compConnect(grpSR, grpSP);
+			sim->compConnect(grpSP, grpSO);
 
-			sim->setSTDP(d1, false);
-			sim->setSTDP(d2, false);
-			sim->setSTDP(d3, false);
-			sim->setSTDP(s, false);
+			sim->setSTDP(grpSR, false);
+			sim->setSTDP(grpSLM, false);
+			sim->setSTDP(grpSO, false);
+			sim->setSTDP(grpSP, false);
 
 			sim->setupNetwork();
 
-			SpikeMonitor* SM = sim->setSpikeMonitor(s, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_1 = sim->setSpikeMonitor(d1, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_2 = sim->setSpikeMonitor(d2, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_3 = sim->setSpikeMonitor(d3, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM = sim->setSpikeMonitor(grpSP, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM_1 = sim->setSpikeMonitor(grpSR, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM_2 = sim->setSpikeMonitor(grpSLM, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM_3 = sim->setSpikeMonitor(grpSO, "DEFAULT"); // put spike times into file
 
 			PoissonRate in(N);
 
@@ -292,7 +300,7 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_COBA) {
 			SM_1->startRecording();
 			SM_2->startRecording();
 			SM_3->startRecording();
-			sim->setExternalCurrent(s, 600);
+			sim->setExternalCurrent(grpSP, 600);
 			sim->runNetwork(1, 0);
 			SM->stopRecording();
 			SM_1->stopRecording();
@@ -344,43 +352,43 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_COBA_Volt_Rec) {
 			CARLsim* sim = new CARLsim("CUBA.firingRateVsData", isGPUmode ? GPU_MODE : CPU_MODE, SILENT, 0, 42);
 			sim->setTimestep(inver_timestep);
 
-			int s = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int d1 = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int d2 = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int d3 = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSP = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSR = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSLM = sim->createGroup("excit", N, EXCITATORY_NEURON);
+			int grpSO = sim->createGroup("excit", N, EXCITATORY_NEURON);
 
-			sim->recordVoltage(s, 0);
+			sim->recordVoltage(grpSP, 0);
 
-			sim->setNeuronParameters(s, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
-			sim->setNeuronParameters(d1, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(d2, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(d3, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSP, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
+			sim->setNeuronParameters(grpSR, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSLM, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSO, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
 
-			sim->setCompartmentParameters(d1, 28.396f, 5.526f);//SR 28 and 5
-			sim->setCompartmentParameters(d2, 50.474f, 0.0f);//SLM 50 and 0
-			sim->setCompartmentParameters(d3, 0.0f, 49.14f);//SO 0 and 49
-			sim->setCompartmentParameters(s, 116.861f, 4.60f);// SP (somatic) 116 and 4
+			sim->setCompartmentParameters(grpSR, 28.396f, 5.526f);//SR 28 and 5
+			sim->setCompartmentParameters(grpSLM, 50.474f, 0.0f);//SLM 50 and 0
+			sim->setCompartmentParameters(grpSO, 0.0f, 49.14f);//SO 0 and 49
+			sim->setCompartmentParameters(grpSP, 116.861f, 4.60f);// SP (somatic) 116 and 4
 
 			int gin = sim->createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
-			sim->connect(gin, s, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
+			sim->connect(gin, grpSP, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
 
 			sim->setConductances(true);//This forces use of COBA model.
 
-			sim->compConnect(d2, d1);
-			sim->compConnect(d1, s);
-			sim->compConnect(s, d3);
+			sim->compConnect(grpSLM, grpSR);
+			sim->compConnect(grpSR, grpSP);
+			sim->compConnect(grpSP, grpSO);
 
-			sim->setSTDP(d1, false);
-			sim->setSTDP(d2, false);
-			sim->setSTDP(d3, false);
-			sim->setSTDP(s, false);
+			sim->setSTDP(grpSR, false);
+			sim->setSTDP(grpSLM, false);
+			sim->setSTDP(grpSO, false);
+			sim->setSTDP(grpSP, false);
 
 			sim->setupNetwork();
 
-			SpikeMonitor* SM = sim->setSpikeMonitor(s, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_1 = sim->setSpikeMonitor(d1, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_2 = sim->setSpikeMonitor(d2, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_3 = sim->setSpikeMonitor(d3, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM = sim->setSpikeMonitor(grpSP, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM_1 = sim->setSpikeMonitor(grpSR, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM_2 = sim->setSpikeMonitor(grpSLM, "DEFAULT"); // put spike times into file
+			SpikeMonitor* SM_3 = sim->setSpikeMonitor(grpSO, "DEFAULT"); // put spike times into file
 
 			PoissonRate in(N);
 
@@ -391,7 +399,7 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_COBA_Volt_Rec) {
 			SM_1->startRecording();
 			SM_2->startRecording();
 			SM_3->startRecording();
-			sim->setExternalCurrent(s, 600);
+			sim->setExternalCurrent(grpSP, 600);
 			sim->runNetwork(0, 100);
 			SM->stopRecording();
 			SM_1->stopRecording();
