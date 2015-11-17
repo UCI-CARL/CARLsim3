@@ -2198,7 +2198,7 @@ void CpuSNN::CpuSNNinit() {
 
 //! update (initialize) numN, numPostSynapses, numPreSynapses, maxDelay_, postSynCnt, preSynCnt
 //! allocate space for voltage, recovery, Izh_a, Izh_b, Izh_c, Izh_d, current, gAMPA, gNMDA, gGABAa, gGABAb
-//! lastSpikeTime, curSpike, nSpikeCnt, intrinsicWeight, stpu, stpx, Npre, Npre_plastic, Npost, cumulativePost, cumulativePre
+//! lastSpikeTime, nSpikeCnt, intrinsicWeight, stpu, stpx, Npre, Npre_plastic, Npost, cumulativePost, cumulativePre
 //! postSynapticIds, tmp_SynapticDely, postDelayInfo, wt, maxSynWt, preSynapticIds, timeTableD2, timeTableD1
 void CpuSNN::buildNetworkInit() {
 	// \FIXME: need to figure out STP buffer for delays > 1
@@ -2221,8 +2221,10 @@ void CpuSNN::buildNetworkInit() {
 	current	   = new float[numNReg];
 	extCurrent = new float[numNReg];
 	memset(extCurrent, 0, sizeof(extCurrent[0])*numNReg);
-	spkTime = new bool[numNReg];
-	memset(spkTime, 0, sizeof(spkTime[0])*numNReg);
+
+	// keeps track of all neurons that spiked at current time step
+	curSpike = new bool[numNReg];
+	memset(curSpike, 0, sizeof(curSpike[0])*numNReg);
 
 	if (sim_with_compartments) {
 		compVoltage = new float[numComp];
@@ -2281,7 +2283,6 @@ void CpuSNN::buildNetworkInit() {
 	cpuSnnSz.neuronInfoSize += sizeof(int) * numN;
 	memset(lastSpikeTime, 0, sizeof(lastSpikeTime[0]) * numN);
 
-	curSpike   = new bool[numN];
 	nSpikeCnt  = new int[numN];
 	KERNEL_INFO("allocated nSpikeCnt");
 
@@ -2357,7 +2358,6 @@ void CpuSNN::buildNetworkInit() {
 int CpuSNN::addSpikeToTable(int nid, int g) {
 	int spikeBufferFull = 0;
 	lastSpikeTime[nid] = simTime;
-	curSpike[nid] = true;
 	nSpikeCnt[nid]++;
 	if (sim_with_homeostasis)
 		avgFiring[nid] += 1000/(grp_Info[g].avgTimeScale*1000);
@@ -2487,7 +2487,7 @@ void CpuSNN::buildNetwork() {
 	// initialize all the parameters....
 	//! update (initialize) numN, numPostSynapses, numPreSynapses, maxDelay_, postSynCnt, preSynCnt
 	//! allocate space for voltage, recovery, Izh_a, Izh_b, Izh_c, Izh_d, current, gAMPA, gNMDA, gGABAa, gGABAb
-	//! lastSpikeTime, curSpike, nSpikeCnt, intrinsicWeight, stpu, stpx, Npre, Npre_plastic, Npost, cumulativePost, cumulativePre
+	//! lastSpikeTime, nSpikeCnt, intrinsicWeight, stpu, stpx, Npre, Npre_plastic, Npost, cumulativePost, cumulativePre
 	//! postSynapticIds, tmp_SynapticDely, postDelayInfo, wt, maxSynWt, preSynapticIds, timeTableD2, timeTableD1, grpDA, grp5HT, grpACh, grpNE
 	buildNetworkInit();
 
@@ -3216,9 +3216,8 @@ void CpuSNN::findFiring() {
 			// 9-param model can set vpeak, but it's hardcoded in 4-param model
 			//float vpeak = (grp_Info[g].withParamModel_9) ? Izh_vpeak[i] : 30.0f;
 			//if (voltage[i] >= vpeak) {
-			if(spkTime[i])
-			{
-				spkTime[i] = 0;
+			if(curSpike[i]) {
+				curSpike[i] = false;
 				//if (grp_Info[g].withCompartments) {
 				//	int compId = (i - grp_Info[g].StartN) + grp_Info[g].StartComp;//Calculate Comp ID of this neuron
 				//	compVoltage[compId] = Izh_c[i];
@@ -3745,7 +3744,7 @@ void  CpuSNN::globalStateUpdate() {
 								prevCompVoltage[compId] = 30.0f;
 							}
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
-							spkTime[i] = 1;
+							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
 						}
@@ -3758,7 +3757,7 @@ void  CpuSNN::globalStateUpdate() {
 								prevCompVoltage[compId] = vpeak;
 							}
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
-							spkTime[i] = 1;
+							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
 						}
@@ -3812,7 +3811,7 @@ void  CpuSNN::globalStateUpdate() {
 								prevCompVoltage[compId] = 30.0f;
 							}
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
-							spkTime[i] = 1;
+							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
 						}
@@ -3861,7 +3860,7 @@ void  CpuSNN::globalStateUpdate() {
 								prevCompVoltage[compId] = vpeak;
 							}
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
-							spkTime[i] = 1;
+							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
 						}
@@ -4093,7 +4092,7 @@ void CpuSNN::makePtrInfo() {
 	cpuNetPtrs.current			= current;
 	cpuNetPtrs.compCurrent		= compCurrent;
 	cpuNetPtrs.extCurrent       = extCurrent;
-	cpuNetPtrs.spkTime          = spkTime;
+	cpuNetPtrs.curSpike         = curSpike;
 	cpuNetPtrs.Npre				= Npre;
 	cpuNetPtrs.Npost			= Npost;
 	cpuNetPtrs.cumulativePost 	= cumulativePost;
@@ -4103,7 +4102,6 @@ void CpuSNN::makePtrInfo() {
 	cpuNetPtrs.wtChange			= wtChange;
 	cpuNetPtrs.cumConnIdPre 	= cumConnIdPre;
 	cpuNetPtrs.nSpikeCnt		= nSpikeCnt;
-	cpuNetPtrs.curSpike 		= curSpike;
 	cpuNetPtrs.firingTableD2 	= firingTableD2;
 	cpuNetPtrs.firingTableD1 	= firingTableD1;
 	cpuNetPtrs.grpIds 			= grpIds;
@@ -4527,11 +4525,6 @@ void CpuSNN::resetConductances() {
 	}
 }
 
-void CpuSNN::resetCounters() {
-	assert(numNReg <= numN);
-	memset(curSpike, 0, sizeof(bool) * numN);
-}
-
 void CpuSNN::resetCPUTiming() {
 	prevCpuExecutionTime = cumExecutionTime;
 	cpuExecutionTime     = 0.0;
@@ -4596,9 +4589,6 @@ void CpuSNN::resetGroups() {
 
 	// reset the conductances...
 	resetConductances();
-
-	//  reset various counters in the group...
-	resetCounters();
 }
 
 void CpuSNN::resetNeuromodulator(int grpId) {
@@ -4775,8 +4765,8 @@ void CpuSNN::resetPointers(bool deallocate) {
 	if (recovery!=NULL && deallocate) delete[] recovery;
 	if (current!=NULL && deallocate) delete[] current;
 	if (extCurrent!=NULL && deallocate) delete[] extCurrent;
-	if (spkTime!=NULL && deallocate) delete[] spkTime;
-	voltage=NULL; recovery=NULL; current=NULL; extCurrent=NULL; spkTime = NULL;
+	if (curSpike!=NULL && deallocate) delete[] curSpike;
+	voltage=NULL; recovery=NULL; current=NULL; extCurrent=NULL; curSpike = NULL;
 
 	if (sim_with_compartments && deallocate) {
 		if (compVoltage != NULL) delete[] compVoltage;
@@ -4828,9 +4818,8 @@ void CpuSNN::resetPointers(bool deallocate) {
 
 	if (lastSpikeTime!=NULL && deallocate) delete[] lastSpikeTime;
 	if (synSpikeTime !=NULL && deallocate) delete[] synSpikeTime;
-	if (curSpike!=NULL && deallocate) delete[] curSpike;
 	if (nSpikeCnt!=NULL && deallocate) delete[] nSpikeCnt;
-	lastSpikeTime=NULL; synSpikeTime=NULL; curSpike=NULL; nSpikeCnt=NULL;
+	lastSpikeTime=NULL; synSpikeTime=NULL; nSpikeCnt=NULL;
 
 	if (postDelayInfo!=NULL && deallocate) delete[] postDelayInfo;
 	if (preSynapticIds!=NULL && deallocate) delete[] preSynapticIds;

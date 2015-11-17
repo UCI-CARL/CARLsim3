@@ -664,8 +664,8 @@ __global__ 	void kernel_findFiring (int t, int sec, int simTime) {
 			}
 			else {
 				//float vpeak = (gpuGrpInfo[grpId].withParamModel_9) ? gpuPtrs.Izh_vpeak[nid] : 30.0f;
-				if (gpuPtrs.spkTime[nid]) {
-					gpuPtrs.spkTime[nid] = 0;
+				if (gpuPtrs.curSpike[nid]) {
+					gpuPtrs.curSpike[nid] = false;
 					needToWrite = true;
 					if (gpuGrpInfo[grpId].withSpikeCounter) {
 						int bufPos = gpuGrpInfo[grpId].spkCntBufPos;
@@ -986,7 +986,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 				if (v > 30.0f) { 
 					v = 30.0f; // break the loop but evaluate u[i]
 					//c=gpuNetInfo.simNumStepsPerMs;
-					gpuPtrs.spkTime[nid] = 1;
+					gpuPtrs.curSpike[nid] = true;
 					v = gpuPtrs.Izh_c[nid];
 					u += gpuPtrs.Izh_d[nid];
 				}
@@ -997,7 +997,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 				if (v > vpeak) { 
 					v = vpeak; // break the loop but evaluate u[i]
 					//c=gpuNetInfo.simNumStepsPerMs;
-					gpuPtrs.spkTime[nid] = 1;
+					gpuPtrs.curSpike[nid] = true;
 					v = gpuPtrs.Izh_c[nid];
 					u += gpuPtrs.Izh_d[nid];
 				}
@@ -1044,7 +1044,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 				if (v > 30.0f) { 
 					v = 30.0f; // break the loop but evaluate u[i]
 					//c=gpuNetInfo.simNumStepsPerMs;
-					gpuPtrs.spkTime[nid] = 1;
+					gpuPtrs.curSpike[nid] = true;
 					v = gpuPtrs.Izh_c[nid];
 					u += gpuPtrs.Izh_d[nid];
 				}
@@ -1088,7 +1088,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 				if (v > vpeak) { 
 					v = vpeak; // break the loop but evaluate u[i]
 					//c=gpuNetInfo.simNumStepsPerMs;
-					gpuPtrs.spkTime[nid] = 1;
+					gpuPtrs.curSpike[nid] = true;
 					v = gpuPtrs.Izh_c[nid];
 					u += gpuPtrs.Izh_d[nid];
 					//printf("*GPU* Voltage: %f; Recovery %f; TotalCurrent: %f; NID: %i\n", v, u, totalCurrent, nid);
@@ -2118,8 +2118,8 @@ void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpy
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->voltage[ptrPos], &src->voltage[ptrPos], sizeof(float) * length, kind));
 
 	if (allocateMem)
-		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->spkTime, sizeof(float) * length));
-	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->spkTime[ptrPos], &src->spkTime[ptrPos], sizeof(float) * length, kind));
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->curSpike, sizeof(float) * length));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->curSpike[ptrPos], &src->curSpike[ptrPos], sizeof(float) * length, kind));
 
 	if (allocateMem)
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compVoltage, sizeof(float) * length3));
@@ -2514,8 +2514,6 @@ void CpuSNN::spikeGeneratorUpdate_GPU() {
 
 	// this part of the code is invoked when we use spike generators
 	if (NgenFunc) {
-		resetCounters();
-
 		assert(cpuNetPtrs.spikeGenBits!=NULL);
 
 		// reset the bit status of the spikeGenBits...
@@ -2658,7 +2656,7 @@ void CpuSNN::deleteObjects_GPU() {
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.recovery) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.current) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.extCurrent) );
-	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.spkTime) );
+	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.curSpike) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.Npre) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.Npre_plastic) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.Npre_plasticInv) );
@@ -2670,7 +2668,6 @@ void CpuSNN::deleteObjects_GPU() {
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.wtChange) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.maxSynWt) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.nSpikeCnt) );
-	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.curSpike) ); // \FIXME exists but never used...
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.firingTableD2) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.firingTableD1) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.avgFiring) );

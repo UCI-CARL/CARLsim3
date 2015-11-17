@@ -158,7 +158,11 @@ typedef struct network_ptr_s {
 	float*	current;
 	float*  compCurrent;
 	float*  extCurrent;
-	bool* spkTime;
+
+	//! Keeps track of all neurons that spiked at current time.
+	//! Because integration step can be < 1ms we might want to keep integrating but remember that the neuron fired,
+	//! so that we don't produce more than 1 spike per ms.
+	bool* curSpike;
 
 	int*		StartComp;
 	int*		CompartmentalNeighbors[4];
@@ -246,7 +250,6 @@ typedef struct network_ptr_s {
 	float* grpNEBuffer[MAX_GRP_PER_SNN];
 
 	unsigned int*	spikeGenBits;
-	bool*		curSpike;
 } network_ptr_t;
 
 typedef struct group_info_s {
