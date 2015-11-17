@@ -410,7 +410,7 @@ void CARLsim::compConnect(int grpId1, int grpId2)
 		//printf("Group %d has %d comp connections.\n", grpId1, numOfConnectionsComp[grpId1]);
 	}
 	else
-		if (numOfConnectionsComp[grpId1] == 4)//This group already has 4 connections.
+		if (numOfConnectionsComp[grpId1] == MAX_NUM_COMP_CONN)//This group already has 4 connections.
 			errorIII = true;
 		else//This group has more than 0, but less than 4 connections.
 		{
@@ -433,7 +433,7 @@ void CARLsim::compConnect(int grpId1, int grpId2)
 		//printf("Group %d has %d comp connections.\n", grpId2, numOfConnectionsComp[grpId2]);
 	}
 	else
-		if (numOfConnectionsComp[grpId2] == 4)
+		if (numOfConnectionsComp[grpId2] == MAX_NUM_COMP_CONN)
 			errorIII = true;
 		else
 		{

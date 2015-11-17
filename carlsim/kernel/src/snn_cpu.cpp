@@ -2227,12 +2227,18 @@ void CpuSNN::buildNetworkInit() {
 	memset(curSpike, 0, sizeof(curSpike[0])*numNReg);
 
 	if (sim_with_compartments) {
-		compVoltage = new float[numComp];
-		prevCompVoltage = new float[numComp];
-		G_u = new float[numComp];
-		G_d = new float[numComp];
-		compCurrent = new float[numComp];
-		memset(compCurrent, 0, sizeof(compCurrent[0])*numComp);
+		// compVoltage = new float[numComp];
+		// prevCompVoltage = new float[numComp];
+		// G_u = new float[numComp];
+		// G_d = new float[numComp];
+		// compCurrent = new float[numComp];
+		// memset(compCurrent, 0, sizeof(compCurrent[0])*numComp);
+		compVoltage = new float[numNReg];
+		prevCompVoltage = new float[numNReg];
+		G_u = new float[numNReg];
+		G_d = new float[numNReg];
+		compCurrent = new float[numNReg];
+		memset(compCurrent, 0, sizeof(compCurrent[0])*numNReg);
 	}
 
 	cpuSnnSz.neuronInfoSize += (sizeof(float)*numNReg*8);
@@ -2563,15 +2569,37 @@ void CpuSNN::buildNetwork() {
 		}
 	} else {
 
-		//build all the compartmental connections first
-		while (newInfo2)
-		{
-			grp_Info[newInfo2->grpSrc].CompartmentalNeighbors[grp_Info[newInfo2->grpSrc].numOfNeighbors] = newInfo2->grpDest;
-			grp_Info[newInfo2->grpSrc].compNeighborDirec[grp_Info[newInfo2->grpSrc].numOfNeighbors] = true;
-			grp_Info[newInfo2->grpSrc].numOfNeighbors++;
-			grp_Info[newInfo2->grpDest].CompartmentalNeighbors[grp_Info[newInfo2->grpDest].numOfNeighbors] = newInfo2->grpSrc;
-			grp_Info[newInfo2->grpDest].compNeighborDirec[grp_Info[newInfo2->grpDest].numOfNeighbors] = false;
-			grp_Info[newInfo2->grpDest].numOfNeighbors++;
+		// build all the compartmental connections first
+		while (newInfo2) {
+			int grpLower = newInfo2->grpSrc;
+			int grpUpper = newInfo2->grpDest;
+
+			int i = grp_Info[grpLower].numCompNeighbors;
+			if (i >= MAX_NUM_COMP_CONN) {
+				KERNEL_ERROR("Group %s(%d) exceeds max number of allowed compartmental connections (%d).",
+					grp_Info2[grpLower].Name.c_str(), grpLower, (int)MAX_NUM_COMP_CONN);
+				exitSimulation(1);
+			}
+			grp_Info[grpLower].compNeighbors[i] = grpUpper;
+			grp_Info[grpLower].compCoupling[i] = grp_Info[grpUpper].G_d; // get down-coupling from upper neighbor
+			grp_Info[grpLower].numCompNeighbors++;
+
+			int j = grp_Info[grpUpper].numCompNeighbors;
+			if (j >= MAX_NUM_COMP_CONN) {
+				KERNEL_ERROR("Group %s(%d) exceeds max number of allowed compartmental connections (%d).",
+					grp_Info2[grpUpper].Name.c_str(), grpUpper, (int)MAX_NUM_COMP_CONN);
+				exitSimulation(1);
+			}
+			grp_Info[grpUpper].compNeighbors[j] = grpLower;
+			grp_Info[grpUpper].compCoupling[j] = grp_Info[grpLower].G_u; // get up-coupling from lower neighbor
+			grp_Info[grpUpper].numCompNeighbors++;
+
+			// grp_Info[newInfo2->grpSrc].CompartmentalNeighbors[grp_Info[newInfo2->grpSrc].numOfNeighbors] = newInfo2->grpDest;
+			// grp_Info[newInfo2->grpSrc].compNeighborDirec[grp_Info[newInfo2->grpSrc].numOfNeighbors] = true;
+			// grp_Info[newInfo2->grpSrc].numOfNeighbors++;
+			// grp_Info[newInfo2->grpDest].CompartmentalNeighbors[grp_Info[newInfo2->grpDest].numOfNeighbors] = newInfo2->grpSrc;
+			// grp_Info[newInfo2->grpDest].compNeighborDirec[grp_Info[newInfo2->grpDest].numOfNeighbors] = false;
+			// grp_Info[newInfo2->grpDest].numOfNeighbors++;
 			
 			newInfo2 = newInfo2->next;
 		}
@@ -3654,6 +3682,18 @@ float  CpuSNN::updateTotalCurrent(bool cEval, int cId, int neurId, int grpId, fl
 	return totalCurrent;
 }
 
+float CpuSNN::getCompCurrent(int grpId, int neurIdRel, float const0, float const1) {
+	float tmpCurrent = 0.0f;
+	for (int k=0; k<grp_Info[grpId].numCompNeighbors; k++) {
+		int grpIdOther = grp_Info[grpId].compNeighbors[k];
+		int neurIdOther = grp_Info[grpIdOther].StartN + neurIdRel;
+		tmpCurrent += grp_Info[grpId].compCoupling[k] * (prevCompVoltage[neurIdOther] + const0)
+			- (prevCompVoltage[neurIdOther] + const1);
+	}
+
+	return tmpCurrent;
+}
+
 void  CpuSNN::globalStateUpdate() {
 	double tmp_iNMDA, tmp_I;
 	double tmp_gNMDA, tmp_gGABAb;
@@ -3711,27 +3751,34 @@ void  CpuSNN::globalStateUpdate() {
 					// do nothing, because current[i] is already set
 				}
 
-				float COUPLING_CONSTANTS[4];
-				int* compNeighbors = NULL;
+				// float COUPLING_CONSTANTS[4];
+				// int* compNeighbors = NULL;
 				bool compEval = false;
-				int compId = 0;
-				int numNeighbors = 0;
-				if (grp_Info[g].withCompartments) {
-					numNeighbors = grp_Info[g].numOfNeighbors;
-					compNeighbors = grp_Info[g].CompartmentalNeighbors;
-					bool* compNeighborsDirec = grp_Info[g].compNeighborDirec;
-
-					// get the coupling constants from neighboring neurons
-					for (int r = 0; r < numNeighbors; r++) {
-						int compId_neighbor = (i - grp_Info[g].StartN) + grp_Info[compNeighbors[r]].StartComp;
-						COUPLING_CONSTANTS[r] = (compNeighborsDirec[r] == true) ? G_d[compId_neighbor] : G_u[compId_neighbor];
-					}
-
-					compId = (i - grp_Info[g].StartN) + grp_Info[g].StartComp;//Calculate Comp ID of this neuron
-					compEval = (grp_Info[g].withCompartments == 1) && (numNeighbors > 0); //this is a compartmental group connected to at least one other compartmental group
+				// int compId = 0;
+				// int numNeighbors = 0;
+				float compCurrent = 0.0f;
+				if (grp_Info[g].withCompartments && grp_Info[g].numCompNeighbors > 0) {
+					compEval = true;
+					compCurrent = getCompCurrent(g, i - grp_Info[g].StartN);
 				}
 
-				totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, 0.0f, 0.0f);
+				totalCurrent = current[i] + extCurrent[i] - compCurrent;
+
+				// 	numNeighbors = grp_Info[g].numOfNeighbors;
+				// 	compNeighbors = grp_Info[g].CompartmentalNeighbors;
+				// 	bool* compNeighborsDirec = grp_Info[g].compNeighborDirec;
+
+				// 	// get the coupling constants from neighboring neurons
+				// 	for (int r = 0; r < numNeighbors; r++) {
+				// 		int compId_neighbor = (i - grp_Info[g].StartN) + grp_Info[compNeighbors[r]].StartComp;
+				// 		COUPLING_CONSTANTS[r] = (compNeighborsDirec[r] == true) ? G_d[compId_neighbor] : G_u[compId_neighbor];
+				// 	}
+
+				// 	compId = (i - grp_Info[g].StartN) + grp_Info[g].StartComp;//Calculate Comp ID of this neuron
+				// 	compEval = (grp_Info[g].withCompartments == 1) && (numNeighbors > 0); //this is a compartmental group connected to at least one other compartmental group
+				// }
+
+				// totalCurrent = updateTotalCurrent(compEval, compId, i, g, COUPLING_CONSTANTS, compNeighbors, numNeighbors, 0.0f, 0.0f);
 
 				switch (simIntegrationMethod_) {
 				case FORWARD_EULER:
@@ -3741,7 +3788,8 @@ void  CpuSNN::globalStateUpdate() {
 						if (voltage[i] > 30.0f) {
 							voltage[i] = 30.0f;
 							if (grp_Info[g].withCompartments) {
-								prevCompVoltage[compId] = 30.0f;
+								// prevCompVoltage[compId] = 30.0f;
+								prevCompVoltage[i] = 30.0f;
 							}
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 							curSpike[i] = true;
@@ -3754,7 +3802,8 @@ void  CpuSNN::globalStateUpdate() {
 						if (voltage[i] > vpeak) {
 							voltage[i] = vpeak;
 							if (grp_Info[g].withCompartments) {
-								prevCompVoltage[compId] = vpeak;
+								// prevCompVoltage[compId] = vpeak;
+								prevCompVoltage[i] = vpeak;
 							}
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 							curSpike[i] = true;
@@ -3808,7 +3857,8 @@ void  CpuSNN::globalStateUpdate() {
 						if (voltage[i] > 30.0f) {
 							voltage[i] = 30.0f;
 							if (grp_Info[g].withCompartments) {
-								prevCompVoltage[compId] = 30.0f;
+								// prevCompVoltage[compId] = 30.0f;
+								prevCompVoltage[i] = 30.0f;
 							}
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 							curSpike[i] = true;
@@ -3857,7 +3907,8 @@ void  CpuSNN::globalStateUpdate() {
 						if (voltage[i] > vpeak) {
 							voltage[i] = vpeak;
 							if (grp_Info[g].withCompartments) {
-								prevCompVoltage[compId] = vpeak;
+								// prevCompVoltage[compId] = vpeak;
+								prevCompVoltage[i] = vpeak;
 							}
 							//j = simNumStepsPerMs_; // break the loop, but evaluate recovery var
 							curSpike[i] = true;
@@ -3891,8 +3942,10 @@ void  CpuSNN::globalStateUpdate() {
 
 				// update compVoltage and prevCompVoltage if necessary
 				if (compEval) {
-					prevCompVoltage[compId] = compVoltage[compId];
-					compVoltage[compId] = voltage[i];
+					// prevCompVoltage[compId] = compVoltage[compId];
+					// compVoltage[compId] = voltage[i];
+					prevCompVoltage[i] = compVoltage[i];
+					compVoltage[i] = voltage[i];
 				}
 			}  // end StartN...EndN
 		}  // end numGrp
@@ -4615,25 +4668,29 @@ void CpuSNN::resetNeuron(unsigned int neurId, int grpId) {
 	Izh_c[neurId] = grp_Info2[grpId].Izh_c + grp_Info2[grpId].Izh_c_sd*(float)drand48();
 	Izh_d[neurId] = grp_Info2[grpId].Izh_d + grp_Info2[grpId].Izh_d_sd*(float)drand48();
 
-	if (grp_Info[grpId].withCompartments == 1)
-	{
-		int compId = (neurId - grp_Info[grpId].StartN) + grp_Info[grpId].StartComp;
+	if (grp_Info[grpId].withCompartments) {
+		// int compId = (neurId - grp_Info[grpId].StartN) + grp_Info[grpId].StartComp;
 		//printf("Generated compId is: %d\n", compId);
-		if (grp_Info[grpId].withParamModel_9 == 0)
-			prevCompVoltage[compId] = compVoltage[compId] = Izh_c[neurId];
-		else
-			prevCompVoltage[compId] = compVoltage[compId] = Izh_vr[neurId];
+		if (!grp_Info[grpId].withParamModel_9) {
+			// prevCompVoltage[compId] = compVoltage[compId] = Izh_c[neurId];
+			prevCompVoltage[neurId] = compVoltage[neurId] = Izh_c[neurId];
+		} else {
+			// prevCompVoltage[compId] = compVoltage[compId] = Izh_vr[neurId];
+			prevCompVoltage[neurId] = compVoltage[neurId] = Izh_vr[neurId];
+		}
 		//Initially all neurons within a group share the same coupling constants.
-		G_u[compId] = grp_Info[grpId].G_u;
-		G_d[compId] = grp_Info[grpId].G_d;
+		// G_u[compId] = grp_Info[grpId].G_u;
+		// G_d[compId] = grp_Info[grpId].G_d;
+		G_u[neurId] = grp_Info[grpId].G_u;
+		G_d[neurId] = grp_Info[grpId].G_d;
 	}
 
-	if (grp_Info[grpId].withParamModel_9 == 0)//Initial values for 4 parameter model.
+	if (!grp_Info[grpId].withParamModel_9)//Initial values for 4 parameter model.
 	{
 		voltage[neurId] = Izh_c[neurId];	// initial values for new_v
 	    recovery[neurId] = Izh_b[neurId] * voltage[neurId]; // initial values for u
 	}
-	else if (grp_Info[grpId].withParamModel_9 == 1)//Initial values for 9 parameter model.
+	else if (grp_Info[grpId].withParamModel_9)//Initial values for 9 parameter model.
 	{
 		voltage[neurId] = Izh_vr[neurId];
 		recovery[neurId] = 0;

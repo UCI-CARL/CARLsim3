@@ -798,6 +798,9 @@ private:
 	//void updateStateAndFiringTable();
 	bool updateTime(); //!< updates simTime, returns true when a new second is started
 
+	float getCompCurrent(int grpId, int neurIdRel, float const0=0.0f, float const1=0.0f);
+
+
 	float updateTotalCurrent(bool cEval, int cId, int I, int G, float* COUPL_CONSTANTS, int* cNeighbors, int nNeighbors, float const_1, float const_2);
 
 	void updateWeights();
