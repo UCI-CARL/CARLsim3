@@ -477,6 +477,7 @@ void CpuSNN::setIntegrationMethod(integrationMethod_t method, int numStepsPerMs)
 	assert(numStepsPerMs >= 1 && numStepsPerMs <= 100);
 	simIntegrationMethod_ = method;
 	simNumStepsPerMs_ = numStepsPerMs;
+	timeStep_ = 1.0f / simNumStepsPerMs_;
 }
 
 // set Izhikevich parameters for group
@@ -2233,8 +2234,6 @@ void CpuSNN::buildNetworkInit() {
 	if (sim_with_compartments) {
 		compVoltage = new float[numNReg];
 		prevCompVoltage = new float[numNReg];
-		compCurrent = new float[numNReg];
-		memset(compCurrent, 0, sizeof(compCurrent[0])*numNReg);
 	}
 
 	cpuSnnSz.neuronInfoSize += (sizeof(float)*numNReg*8);
@@ -3651,88 +3650,59 @@ float CpuSNN::getCompCurrent(int grpId, int neurId, float const0, float const1) 
 }
 
 void  CpuSNN::globalStateUpdate() {
-	double tmp_iNMDA, tmp_I;
-	double tmp_gNMDA, tmp_gGABAb;
-	float totalCurrent = 0;
-	float tempCurrent = 0;
-
-	float timeStep = 1.0f / simNumStepsPerMs_;
-
 	for (int j=0; j<simNumStepsPerMs_; j++) {
-
 		for(int g=0; g<numGrp; g++) {
 			if (grp_Info[g].Type & POISSON_NEURON) {
 				continue;
 			}
 
-			// update dopamine
+			// update group dopamine
 			cpuNetPtrs.grpDABuffer[g][simTimeMs] = cpuNetPtrs.grpDA[g];
 
-			// whether this group is compartmentally enabled
-			bool compEval = grp_Info[g].withCompartments && grp_Info[g].numCompNeighbors > 0;
-
 			for(int i=grp_Info[g].StartN; i<=grp_Info[g].EndN; i++) {
-				// pre-Load izhekevich variables to avoid unnecessary memory accesses + unclutter the code.
+				// pre-load izhikevich variables to avoid unnecessary memory accesses + unclutter the code.
 				float k = Izh_k[i];
 				float vr = Izh_vr[i];
 				float vt = Izh_vt[i];
 				float inverse_C = 1.0f / Izh_C[i];
 				float a = Izh_a[i];
 				float b = Izh_b[i];
-				float vpeak = Izh_vpeak[i];
 
+				// sum up total current = synaptic + external - compartmental
+				float totalCurrent = extCurrent[i];
 				if (sim_with_conductances) { // COBA model
-					// all the tmpIs will be summed into current[i] in the following loop
-					current[i] = 0.0f;
+					float tmp_gNMDA = sim_with_NMDA_rise ? gNMDA_d[i]-gNMDA_r[i] : gNMDA[i];
+					float tmp_gGABAb = sim_with_GABAb_rise ? gGABAb_d[i]-gGABAb_r[i] : gGABAb[i];
+					float tmp_iNMDA = (voltage[i] + 80.0f) * (voltage[i] + 80.0f) / 60.0f / 60.0f;
 
-					// \FIXME: these tmp vars cause a lot of rounding errors... consider rewriting
-					tmp_iNMDA = (voltage[i] + 80.0f) * (voltage[i] + 80.0f) / 60.0f / 60.0f;
-
-					tmp_gNMDA = sim_with_NMDA_rise ? gNMDA_d[i]-gNMDA_r[i] : gNMDA[i];
-					tmp_gGABAb = sim_with_GABAb_rise ? gGABAb_d[i]-gGABAb_r[i] : gGABAb[i];
-
-					tmp_I = -(   gAMPA[i] * (voltage[i] - 0.0f)
-									 + tmp_gNMDA * tmp_iNMDA / (1.0f + tmp_iNMDA) * (voltage[i] - 0.0f)
-									 + gGABAa[i] * (voltage[i] + 70.0f)
-									 + tmp_gGABAb * (voltage[i] + 90.0f)
-								   );
-
-					// keep track of total current
-					current[i] = tmp_I;
+					totalCurrent += -(gAMPA[i] * (voltage[i] - 0.0f) +
+						tmp_gNMDA * tmp_iNMDA / (1.0f + tmp_iNMDA) * (voltage[i] - 0.0f) +
+						gGABAa[i] * (voltage[i] + 70.0f) +
+						tmp_gGABAb * (voltage[i] + 90.0f));
 				} else { // CUBA model
-					// do nothing, because current[i] is already set
+					totalCurrent += current[i];
 				}
-
-				float compCurrent = 0.0f;
-				if (grp_Info[g].withCompartments && grp_Info[g].numCompNeighbors > 0) {
-					// compEval = true;
-					compCurrent = getCompCurrent(g, i);
+				if (grp_Info[g].withCompartments) {
+					totalCurrent -= getCompCurrent(g, i);
 				}
-
-				totalCurrent = current[i] + extCurrent[i] - compCurrent;
 
 				switch (simIntegrationMethod_) {
 				case FORWARD_EULER:
 					if (grp_Info[g].withParamModel_9 == 0) {
 						// 4-param Izhikevich
-						voltage[i] += dvdtIzhikevich4(voltage[i], recovery[i], totalCurrent, timeStep);
+						voltage[i] += dvdtIzhikevich4(voltage[i], recovery[i], totalCurrent, timeStep_);
 						if (voltage[i] > 30.0f) {
 							voltage[i] = 30.0f;
-							if (grp_Info[g].withCompartments) {
-								prevCompVoltage[i] = 30.0f;
-							}
 							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
 						}
 					} else {
 						// 9-param Izhikevich
-						voltage[i] += dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, totalCurrent, timeStep);
-						if (voltage[i] > vpeak) {
-							voltage[i] = vpeak;
-							if (grp_Info[g].withCompartments) {
-								prevCompVoltage[i] = vpeak;
-							}
+						voltage[i] += dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, totalCurrent, 
+							timeStep_);
+						if (voltage[i] > Izh_vpeak[i]) {
+							voltage[i] = Izh_vpeak[i];
 							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
@@ -3750,9 +3720,9 @@ void  CpuSNN::globalStateUpdate() {
 					#endif
 
 					if (grp_Info[g].withParamModel_9 == 0) {
-						recovery[i] += dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep);
+						recovery[i] += dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep_);
 					} else {
-						recovery[i] += dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep);
+						recovery[i] += dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep_);
 					}
 
 					break;
@@ -3760,24 +3730,23 @@ void  CpuSNN::globalStateUpdate() {
 					// TODO for Stas
 					if (grp_Info[g].withParamModel_9 == 0) {
 						// 4-param Izhikevich
-						float k1 = dvdtIzhikevich4(voltage[i], recovery[i], totalCurrent, timeStep);
-						float l1 = dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep);
+						float k1 = dvdtIzhikevich4(voltage[i], recovery[i], totalCurrent, timeStep_);
+						float l1 = dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep_);
 
-						float k2 = dvdtIzhikevich4(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, totalCurrent, timeStep);
-						float l2 = dudtIzhikevich4(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, a, b, timeStep);
+						float k2 = dvdtIzhikevich4(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, totalCurrent, 
+							timeStep_);
+						float l2 = dudtIzhikevich4(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, a, b, timeStep_);
 
-						float k3 = dvdtIzhikevich4(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, totalCurrent, timeStep);
-						float l3 = dudtIzhikevich4(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, a, b, timeStep);
+						float k3 = dvdtIzhikevich4(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, totalCurrent, 
+							timeStep_);
+						float l3 = dudtIzhikevich4(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, a, b, timeStep_);
 
-						float k4 = dvdtIzhikevich4(voltage[i] + k3, recovery[i] + l3, totalCurrent, timeStep);
-						float l4 = dudtIzhikevich4(voltage[i] + k3, recovery[i] + l3, a, b, timeStep);
+						float k4 = dvdtIzhikevich4(voltage[i] + k3, recovery[i] + l3, totalCurrent, timeStep_);
+						float l4 = dudtIzhikevich4(voltage[i] + k3, recovery[i] + l3, a, b, timeStep_);
 
 						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2 * k2 + 2 * k3 + k4);
 						if (voltage[i] > 30.0f) {
 							voltage[i] = 30.0f;
-							if (grp_Info[g].withCompartments) {
-								prevCompVoltage[i] = 30.0f;
-							}
 							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
@@ -3797,25 +3766,26 @@ void  CpuSNN::globalStateUpdate() {
 					} else {
 						// 9-param Izhikevich
 
-						float k1 = dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, totalCurrent, timeStep);
-						float l1 = dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep);
+						float k1 = dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, totalCurrent, 
+							timeStep_);
+						float l1 = dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep_);
 
-						float k2 = dvdtIzhikevich9(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, inverse_C, k, vr, vt, totalCurrent, timeStep);
-						float l2 = dudtIzhikevich9(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, vr, a, b, timeStep);
+						float k2 = dvdtIzhikevich9(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, inverse_C, k, vr, vt, 
+							totalCurrent, timeStep_);
+						float l2 = dudtIzhikevich9(voltage[i] + k1/2.0f, recovery[i] + l1/2.0f, vr, a, b, timeStep_);
 
-						float k3 = dvdtIzhikevich9(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, inverse_C, k, vr, vt, totalCurrent, timeStep);
-						float l3 = dudtIzhikevich9(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, vr, a, b, timeStep);
+						float k3 = dvdtIzhikevich9(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, inverse_C, k, vr, vt,
+							totalCurrent, timeStep_);
+						float l3 = dudtIzhikevich9(voltage[i] + k2/2.0f, recovery[i] + l2/2.0f, vr, a, b, timeStep_);
 
-						float k4 = dvdtIzhikevich9(voltage[i] + k3, recovery[i] + l3, inverse_C, k, vr, vt, totalCurrent, timeStep);
-						float l4 = dudtIzhikevich9(voltage[i] + k3, recovery[i] + l3, vr, a, b, timeStep);
+						float k4 = dvdtIzhikevich9(voltage[i] + k3, recovery[i] + l3, inverse_C, k, vr, vt, 
+							totalCurrent, timeStep_);
+						float l4 = dudtIzhikevich9(voltage[i] + k3, recovery[i] + l3, vr, a, b, timeStep_);
 
 						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2 * k2 + 2 * k3 + k4);
 
-						if (voltage[i] > vpeak) {
-							voltage[i] = vpeak;
-							if (grp_Info[g].withCompartments) {
-								prevCompVoltage[i] = vpeak;
-							}
+						if (voltage[i] > Izh_vpeak[i]) {
+							voltage[i] = Izh_vpeak[i];
 							curSpike[i] = true;
 							voltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
@@ -3842,7 +3812,7 @@ void  CpuSNN::globalStateUpdate() {
 				}
 
 				// update compVoltage and prevCompVoltage if necessary
-				if (compEval) {
+				if (grp_Info[g].withCompartments) {
 					prevCompVoltage[i] = compVoltage[i];
 					compVoltage[i] = voltage[i];
 				}
@@ -4042,7 +4012,6 @@ void CpuSNN::makePtrInfo() {
 	cpuNetPtrs.prevCompVoltage  = prevCompVoltage;
 	cpuNetPtrs.recovery			= recovery;
 	cpuNetPtrs.current			= current;
-	cpuNetPtrs.compCurrent		= compCurrent;
 	cpuNetPtrs.extCurrent       = extCurrent;
 	cpuNetPtrs.curSpike         = curSpike;
 	cpuNetPtrs.Npre				= Npre;
@@ -4718,9 +4687,8 @@ void CpuSNN::resetPointers(bool deallocate) {
 	if (sim_with_compartments && deallocate) {
 		if (compVoltage != NULL) delete[] compVoltage;
 		if (prevCompVoltage != NULL) delete[] prevCompVoltage;
-		if (compCurrent != NULL) delete[] compCurrent;
 	}
-	prevCompVoltage = NULL; compCurrent = NULL;
+	compVoltage = NULL; prevCompVoltage = NULL;
 
 	if (Izh_C != NULL && deallocate) delete[] Izh_C;
 	if (Izh_k != NULL && deallocate) delete[] Izh_k;

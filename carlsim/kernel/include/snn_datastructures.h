@@ -98,6 +98,7 @@ typedef struct network_info_s  {
 
 	integrationMethod_t simIntegrationMethod;
 	int simNumStepsPerMs;
+	float timeStep;
 
 	bool 			sim_with_NMDA_rise;	//!< a flag to inform whether to compute NMDA rise time
 	bool 			sim_with_GABAb_rise;	//!< a flag to inform whether to compute GABAb rise time

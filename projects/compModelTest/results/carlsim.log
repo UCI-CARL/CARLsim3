@@ -5,22 +5,28 @@
 [INFO carlsim/kernel/src/snn_cpu.cpp:2013] ***************************** Configuring Network ********************************
 [INFO carlsim/kernel/src/snn_cpu.cpp:2015] Starting CARLsim simulation "random" in USER mode
 [INFO carlsim/kernel/src/snn_cpu.cpp:2016] Random number seed: 42
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:2022] Current local time and date: Tue Nov 17 11:49:21 2015
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:2022] Current local time and date: Tue Nov 17 12:29:46 2015
+
+[INFO carlsim/kernel/src/snn_gpu.cu:2945] CUDA devices Configuration:
+[INFO carlsim/kernel/src/snn_gpu.cu:2946]   - Number of CUDA devices          =         1
+[INFO carlsim/kernel/src/snn_gpu.cu:2949]   - CUDA device ID with max GFLOPs  =         0
+[INFO carlsim/kernel/src/snn_gpu.cu:2958]   - Use CUDA device[0]              = GeForce GTX 780
+[INFO carlsim/kernel/src/snn_gpu.cu:2959]   - CUDA Compute Capability (CC)    =       3.5
 
 [INFO carlsim/kernel/src/snn_cpu.cpp:432] Running CUBA mode (all synaptic conductances disabled)
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:201] grp_Info[4, input].numPostSynapses = 1, grp_Info[0, soma].numPreSynapses = 1
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:209] CONNECT SETUP: connId=0, mulFast=1.000000, mulSlow=1.000000
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4509] Beginning reorganization of network....
-[INFO carlsim/kernel/src/snn_cpu.cpp:2476] 
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4408] Beginning reorganization of network....
+[INFO carlsim/kernel/src/snn_cpu.cpp:2461] 
 
-[INFO carlsim/kernel/src/snn_cpu.cpp:2477] ***************************** Setting up Network **********************************
-[INFO carlsim/kernel/src/snn_cpu.cpp:2479] numN = 25000, numPostSynapses = 1, numPreSynapses = 1, maxDelay = 1
-[INFO carlsim/kernel/src/snn_cpu.cpp:2298] allocated nSpikeCnt
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:2433] Allocation for 0(soma), St=0, End=4999
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:2433] Allocation for 1(d1), St=5000, End=9999
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:2433] Allocation for 2(d2), St=10000, End=14999
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:2433] Allocation for 3(d3), St=15000, End=19999
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:2664] Allocation for 4(input), St=20000, End=24999
+[INFO carlsim/kernel/src/snn_cpu.cpp:2462] ***************************** Setting up Network **********************************
+[INFO carlsim/kernel/src/snn_cpu.cpp:2464] numN = 25000, numPostSynapses = 1, numPreSynapses = 1, maxDelay = 1
+[INFO carlsim/kernel/src/snn_cpu.cpp:2290] allocated nSpikeCnt
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:2418] Allocation for 0(soma), St=0, End=4999
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:2418] Allocation for 1(d1), St=5000, End=9999
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:2418] Allocation for 2(d2), St=10000, End=14999
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:2418] Allocation for 3(d3), St=15000, End=19999
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:2649] Allocation for 4(input), St=20000, End=24999
 [INFO carlsim/kernel/src/print_snn_info.cpp:288] Group soma(0): 
 [INFO carlsim/kernel/src/print_snn_info.cpp:291]   - Type                       =    EXCIT
 [INFO carlsim/kernel/src/print_snn_info.cpp:292]   - Size                       =     5000
@@ -69,445 +75,1141 @@
 [INFO carlsim/kernel/src/print_snn_info.cpp:279]   - Radius Z                   =    -1.00
 [INFO carlsim/kernel/src/print_snn_info.cpp:283]   - Avg numPreSynapses         =        1
 [INFO carlsim/kernel/src/print_snn_info.cpp:284]   - Avg numPostSynapses        =        1
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:2744] ******************
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:2745] CompactConnection: 
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:2746] ******************
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:2747] old_postCnt = 5000, new_postCnt = 5000
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:2748] old_preCnt = 5000,  new_postCnt = 5000
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:2729] ******************
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:2730] CompactConnection: 
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:2731] ******************
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:2732] old_postCnt = 5000, new_postCnt = 5000
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:2733] old_preCnt = 5000,  new_postCnt = 5000
 [DEBUG carlsim/kernel/src/print_snn_info.cpp:66] checkNetworkBuilt()
 [DEBUG carlsim/kernel/src/print_snn_info.cpp:67] Network not yet elaborated and built...
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4959] Grp: 0:soma s=0 e=4999 
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4961] Grp: 0:soma s=0 e=4999  
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4998] 	4 (input) start=0, type=F maxWts = 0.000000 (**)
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4959] Grp: 1:d1 s=5000 e=9999 
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4961] Grp: 1:d1 s=5000 e=9999  
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4959] Grp: 2:d2 s=10000 e=14999 
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4961] Grp: 2:d2 s=10000 e=14999  
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4959] Grp: 3:d3 s=15000 e=19999 
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4961] Grp: 3:d3 s=15000 e=19999  
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4959] Grp: 4:input s=20000 e=24999 
-[DEBUG carlsim/kernel/src/snn_cpu.cpp:4961] Grp: 4:input s=20000 e=24999  
-[INFO carlsim/kernel/src/snn_cpu.cpp:4544] 
-[INFO carlsim/kernel/src/snn_cpu.cpp:4546] *****************      Initializing CPU Simulation      *************************
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4849] Grp: 0:soma s=0 e=4999 
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4851] Grp: 0:soma s=0 e=4999  
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4888] 	4 (input) start=0, type=F maxWts = 0.000000 (**)
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4849] Grp: 1:d1 s=5000 e=9999 
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4851] Grp: 1:d1 s=5000 e=9999  
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4849] Grp: 2:d2 s=10000 e=14999 
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4851] Grp: 2:d2 s=10000 e=14999  
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4849] Grp: 3:d3 s=15000 e=19999 
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4851] Grp: 3:d3 s=15000 e=19999  
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4849] Grp: 4:input s=20000 e=24999 
+[DEBUG carlsim/kernel/src/snn_cpu.cpp:4851] Grp: 4:input s=20000 e=24999  
+[INFO carlsim/kernel/src/snn_cpu.cpp:4443] 
+[INFO carlsim/kernel/src/snn_cpu.cpp:4445] *****************      Initializing GPU Simulation      *************************
+[INFO carlsim/kernel/src/snn_gpu.cu:3031] GPU Memory Management: (Total 2.999 GB)
+[INFO carlsim/kernel/src/snn_gpu.cu:3032] Data			Size		Total Used	Total Available
+[INFO carlsim/kernel/src/snn_gpu.cu:3034] Init:			2.999 GB	0.277 GB	2.722 GB
+[INFO carlsim/kernel/src/snn_gpu.cu:3041] Ntw Params:		0.000 GB	0.277 GB	2.722 GB
+[DEBUG carlsim/kernel/src/snn_gpu.cu:280] Grp Size = 5000, Total Buffer Cnt = 40, Buffer Cnt = 40
+[DEBUG carlsim/kernel/src/snn_gpu.cu:280] Grp Size = 5000, Total Buffer Cnt = 80, Buffer Cnt = 40
+[DEBUG carlsim/kernel/src/snn_gpu.cu:280] Grp Size = 5000, Total Buffer Cnt = 120, Buffer Cnt = 40
+[DEBUG carlsim/kernel/src/snn_gpu.cu:280] Grp Size = 5000, Total Buffer Cnt = 160, Buffer Cnt = 40
+[DEBUG carlsim/kernel/src/snn_gpu.cu:280] Grp Size = 5000, Total Buffer Cnt = 200, Buffer Cnt = 40
+[DEBUG carlsim/kernel/src/snn_gpu.cu:285] STATIC THREAD ALLOCATION
+[DEBUG carlsim/kernel/src/snn_gpu.cu:286] ------------------------
+[DEBUG carlsim/kernel/src/snn_gpu.cu:287] Buffer Size = 128, Buffer Count = 200
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 0. Start=0, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 1. Start=128, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 2. Start=256, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 3. Start=384, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 4. Start=512, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 5. Start=640, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 6. Start=768, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 7. Start=896, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 8. Start=1024, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 9. Start=1152, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 10. Start=1280, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 11. Start=1408, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 12. Start=1536, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 13. Start=1664, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 14. Start=1792, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 15. Start=1920, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 16. Start=2048, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 17. Start=2176, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 18. Start=2304, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 19. Start=2432, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 20. Start=2560, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 21. Start=2688, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 22. Start=2816, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 23. Start=2944, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 24. Start=3072, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 25. Start=3200, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 26. Start=3328, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 27. Start=3456, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 28. Start=3584, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 29. Start=3712, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 30. Start=3840, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 31. Start=3968, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 32. Start=4096, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 33. Start=4224, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 34. Start=4352, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 35. Start=4480, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 36. Start=4608, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 37. Start=4736, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 38. Start=4864, size=128 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 39. Start=4992, size=8 grpId=0:soma (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 40. Start=5000, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 41. Start=5128, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 42. Start=5256, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 43. Start=5384, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 44. Start=5512, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 45. Start=5640, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 46. Start=5768, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 47. Start=5896, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 48. Start=6024, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 49. Start=6152, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 50. Start=6280, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 51. Start=6408, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 52. Start=6536, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 53. Start=6664, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 54. Start=6792, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 55. Start=6920, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 56. Start=7048, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 57. Start=7176, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 58. Start=7304, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 59. Start=7432, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 60. Start=7560, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 61. Start=7688, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 62. Start=7816, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 63. Start=7944, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 64. Start=8072, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 65. Start=8200, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 66. Start=8328, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 67. Start=8456, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 68. Start=8584, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 69. Start=8712, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 70. Start=8840, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 71. Start=8968, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 72. Start=9096, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 73. Start=9224, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 74. Start=9352, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 75. Start=9480, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 76. Start=9608, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 77. Start=9736, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 78. Start=9864, size=128 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 79. Start=9992, size=8 grpId=1:d1 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 80. Start=10000, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 81. Start=10128, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 82. Start=10256, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 83. Start=10384, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 84. Start=10512, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 85. Start=10640, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 86. Start=10768, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 87. Start=10896, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 88. Start=11024, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 89. Start=11152, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 90. Start=11280, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 91. Start=11408, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 92. Start=11536, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 93. Start=11664, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 94. Start=11792, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 95. Start=11920, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 96. Start=12048, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 97. Start=12176, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 98. Start=12304, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 99. Start=12432, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 100. Start=12560, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 101. Start=12688, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 102. Start=12816, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 103. Start=12944, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 104. Start=13072, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 105. Start=13200, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 106. Start=13328, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 107. Start=13456, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 108. Start=13584, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 109. Start=13712, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 110. Start=13840, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 111. Start=13968, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 112. Start=14096, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 113. Start=14224, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 114. Start=14352, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 115. Start=14480, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 116. Start=14608, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 117. Start=14736, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 118. Start=14864, size=128 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 119. Start=14992, size=8 grpId=2:d2 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 120. Start=15000, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 121. Start=15128, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 122. Start=15256, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 123. Start=15384, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 124. Start=15512, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 125. Start=15640, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 126. Start=15768, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 127. Start=15896, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 128. Start=16024, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 129. Start=16152, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 130. Start=16280, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 131. Start=16408, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 132. Start=16536, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 133. Start=16664, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 134. Start=16792, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 135. Start=16920, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 136. Start=17048, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 137. Start=17176, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 138. Start=17304, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 139. Start=17432, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 140. Start=17560, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 141. Start=17688, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 142. Start=17816, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 143. Start=17944, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 144. Start=18072, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 145. Start=18200, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 146. Start=18328, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 147. Start=18456, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 148. Start=18584, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 149. Start=18712, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 150. Start=18840, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 151. Start=18968, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 152. Start=19096, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 153. Start=19224, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 154. Start=19352, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 155. Start=19480, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 156. Start=19608, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 157. Start=19736, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 158. Start=19864, size=128 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 159. Start=19992, size=8 grpId=3:d3 (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 160. Start=20000, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 161. Start=20128, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 162. Start=20256, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 163. Start=20384, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 164. Start=20512, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 165. Start=20640, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 166. Start=20768, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 167. Start=20896, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 168. Start=21024, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 169. Start=21152, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 170. Start=21280, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 171. Start=21408, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 172. Start=21536, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 173. Start=21664, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 174. Start=21792, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 175. Start=21920, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 176. Start=22048, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 177. Start=22176, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 178. Start=22304, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 179. Start=22432, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 180. Start=22560, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 181. Start=22688, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 182. Start=22816, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 183. Start=22944, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 184. Start=23072, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 185. Start=23200, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 186. Start=23328, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 187. Start=23456, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 188. Start=23584, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 189. Start=23712, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 190. Start=23840, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 191. Start=23968, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 192. Start=24096, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 193. Start=24224, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 194. Start=24352, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 195. Start=24480, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 196. Start=24608, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 197. Start=24736, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 198. Start=24864, size=128 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:311] 199. Start=24992, size=8 grpId=4:input (SpikeMonId=-1) (GroupMonId=-1)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:319] GPU loadBufferSize = 128, GPU loadBufferCount = 200
+[INFO carlsim/kernel/src/snn_gpu.cu:3048] Static Load:		0.001 GB	0.278 GB	2.721 GB
+[INFO carlsim/kernel/src/snn_gpu.cu:3054] Group Id:		0.001 GB	0.279 GB	2.720 GB
+[INFO carlsim/kernel/src/snn_gpu.cu:3070] Conn Info:		0.001 GB	0.280 GB	2.719 GB
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=-1, ptrPos=0, length=20000, allocate=y
+[INFO carlsim/kernel/src/snn_gpu.cu:3085] State Info:		0.096 GB	0.376 GB	2.623 GB
+
+
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3124] Transfering group settings to GPU:
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3126] Settings for Group soma:
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3128] 	Type: 6
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3129] 	SizeN: 5000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3130] 	MaxFiringRate: 1000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3131] 	RefractPeriod: 0.000000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3132] 	M: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3133] 	PreM: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3134] 	spikeGenerator: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3135] 	FixedInputWts: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3136] 	MaxDelay: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3137] 	WithSTDP: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3154] 	WithSTP: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3160] 	spikeGen: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3161] 	spikeMonitorRT: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3165] 	spikeGen: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3126] Settings for Group d1:
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3128] 	Type: 6
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3129] 	SizeN: 5000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3130] 	MaxFiringRate: 1000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3131] 	RefractPeriod: 0.000000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3132] 	M: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3133] 	PreM: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3134] 	spikeGenerator: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3135] 	FixedInputWts: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3136] 	MaxDelay: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3137] 	WithSTDP: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3154] 	WithSTP: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3160] 	spikeGen: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3161] 	spikeMonitorRT: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3165] 	spikeGen: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3126] Settings for Group d2:
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3128] 	Type: 6
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3129] 	SizeN: 5000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3130] 	MaxFiringRate: 1000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3131] 	RefractPeriod: 0.000000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3132] 	M: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3133] 	PreM: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3134] 	spikeGenerator: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3135] 	FixedInputWts: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3136] 	MaxDelay: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3137] 	WithSTDP: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3154] 	WithSTP: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3160] 	spikeGen: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3161] 	spikeMonitorRT: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3165] 	spikeGen: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3126] Settings for Group d3:
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3128] 	Type: 6
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3129] 	SizeN: 5000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3130] 	MaxFiringRate: 1000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3131] 	RefractPeriod: 0.000000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3132] 	M: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3133] 	PreM: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3134] 	spikeGenerator: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3135] 	FixedInputWts: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3136] 	MaxDelay: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3137] 	WithSTDP: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3154] 	WithSTP: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3160] 	spikeGen: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3161] 	spikeMonitorRT: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3165] 	spikeGen: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3126] Settings for Group input:
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3128] 	Type: 7
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3129] 	SizeN: 5000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3130] 	MaxFiringRate: 1000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3131] 	RefractPeriod: 0.000000
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3132] 	M: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3133] 	PreM: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3134] 	spikeGenerator: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3135] 	FixedInputWts: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3136] 	MaxDelay: 1
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3137] 	WithSTDP: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3154] 	WithSTP: 0
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3160] 	spikeGen: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3161] 	spikeMonitorRT: Is Null
+[DEBUG carlsim/kernel/src/snn_gpu.cu:3165] 	spikeGen: Is Null
 [INFO carlsim/kernel/src/snn_cpu.cpp:1241] SpikeMonitor set for group 0 (soma)
 [INFO carlsim/kernel/src/snn_cpu.cpp:1241] SpikeMonitor set for group 1 (d1)
 [INFO carlsim/kernel/src/snn_cpu.cpp:1241] SpikeMonitor set for group 2 (d2)
 [INFO carlsim/kernel/src/snn_cpu.cpp:1241] SpikeMonitor set for group 3 (d3)
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=400ms, printRunSummary=n, copyState=n
+[DEBUG carlsim/kernel/src/snn_gpu.cu:2860] copyExternalCurrent: grpId=0, ptrPos=0, length=5000, allocate=n
 [DEBUG carlsim/kernel/src/snn_cpu.cpp:735] runNetwork: runDur=100ms, printRunSummary=n, copyState=n
-[INFO carlsim/kernel/src/snn_cpu.cpp:3006] 
+[INFO carlsim/kernel/src/snn_cpu.cpp:2991] 
 
-[INFO carlsim/kernel/src/snn_cpu.cpp:3008] ********************      CPU Simulation Summary      ***************************
-[INFO carlsim/kernel/src/snn_cpu.cpp:3011] Network Parameters: 	numNeurons = 25000 (numNExcReg:numNInhReg = 80.0:0.0)
-[INFO carlsim/kernel/src/snn_cpu.cpp:3012] 			numSynapses = 5000
-[INFO carlsim/kernel/src/snn_cpu.cpp:3013] 			maxDelay = 1
-[INFO carlsim/kernel/src/snn_cpu.cpp:3014] Simulation Mode:	CUBA
-[INFO carlsim/kernel/src/snn_cpu.cpp:3015] Random Seed:		42
-[INFO carlsim/kernel/src/snn_cpu.cpp:3016] Timing:			Model Simulation Time = 100 sec
-[INFO carlsim/kernel/src/snn_cpu.cpp:3017] 			Actual Execution Time = 742.99 sec
-[INFO carlsim/kernel/src/snn_cpu.cpp:3018] Average Firing Rate:	2+ms delay = 0.000 Hz
-[INFO carlsim/kernel/src/snn_cpu.cpp:3019] 			1ms delay = inf Hz
-[INFO carlsim/kernel/src/snn_cpu.cpp:3020] 			Overall = 2.108 Hz
-[INFO carlsim/kernel/src/snn_cpu.cpp:3021] Overall Firing Count:	2+ms delay = 0
-[INFO carlsim/kernel/src/snn_cpu.cpp:3022] 			1ms delay = 5270000
-[INFO carlsim/kernel/src/snn_cpu.cpp:3023] 			Total = 5270000
-[INFO carlsim/kernel/src/snn_cpu.cpp:3024] *********************************************************************************
+[INFO carlsim/kernel/src/snn_cpu.cpp:2993] ********************      GPU Simulation Summary      ***************************
+[INFO carlsim/kernel/src/snn_cpu.cpp:2996] Network Parameters: 	numNeurons = 25000 (numNExcReg:numNInhReg = 80.0:0.0)
+[INFO carlsim/kernel/src/snn_cpu.cpp:2997] 			numSynapses = 5000
+[INFO carlsim/kernel/src/snn_cpu.cpp:2998] 			maxDelay = 1
+[INFO carlsim/kernel/src/snn_cpu.cpp:2999] Simulation Mode:	CUBA
+[INFO carlsim/kernel/src/snn_cpu.cpp:3000] Random Seed:		42
+[INFO carlsim/kernel/src/snn_cpu.cpp:3001] Timing:			Model Simulation Time = 100 sec
+[INFO carlsim/kernel/src/snn_cpu.cpp:3002] 			Actual Execution Time = 24.73 sec
+[INFO carlsim/kernel/src/snn_cpu.cpp:3003] Average Firing Rate:	2+ms delay = 0.000 Hz
+[INFO carlsim/kernel/src/snn_cpu.cpp:3004] 			1ms delay = inf Hz
+[INFO carlsim/kernel/src/snn_cpu.cpp:3005] 			Overall = 2.108 Hz
+[INFO carlsim/kernel/src/snn_cpu.cpp:3006] Overall Firing Count:	2+ms delay = 0
+[INFO carlsim/kernel/src/snn_cpu.cpp:3007] 			1ms delay = 5269744
+[INFO carlsim/kernel/src/snn_cpu.cpp:3008] 			Total = 5269744
+[INFO carlsim/kernel/src/snn_cpu.cpp:3009] *********************************************************************************
 

@@ -985,6 +985,7 @@ private:
 
 	integrationMethod_t simIntegrationMethod_;	//!< integration method
 	int simNumStepsPerMs_;	//!< number of integration steps per 1ms simulation time step
+	float timeStep_; //!< the inverse of simNumStepsPerMs_
 
 	// spiking neural network related information, including neurons, synapses and network parameters
 	int	        	numN;				//!< number of neurons in the spiking neural network
@@ -998,7 +999,7 @@ private:
 	int   			numNExcPois;		//!< number of excitatory poisson neurons
 	int				numNInhPois;		//!< number of inhibitory poisson neurons
 	int				numNPois;			//!< number of poisson neurons
-	float       	*voltage, *compVoltage, *prevCompVoltage, *recovery, *Izh_C, *Izh_k, *Izh_vr, *Izh_vt, *Izh_vpeak, *Izh_a, *Izh_b, *Izh_c, *Izh_d, *current, *compCurrent, *extCurrent;
+	float       	*voltage, *compVoltage, *prevCompVoltage, *recovery, *Izh_C, *Izh_k, *Izh_vr, *Izh_vt, *Izh_vpeak, *Izh_a, *Izh_b, *Izh_c, *Izh_d, *current, *extCurrent;
 
 	//! Keeps track of all neurons that spiked at current time.
 	//! Because integration step can be < 1ms we might want to keep integrating but remember that the neuron fired,
