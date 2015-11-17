@@ -49,6 +49,7 @@
 //4 compartments tutorial
 int main() {
 
+	Stopwatch watch;
 	//Goal of this tutorial is to introduce you to the basics of creating, setting up, simulating, and tuning multi-compartment neurons within CARLSim network. 
 	//There are 3 main stages when using CARLSim. CONFIG, SETUP, and RUN. 
 	//CONFIG is the initial stage. This is where we initialize CARLsim object in either GPU or CPU mode.
@@ -64,13 +65,13 @@ int main() {
 	int randSeed = 42;// A random seed.
 
 	//GPU Mode:
-	CARLsim sim("random", GPU_MODE, USER, ithGPU, 42);//For large networks CARLSim performs best in GPU mode.
+	CARLsim sim("random", CPU_MODE, USER, ithGPU, 42);//For large networks CARLSim performs best in GPU mode.
 
 	//CPU Mode:
 	//CARLsim sim("hello_world");//For small networks CARLsim performs best in CPU mode. 
 
 	// simulation details
-	int N = 5; //number of neurons
+	int N = 5000; //number of neurons
 
 	//Each of these groups represents a layer. Together these 4 groups represent N 4-compartment neurons. Ex: If N is 5, there are 5 4-compartment neurons in this simulation.
 	int s = sim.createGroup("soma", N, EXCITATORY_NEURON);
@@ -116,6 +117,7 @@ int main() {
 
 	sim.setIntegrationMethod(RUNGE_KUTTA4, 10);
 
+	watch.lap("setupNetwork");
 	sim.setupNetwork();
 
 	SpikeMonitor* SM = sim.setSpikeMonitor(s, "DEFAULT"); // put spike times into file
@@ -130,30 +132,35 @@ int main() {
 	sim.setSpikeRate(gin, &in);//Make gin an inactive (silent) input group.
 
 	//Testing Segment
-	SM->startRecording();//Record spikes within layer (group) s
-	SM_1->startRecording();//Record spikes within layer (group) d1
-	SM_2->startRecording();//Record spikes within layer (group) d2
-	SM_3->startRecording();//Record spikes within layer (group) d3
+	// SM->startRecording();//Record spikes within layer (group) s
+	// SM_1->startRecording();//Record spikes within layer (group) d1
+	// SM_2->startRecording();//Record spikes within layer (group) d2
+	// SM_3->startRecording();//Record spikes within layer (group) d3
 
-	sim.setExternalCurrent(s, 0);//Set external current of 0 into layer (group) s 
-	sim.runNetwork(0, 100);//Run network for 100ms
-	sim.setExternalCurrent(s, 592);//Set external current of 592 into layer (group) s 
-	sim.runNetwork(0, 400);//Run network for 400ms
+	watch.lap("runNetwork");
+	for (int i=0; i<100; i++) {
+		sim.setExternalCurrent(s, 0);//Set external current of 0 into layer (group) s 
+		sim.runNetwork(0, 100, false);//Run network for 100ms
+		sim.setExternalCurrent(s, 592);//Set external current of 592 into layer (group) s 
+		sim.runNetwork(0, 400, false);//Run network for 400ms
 
-	sim.setExternalCurrent(s, 592);//Set external current of 592 into layer (group) s 
-	sim.runNetwork(0, 400);//Run network for 400ms
-	sim.setExternalCurrent(s, 0);//Set external current of 0 into layer (group) s 
-	sim.runNetwork(0, 100);//Run network for 100ms
+		sim.setExternalCurrent(s, 592);//Set external current of 592 into layer (group) s 
+		sim.runNetwork(0, 400, false);//Run network for 400ms
+		sim.setExternalCurrent(s, 0);//Set external current of 0 into layer (group) s 
+		sim.runNetwork(0, 100, false);//Run network for 100ms
+	}
 
-	SM->stopRecording();//Stop recording layer (group) s
-	SM_1->stopRecording();//Stop recording layer (group) d1
-	SM_2->stopRecording();//Stop recording layer (group) d2
-	SM_3->stopRecording();//Record spikes within layer (group) d3
+	// SM->stopRecording();//Stop recording layer (group) s
+	// SM_1->stopRecording();//Stop recording layer (group) d1
+	// SM_2->stopRecording();//Stop recording layer (group) d2
+	// SM_3->stopRecording();//Record spikes within layer (group) d3
 
-	SM_3->print();//Print spike times for layer (group) d3
-	SM->print();//Print spike times for layer (group) s
-	SM_1->print();//Print spike times for layer (group) d1
-	SM_2->print();//Print spike times for layer (group) d2
+	// SM_3->print();//Print spike times for layer (group) d3
+	// SM->print();//Print spike times for layer (group) s
+	// SM_1->print();//Print spike times for layer (group) d1
+	// SM_2->print();//Print spike times for layer (group) d2
+
+	watch.stop();
 
 
 	return 0;

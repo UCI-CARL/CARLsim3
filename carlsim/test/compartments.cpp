@@ -26,16 +26,16 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 
 	// expected spike times for soma
 	int expectSpikeTimeSO[5][7] = {	{148, 188, 243, 339, 514, 690, 866},
-						 			{148, 189, 242, 328, 508, 681, 855},
+									{148, 189, 242, 328, 508, 681, 855},
 									{148, 188, 240, 328, 506, 679, 853},
 									{148, 187, 240, 326, 504, 677, 851},
 									{148, 187, 240, 326, 505, 677, 851}};
 
 	int expectSpikeTimeSP[5][7] = {	{148, 188, 243, 339, 515, 691, 866},
-	 					 			{148, 189, 243, 329, 509, 681, 856},
-	 								{148, 188, 241, 328, 507, 679, 853},
-	 								{148, 188, 240, 327, 505, 678, 852},
-	 								{148, 188, 240, 326, 506, 677, 852} };
+									{148, 189, 243, 329, 509, 681, 856},
+									{148, 188, 241, 328, 507, 679, 853},
+									{148, 188, 240, 327, 505, 678, 852},
+									{148, 188, 240, 326, 506, 677, 852} };
 
 	// \FIXME: GPU side not implemented yet
 	numModes = 0;
@@ -100,13 +100,13 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 			spikeSLM->startRecording();
 			spikeSO->startRecording();
 			sim->setExternalCurrent(grpSP, 0);
-			sim->runNetwork(0, 10);
+			sim->runNetwork(0, 100);
 			sim->setExternalCurrent(grpSP, 592);
-                        sim->runNetwork(0, 400);
+			sim->runNetwork(0, 400);
 			sim->setExternalCurrent(grpSP, 592);
-                        sim->runNetwork(0, 400);
+						sim->runNetwork(0, 400);
 			sim->setExternalCurrent(grpSP, 0);
-                        sim->runNetwork(0, 100);
+						sim->runNetwork(0, 100);
 
 			spikeSP->stopRecording();
 			spikeSR->stopRecording();

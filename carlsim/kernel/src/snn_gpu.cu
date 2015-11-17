@@ -1125,9 +1125,9 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 	}
 
 	if (compEval) {
-		// gpuPtrs.prevCompVoltage[compId] = gpuPtrs.compVoltage[compId];
-		// gpuPtrs.compVoltage[compId] = v;
-		gpuPtrs.prevCompVoltage[nid] = v;
+		gpuPtrs.prevCompVoltage[nid] = gpuPtrs.compVoltage[nid];
+		gpuPtrs.compVoltage[nid] = v;
+		// gpuPtrs.prevCompVoltage[nid] = v;
 	}
 
 	//printf("*GPU* Voltage: %f; Recovery %f; TotalCurrent: %f; NID: %i\n", v, u, totalCurrent, nid);
@@ -2079,23 +2079,20 @@ void CpuSNN::copyConductanceState(network_ptr_t* dest, network_ptr_t* src, cudaM
 void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpyKind kind, bool allocateMem, int grpId) {
 	checkAndSetGPUDevice();
 
-	int ptrPos, ptrPos2, length, length2, length3;
+	int ptrPos, length, length2;
 
 	// check that the destination pointer is properly allocated..
 	checkDestSrcPtrs(dest, src, kind, allocateMem, grpId);
 
 	if(grpId == -1) {
 		ptrPos  = 0;
-		ptrPos2 = 0;
 		length  = numNReg;
 		length2 = numN;
-		length3 = numComp;
 	}
 	else {
 		ptrPos  = grp_Info[grpId].StartN;
-		ptrPos2 = grp_Info[grpId].StartComp;
 		length  = grp_Info[grpId].SizeN;
-		length3 = length2 = length;
+		length2 = length;
 	}
 
 	assert(length  <= numNReg);
@@ -2127,17 +2124,17 @@ void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpy
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->curSpike, sizeof(float) * length));
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->curSpike[ptrPos], &src->curSpike[ptrPos], sizeof(float) * length, kind));
 
-	// if (allocateMem)
-	// 	CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compVoltage, sizeof(float) * length3));
-	// CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compVoltage[ptrPos2], &src->compVoltage[ptrPos2], sizeof(float) * length3, kind));
+	if (allocateMem)
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compVoltage, sizeof(float) * length2));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compVoltage[ptrPos], &src->compVoltage[ptrPos], sizeof(float) * length2, kind));
 
 	if (allocateMem)
-		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->prevCompVoltage, sizeof(float) * length3));
-	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->prevCompVoltage[ptrPos2], &src->prevCompVoltage[ptrPos2], sizeof(float) * length3, kind));
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->prevCompVoltage, sizeof(float) * length2));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->prevCompVoltage[ptrPos], &src->prevCompVoltage[ptrPos], sizeof(float) * length2, kind));
 
 	if (allocateMem)
-		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compCurrent, sizeof(float) * length3));
-	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compCurrent[ptrPos2], &src->compCurrent[ptrPos2], sizeof(float) * length3, kind));
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compCurrent, sizeof(float) * length2));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compCurrent[ptrPos], &src->compCurrent[ptrPos], sizeof(float) * length2, kind));
 
 	if (sim_with_conductances) {
 	    //conductance information
@@ -2657,7 +2654,7 @@ void CpuSNN::deleteObjects_GPU() {
 
 	// cudaFree all device pointers
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.voltage) );
-	// CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.compVoltage));
+	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.compVoltage));
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.compCurrent));
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.prevCompVoltage));
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.recovery) );

@@ -336,21 +336,12 @@ typedef struct group_info_s {
 	bool		newUpdates;  //!< FIXME this flag has mixed meaning and is not rechecked after the simulation is started
 	bool		withParamModel_9;//Value of 0 represents 4 param model, and value of 1 represents 9 param model.
 
-	//Start Id for compartmental group.
-	int			StartComp;
-	//Contains Group Ids of neurons from compartmentally connected groups, can have at most 4 neighboring groups.
+	bool		withCompartments;
 	int         compNeighbors[4];
 	float       compCoupling[4];
 	short       numCompNeighbors;
-
-	int			CompartmentalNeighbors[4];
-	bool		compNeighborDirec[4];//True stands for neighbor being upward of current neuron, false stands for neighbor being downward of current neuron
-	//Defines number of Neighboring Groups, can at most be 4 (up to 1 parent and up to 3 children)
-	short		numOfNeighbors;
-	//Compartmental Coupling Constants
 	float		G_u;
 	float		G_d;
-	bool		withCompartments;
 
 } group_info_t;
 
