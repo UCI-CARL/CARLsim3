@@ -143,9 +143,10 @@ typedef struct compConnectData_s {
 }compConnectInfo_t;
 
 typedef struct network_ptr_s {
-	float*	voltage;
-	float*  compVoltage;
-	float*  prevCompVoltage;
+	float*	voltage;			//!< membrane potential for each regular neuron
+	float*  nextVoltage;		//!< membrane potential buffer (next/future time step) for each regular neuron
+	// float*  compVoltage;
+	// float*  prevCompVoltage;
 	float*	recovery;
 	float* 	Izh_C;
 	float* 	Izh_k;

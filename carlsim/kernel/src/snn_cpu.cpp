@@ -2213,6 +2213,7 @@ void CpuSNN::buildNetworkInit() {
 	}
 
 	voltage	   = new float[numNReg];
+	nextVoltage = new float[numNReg]; // voltage buffer for previous time step
 	recovery   = new float[numNReg];
 	Izh_C = new float[numNReg];
 	Izh_k = new float[numNReg];
@@ -2231,10 +2232,10 @@ void CpuSNN::buildNetworkInit() {
 	curSpike = new bool[numNReg];
 	memset(curSpike, 0, sizeof(curSpike[0])*numNReg);
 
-	if (sim_with_compartments) {
-		compVoltage = new float[numNReg];
-		prevCompVoltage = new float[numNReg];
-	}
+	// if (sim_with_compartments) {
+	// 	compVoltage = new float[numNReg];
+	// 	prevCompVoltage = new float[numNReg];
+	// }
 
 	cpuSnnSz.neuronInfoSize += (sizeof(float)*numNReg*8);
 
@@ -3154,7 +3155,7 @@ void CpuSNN::globalStateDecay() {
 	// but avoids having to check the condition for every neuron in the network (= faster)
 
 	// decay the STP variables before adding new spikes.
-	for(int grpId=0; (grpId < numGrp) & !spikeBufferFull; grpId++) {
+	for (int grpId=0; (grpId < numGrp) & !spikeBufferFull; grpId++) {
 		// decay homeostasis avg firing
 		if (grp_Info[grpId].WithHomeostasis) {
 			for(int i=grp_Info[grpId].StartN; i<=grp_Info[grpId].EndN; i++) {
@@ -3202,11 +3203,12 @@ void CpuSNN::globalStateDecay() {
 					gGABAb[i] *= dGABAb;	// instantaneous rise
 				}
 			}
-		} else {
-			for(int i=grp_Info[grpId].StartN; i<=grp_Info[grpId].EndN; i++) {
-				current[i] = 0.0f; // in CUBA mode, reset current to 0 at each time step and sum up all wts
-			}
 		}
+	} // end grpId loop
+
+	// In CUBA mode, reset current to 0 each time step
+	if (!sim_with_conductances) {
+		resetCurrent();
 	}
 }
 
@@ -3642,14 +3644,21 @@ float CpuSNN::getCompCurrent(int grpId, int neurId, float const0, float const1) 
 		// to the i-th neuron in grpIdOther
 		int grpIdOther = grp_Info[grpId].compNeighbors[k];
 		int neurIdOther = neurId - grp_Info[grpId].StartN + grp_Info[grpIdOther].StartN;
-		compCurrent += grp_Info[grpId].compCoupling[k] * ((prevCompVoltage[neurIdOther] + const1)
-			- (prevCompVoltage[neurId] + const0));
+		compCurrent += grp_Info[grpId].compCoupling[k] * ((voltage[neurIdOther] + const1)
+			- (voltage[neurId] + const0));
+		// compCurrent += grp_Info[grpId].compCoupling[k] * ((prevCompVoltage[neurIdOther] + const1)
+		// 	- (prevCompVoltage[neurId] + const0));
 	}
 
 	return compCurrent;
 }
 
 void  CpuSNN::globalStateUpdate() {
+	// We use the current values of voltage and recovery to compute the values for the next (future) time step
+	// these results are stored in nextVoltage, and are not applied to the voltage array until the end of the
+	// integration step.
+	// We do it this way because compartmental currents depend on neighboring neuron's voltages.
+	// We don't need a nextRecovery buffer because every neuron depends only on its own recovery value.
 	for (int j=1; j<=simNumStepsPerMs_; j++) {
 		for(int g=0; g<numGrp; g++) {
 			if (grp_Info[g].Type & POISSON_NEURON) {
@@ -3659,7 +3668,7 @@ void  CpuSNN::globalStateUpdate() {
 			// update group dopamine
 			cpuNetPtrs.grpDABuffer[g][simTimeMs] = cpuNetPtrs.grpDA[g];
 
-			for(int i=grp_Info[g].StartN; i<=grp_Info[g].EndN; i++) {
+			for (int i=grp_Info[g].StartN; i<=grp_Info[g].EndN; i++) {
 				// pre-load izhikevich variables to avoid unnecessary memory accesses + unclutter the code.
 				float k = Izh_k[i];
 				float vr = Izh_vr[i];
@@ -3690,39 +3699,40 @@ void  CpuSNN::globalStateUpdate() {
 				case FORWARD_EULER:
 					if (!grp_Info[g].withParamModel_9) {
 						// 4-param Izhikevich
-						voltage[i] += dvdtIzhikevich4(voltage[i], recovery[i], totalCurrent, timeStep_);
-						if (voltage[i] > 30.0f) {
-							voltage[i] = 30.0f;
+						nextVoltage[i] = voltage[i] + dvdtIzhikevich4(voltage[i], recovery[i], totalCurrent, timeStep_);
+						if (nextVoltage[i] > 30.0f) {
+							nextVoltage[i] = 30.0f;
 							curSpike[i] = true;
-							voltage[i] = Izh_c[i];
+							nextVoltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
 						}
 					} else {
 						// 9-param Izhikevich
-						voltage[i] += dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, totalCurrent, 
-							timeStep_);
-						if (voltage[i] > Izh_vpeak[i]) {
-							voltage[i] = Izh_vpeak[i];
+						nextVoltage[i] = voltage[i] + dvdtIzhikevich9(voltage[i], recovery[i], inverse_C, k, vr, vt, 
+							totalCurrent, timeStep_);
+						if (nextVoltage[i] > Izh_vpeak[i]) {
+							nextVoltage[i] = Izh_vpeak[i];
 							curSpike[i] = true;
-							voltage[i] = Izh_c[i];
+							nextVoltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
 						}
 					}
-					if (voltage[i] < -90.0f) {
-						voltage[i] = -90.0f;
+					if (nextVoltage[i] < -90.0f) {
+						nextVoltage[i] = -90.0f;
 					}
 					#if defined(WIN32) || defined(WIN64)
-						assert(!_isnan(voltage[i]));
-						assert(_finite(voltage[i]));
+						assert(!_isnan(nextVoltage[i]));
+						assert(_finite(nextVoltage[i]));
 					#else
-						assert(!isnan(voltage[i]));
-						assert(!isinf(voltage[i]));
+						assert(!isnan(nextVoltage[i]));
+						assert(!isinf(nextVoltage[i]));
 					#endif
 
+					// To maintain consistency with Izhikevich' original Matlab code, recovery is based on nextVoltage.
 					if (!grp_Info[g].withParamModel_9) {
-						recovery[i] += dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep_);
+						recovery[i] += dudtIzhikevich4(nextVoltage[i], recovery[i], a, b, timeStep_);
 					} else {
-						recovery[i] += dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep_);
+						recovery[i] += dudtIzhikevich9(nextVoltage[i], recovery[i], vr, a, b, timeStep_);
 					}
 
 					break;
@@ -3744,25 +3754,25 @@ void  CpuSNN::globalStateUpdate() {
 						float k4 = dvdtIzhikevich4(voltage[i] + k3, recovery[i] + l3, totalCurrent, timeStep_);
 						float l4 = dudtIzhikevich4(voltage[i] + k3, recovery[i] + l3, a, b, timeStep_);
 
-						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
-						if (voltage[i] > 30.0f) {
-							voltage[i] = 30.0f;
+						nextVoltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
+						if (nextVoltage[i] > 30.0f) {
+							nextVoltage[i] = 30.0f;
 							curSpike[i] = true;
-							voltage[i] = Izh_c[i];
+							nextVoltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
 						}
-						if (voltage[i] < -90.0f) {
-							voltage[i] = -90.0f;
+						if (nextVoltage[i] < -90.0f) {
+							nextVoltage[i] = -90.0f;
 						}
 						#if defined(WIN32) || defined(WIN64)
-						assert(!_isnan(voltage[i]));
-						assert(_finite(voltage[i]));
+						assert(!_isnan(nextVoltage[i]));
+						assert(_finite(nextVoltage[i]));
 						#else
-						assert(!isnan(voltage[i]));
-						assert(!isinf(voltage[i]));
+						assert(!isnan(nextVoltage[i]));
+						assert(!isinf(nextVoltage[i]));
 						#endif
 
-						recovery[i] = recovery[i] + (1.0f / 6.0f) * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
+						recovery[i] += (1.0f / 6.0f) * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
 					} else {
 						// 9-param Izhikevich
 
@@ -3782,27 +3792,27 @@ void  CpuSNN::globalStateUpdate() {
 							totalCurrent, timeStep_);
 						float l4 = dudtIzhikevich9(voltage[i] + k3, recovery[i] + l3, vr, a, b, timeStep_);
 
-						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
+						nextVoltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
 
-						if (voltage[i] > Izh_vpeak[i]) {
-							voltage[i] = Izh_vpeak[i];
+						if (nextVoltage[i] > Izh_vpeak[i]) {
+							nextVoltage[i] = Izh_vpeak[i];
 							curSpike[i] = true;
-							voltage[i] = Izh_c[i];
+							nextVoltage[i] = Izh_c[i];
 							recovery[i] += Izh_d[i];
 						}
 
-						if (voltage[i] < -90.0f) {
-							voltage[i] = -90.0f;
+						if (nextVoltage[i] < -90.0f) {
+							nextVoltage[i] = -90.0f;
 						}
 						#if defined(WIN32) || defined(WIN64)
-						assert(!_isnan(voltage[i]));
-						assert(_finite(voltage[i]));
+						assert(!_isnan(nextVoltage[i]));
+						assert(_finite(nextVoltage[i]));
 						#else
-						assert(!isnan(voltage[i]));
-						assert(!isinf(voltage[i]));
+						assert(!isnan(nextVoltage[i]));
+						assert(!isinf(nextVoltage[i]));
 						#endif
 
-						recovery[i] = recovery[i] + (1.0f / 6.0f) * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
+						recovery[i] += (1.0f / 6.0f) * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
 					}
 					break;
 				case UNKNOWN_INTEGRATION:
@@ -3813,10 +3823,13 @@ void  CpuSNN::globalStateUpdate() {
 			}  // end StartN...EndN
 		}  // end numGrp
 
-		if (sim_with_compartments) {
-			memcpy(prevCompVoltage, compVoltage, sizeof(float)*numNReg);
-			memcpy(compVoltage, voltage, sizeof(float)*numNReg);
-		}
+		// if (sim_with_compartments) {
+			// memcpy(prevCompVoltage, compVoltage, sizeof(float)*numNReg);
+		// }
+
+		// Only after we are done computing nextVoltage for all neurons do we copy the new values to the voltage array.
+		// This is crucial for GPU (asynchronous kernel launch) and in the future for a multi-threaded CARLsim version.
+		memcpy(voltage, nextVoltage, sizeof(float)*numNReg);
 	}  // end simNumStepsPerMs_ loop
 
 }
@@ -4008,8 +4021,9 @@ double CpuSNN::getRFDist3D(const RadiusRF& radius, const Point3D& pre, const Poi
 // don't forget to cudaFree the device pointers if you make cpu_gpuNetPtrs
 void CpuSNN::makePtrInfo() {
 	cpuNetPtrs.voltage			= voltage;
-	cpuNetPtrs.compVoltage		= compVoltage;
-	cpuNetPtrs.prevCompVoltage  = prevCompVoltage;
+	cpuNetPtrs.nextVoltage      = nextVoltage;
+	// cpuNetPtrs.compVoltage		= compVoltage;
+	// cpuNetPtrs.prevCompVoltage  = prevCompVoltage;
 	cpuNetPtrs.recovery			= recovery;
 	cpuNetPtrs.current			= current;
 	cpuNetPtrs.extCurrent       = extCurrent;
@@ -4535,21 +4549,12 @@ void CpuSNN::resetNeuron(unsigned int neurId, int grpId) {
 	Izh_c[neurId] = grp_Info2[grpId].Izh_c + grp_Info2[grpId].Izh_c_sd*(float)drand48();
 	Izh_d[neurId] = grp_Info2[grpId].Izh_d + grp_Info2[grpId].Izh_d_sd*(float)drand48();
 
-	if (grp_Info[grpId].withCompartments) {
-		if (!grp_Info[grpId].withParamModel_9) {
-			prevCompVoltage[neurId] = compVoltage[neurId] = Izh_c[neurId];
-		} else {
-			prevCompVoltage[neurId] = compVoltage[neurId] = Izh_vr[neurId];
-		}
-	}
+	// initialize membrane potential to reset potential
+	float vreset = grp_Info[grpId].withParamModel_9 ? Izh_vr[neurId] : Izh_c[neurId];
+	voltage[neurId] = nextVoltage[neurId] = vreset;
 
-	if (!grp_Info[grpId].withParamModel_9) { //Initial values for 4 parameter model.
-		voltage[neurId] = Izh_c[neurId];	// initial values for new_v
-	    recovery[neurId] = Izh_b[neurId] * voltage[neurId]; // initial values for u
-	} else if (grp_Info[grpId].withParamModel_9) { //Initial values for 9 parameter model.
-		voltage[neurId] = Izh_vr[neurId];
-		recovery[neurId] = 0;
-	}
+	// recovery is initialized to 0 in 9-param model
+	recovery[neurId] = grp_Info[grpId].withParamModel_9 ? 0.0f : Izh_b[neurId]*voltage[neurId];
 
  	if (grp_Info[grpId].WithHomeostasis) {
 		// set the baseFiring with some standard deviation.
@@ -4674,17 +4679,18 @@ void CpuSNN::resetPointers(bool deallocate) {
 	// -------------- DEALLOCATE CORE OBJECTS ---------------------- //
 
 	if (voltage!=NULL && deallocate) delete[] voltage;
+	if (nextVoltage!=NULL && deallocate) delete[] nextVoltage;
 	if (recovery!=NULL && deallocate) delete[] recovery;
 	if (current!=NULL && deallocate) delete[] current;
 	if (extCurrent!=NULL && deallocate) delete[] extCurrent;
 	if (curSpike!=NULL && deallocate) delete[] curSpike;
-	voltage=NULL; recovery=NULL; current=NULL; extCurrent=NULL; curSpike = NULL;
+	voltage=NULL; nextVoltage=NULL; recovery=NULL; current=NULL; extCurrent=NULL; curSpike = NULL;
 
-	if (sim_with_compartments && deallocate) {
-		if (compVoltage != NULL) delete[] compVoltage;
-		if (prevCompVoltage != NULL) delete[] prevCompVoltage;
-	}
-	compVoltage = NULL; prevCompVoltage = NULL;
+	// if (sim_with_compartments && deallocate) {
+	// 	if (compVoltage != NULL) delete[] compVoltage;
+	// 	if (prevCompVoltage != NULL) delete[] prevCompVoltage;
+	// }
+	// compVoltage = NULL; prevCompVoltage = NULL;
 
 	if (Izh_C != NULL && deallocate) delete[] Izh_C;
 	if (Izh_k != NULL && deallocate) delete[] Izh_k;

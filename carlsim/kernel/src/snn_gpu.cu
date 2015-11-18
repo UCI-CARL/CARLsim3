@@ -908,8 +908,10 @@ __device__ float getCompCurrent_GPU(int grpId, int neurId, float const0=0.0f, fl
 	for (int k=0; k<gpuGrpInfo[grpId].numCompNeighbors; k++) {
 		int grpIdOther = gpuGrpInfo[grpId].compNeighbors[k];
 		int neurIdOther = neurId - gpuGrpInfo[grpId].StartN + gpuGrpInfo[grpIdOther].StartN;
-		compCurrent += gpuGrpInfo[grpId].compCoupling[k] * ((gpuPtrs.prevCompVoltage[neurIdOther] + const1)
-			- (gpuPtrs.prevCompVoltage[neurId] + const0));
+		compCurrent += gpuGrpInfo[grpId].compCoupling[k] * ((gpuPtrs.voltage[neurIdOther] + const1)
+			- (gpuPtrs.voltage[neurId] + const0));
+		// compCurrent += gpuGrpInfo[grpId].compCoupling[k] * ((gpuPtrs.prevCompVoltage[neurIdOther] + const1)
+		// 	- (gpuPtrs.prevCompVoltage[neurId] + const0));
 	}
 
 	return compCurrent;
@@ -917,7 +919,15 @@ __device__ float getCompCurrent_GPU(int grpId, int neurId, float const0=0.0f, fl
 
 
 __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) {
+	// We use the current values of voltage and recovery to compute the values for the next (future) time step
+	// these results are stored in nextVoltage, and are not applied to the voltage array until the end of the
+	// integration step.
+	// We do it this way because compartmental currents depend on neighboring neuron's voltages, and we don't know
+	// the order in which neurons are updated (asynchronous kernel launch).
 	float v = gpuPtrs.voltage[nid];
+	float vNext;
+
+	// we don't need a nextRecovery buffer because every neuron depends only on its own recovery value
 	float u = gpuPtrs.recovery[nid];
 
 	// pre-Load izhekevich variables to avoid unnecessary memory accesses.
@@ -947,49 +957,50 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 		totalCurrent += getCompCurrent_GPU(grpId, nid);
 	}
 
+	// when a spike happens, we reset the membrane potential immediately and keep integrating
+	// spikes are recorded via curSpike: there can be at most 1 spike per ms
 	switch (gpuNetInfo.simIntegrationMethod) {
 	case FORWARD_EULER:
 		if (!gpuGrpInfo[grpId].withParamModel_9) {
 			// 4-param Izhikevich
-			v += dvdtIzhikevich4(v, u, totalCurrent, gpuNetInfo.timeStep);
-			if (v > 30.0f) { 
-				v = 30.0f; // break the loop but evaluate u[i]
+			vNext = v + dvdtIzhikevich4(v, u, totalCurrent, gpuNetInfo.timeStep);
+			if (vNext > 30.0f) {
+				// record spike but keep integrating
 				gpuPtrs.curSpike[nid] = true;
-				v = gpuPtrs.Izh_c[nid];
+				vNext = gpuPtrs.Izh_c[nid];
 				u += gpuPtrs.Izh_d[nid];
 			}
 		} else {
 			// 9-param Izhikevich
-			v += dvdtIzhikevich9(v, u, invCapac, k, vr, vt, totalCurrent, gpuNetInfo.timeStep);
-			if (v > vpeak) { 
-				v = vpeak; // break the loop but evaluate u[i]
+			vNext = v + dvdtIzhikevich9(v, u, invCapac, k, vr, vt, totalCurrent, gpuNetInfo.timeStep);
+			if (vNext > vpeak) {
+				// record spike but keep integrating
 				gpuPtrs.curSpike[nid] = true;
-				v = gpuPtrs.Izh_c[nid];
+				vNext = gpuPtrs.Izh_c[nid];
 				u += gpuPtrs.Izh_d[nid];
 			}
 		}
 
-		if (v < -90.0f) {
-			v = -90.0f;
+		if (vNext < -90.0f) {
+			vNext = -90.0f;
 		}
 		#if defined(WIN32) || defined(WIN64)
-		assert(!_isnan(v));
-		assert(_finite(v));
+		assert(!_isnan(vNext));
+		assert(_finite(vNext));
 		#else
-		assert(!isnan(v));
-		assert(!isinf(v));
+		assert(!isnan(vNext));
+		assert(!isinf(vNext));
 		#endif
 
-		// recovery is always updated using forward-Euler
+		// To maintain consistency with Izhikevich' original Matlab code, u is based on vNext.
 		if (!gpuGrpInfo[grpId].withParamModel_9) {
-			u += dudtIzhikevich4(v, u, a, b, gpuNetInfo.timeStep);
+			u += dudtIzhikevich4(vNext, u, a, b, gpuNetInfo.timeStep);
 		} else {
-			u += dudtIzhikevich9(v, u, vr, a, b, gpuNetInfo.timeStep);
+			u += dudtIzhikevich9(vNext, u, vr, a, b, gpuNetInfo.timeStep);
 		}
 
 		break;
 	case RUNGE_KUTTA4:
-		// TODO for Stas
 		if (!gpuGrpInfo[grpId].withParamModel_9) {
 			// 4-param Izhikevich
 			float k1 = dvdtIzhikevich4(v, u, totalCurrent, gpuNetInfo.timeStep);
@@ -1005,27 +1016,27 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 			float l4 = dudtIzhikevich4(v + k3, u + l3, a, b, gpuNetInfo.timeStep);
 
 			const float one_sixth = 1.0f / 6.0f;
-			v = v + one_sixth * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
+			vNext = v + one_sixth * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
 
-			if (v > 30.0f) { 
-				v = 30.0f; // break the loop but evaluate u[i]
+			if (vNext > 30.0f) {
+				// record spike but keep integrating
 				gpuPtrs.curSpike[nid] = true;
-				v = gpuPtrs.Izh_c[nid];
+				vNext = gpuPtrs.Izh_c[nid];
 				u += gpuPtrs.Izh_d[nid];
 			}
 
-			if (v < -90.0f) {
-				v = -90.0f;
+			if (vNext < -90.0f) {
+				vNext = -90.0f;
 			}
 			#if defined(WIN32) || defined(WIN64)
-			assert(!_isnan(v));
-			assert(_finite(v));
+			assert(!_isnan(vNext));
+			assert(_finite(vNext));
 			#else
-			assert(!isnan(v));
-			assert(!isinf(v));
+			assert(!isnan(vNext));
+			assert(!isinf(vNext));
 			#endif
 
-			u = u + one_sixth * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
+			u += one_sixth * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
 		} else {
 			// 9-param Izhikevich
 			float k1 = dvdtIzhikevich9(v, u, invCapac, k, vr, vt, totalCurrent, gpuNetInfo.timeStep);
@@ -1045,27 +1056,27 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 			//printf("k4: %f; l4: %f\n", k4, l4);
 
 			const float one_sixth = 1.0f / 6.0f;
-			v = v + one_sixth * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
+			vNext = v + one_sixth * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
 
-			if (v > vpeak) { 
-				v = vpeak; // break the loop but evaluate u[i]
+			if (vNext > vpeak) {
+				// record spike but keep integrating
 				gpuPtrs.curSpike[nid] = true;
-				v = gpuPtrs.Izh_c[nid];
+				vNext = gpuPtrs.Izh_c[nid];
 				u += gpuPtrs.Izh_d[nid];
 			}
 
-			if (v < -90.0f) {
-				v = -90.0f;
+			if (vNext < -90.0f) {
+				vNext = -90.0f;
 			}
 			#if defined(WIN32) || defined(WIN64)
-			assert(!_isnan(v));
-			assert(_finite(v));
+			assert(!_isnan(vNext));
+			assert(_finite(vNext));
 			#else
-			assert(!isnan(v));
-			assert(!isinf(v));
+			assert(!isnan(vNext));
+			assert(!isinf(vNext));
 			#endif
 
-			u = u + one_sixth * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
+			u += one_sixth * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
 		}
 		break;
 	case UNKNOWN_INTEGRATION:
@@ -1074,15 +1085,15 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 		assert(false);
 	}
 
-	if (lastIter) {
-		if (gpuNetInfo.sim_with_conductances) {
-			// gpuPtrs.current[nid] = I_sum;
-		} else {
-			// current must be reset here for CUBA and not kernel_STPUpdateAndDecayConductances
-			gpuPtrs.current[nid] = 0.0f;
-		}
-	}
-	gpuPtrs.voltage[nid] = v;
+	// if (lastIter) {
+	// 	if (gpuNetInfo.sim_with_conductances) {
+	// 		// gpuPtrs.current[nid] = I_sum;
+	// 	} else {
+	// 		// current must be reset here for CUBA and not kernel_STPUpdateAndDecayConductances
+	// 		gpuPtrs.current[nid] = 0.0f;
+	// 	}
+	// }
+	gpuPtrs.nextVoltage[nid] = vNext;
 	gpuPtrs.recovery[nid] = u;
 }
 
@@ -1175,12 +1186,15 @@ void CpuSNN::globalStateUpdate_GPU() {
 		kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime, lastIter);
 		CUDA_GET_LAST_ERROR("kernel_globalStateUpdate failed");
 
-		if (sim_with_compartments) {
-			CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.prevCompVoltage, cpu_gpuNetPtrs.compVoltage, 
-				sizeof(float) * numNReg, cudaMemcpyDeviceToDevice));
-			CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.compVoltage, cpu_gpuNetPtrs.voltage, sizeof(float) * numNReg,
-				cudaMemcpyDeviceToDevice));
-		}
+		// if (sim_with_compartments) {
+		// 	CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.prevCompVoltage, cpu_gpuNetPtrs.compVoltage, 
+		// 		sizeof(float) * numNReg, cudaMemcpyDeviceToDevice));
+		// 	CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.compVoltage, cpu_gpuNetPtrs.voltage, sizeof(float) * numNReg,
+		// 		cudaMemcpyDeviceToDevice));
+		// }
+		// the above kernel should end with a syncthread statement to be on the safe side
+		CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.voltage, cpu_gpuNetPtrs.nextVoltage, 
+			sizeof(float) * numNReg, cudaMemcpyDeviceToDevice));
 	}
 
 	kernel_globalGroupStateUpdate <<<4, blkSize>>> (simTimeMs);
@@ -1204,12 +1218,12 @@ __global__ void kernel_STPUpdateAndDecayConductances (int t, int sec, int simTim
 		// instead of reading each neuron group separately .....
 		// read a whole buffer and use the result ......
 		int2 threadLoad  = getStaticThreadLoad(bufPos);
-		unsigned int nid        = (STATIC_LOAD_START(threadLoad) + threadIdx.x);
+		unsigned int nid = (STATIC_LOAD_START(threadLoad) + threadIdx.x);
 		int  lastId      = STATIC_LOAD_SIZE(threadLoad);
 		uint32_t  grpId  = STATIC_LOAD_GROUP(threadLoad);
 
 
-    // update the conductane parameter of the current neron
+    	// update the conductane parameter of the current neron
 		if (gpuNetInfo.sim_with_conductances && IS_REGULAR_NEURON(nid, gpuNetInfo.numNReg, gpuNetInfo.numNPois)) {
 			gpuPtrs.gAMPA[nid]   *=  gpuNetInfo.dAMPA;
 			if (gpuNetInfo.sim_with_NMDA_rise) {
@@ -2095,18 +2109,22 @@ void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpy
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->voltage[ptrPos], &src->voltage[ptrPos], sizeof(float) * length, kind));
 
 	if (allocateMem)
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->nextVoltage, sizeof(float) * length));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->nextVoltage[ptrPos], &src->nextVoltage[ptrPos], sizeof(float) * length, kind));
+
+	if (allocateMem)
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->curSpike, sizeof(float) * length));
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->curSpike[ptrPos], &src->curSpike[ptrPos], sizeof(float) * length, kind));
 
-	if (sim_with_compartments) {
-		if (allocateMem)
-			CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compVoltage, sizeof(float) * length));
-		CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compVoltage[ptrPos], &src->compVoltage[ptrPos], sizeof(float) * length, kind));
+	// if (sim_with_compartments) {
+	// 	if (allocateMem)
+	// 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compVoltage, sizeof(float) * length));
+	// 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compVoltage[ptrPos], &src->compVoltage[ptrPos], sizeof(float) * length, kind));
 
-		if (allocateMem)
-			CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->prevCompVoltage, sizeof(float) * length));
-		CUDA_CHECK_ERRORS(cudaMemcpy(&dest->prevCompVoltage[ptrPos], &src->prevCompVoltage[ptrPos], sizeof(float) * length, kind));
-	}
+	// 	if (allocateMem)
+	// 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->prevCompVoltage, sizeof(float) * length));
+	// 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->prevCompVoltage[ptrPos], &src->prevCompVoltage[ptrPos], sizeof(float) * length, kind));
+	// }
 
 	if (sim_with_conductances) {
 	    //conductance information
@@ -2583,6 +2601,11 @@ void CpuSNN::globalStateDecay_GPU(int gridSize, int blkSize) {
 		CUDA_GET_LAST_ERROR("STP update\n");
 	}
 
+	// reset current to zero
+	if (!sim_with_conductances) {
+		CUDA_CHECK_ERRORS(cudaMemset(cpu_gpuNetPtrs.current, 0, sizeof(float)*numNReg));
+	}
+
 	// update all group state (i.e., concentration of neuronmodulators)
 	// currently support 4 x 128 groups
 	kernel_groupStateDecay<<<4, blkSize>>> (simTimeMs);
@@ -2610,7 +2633,7 @@ void CpuSNN::printCurrentInfo(FILE* fp) {
 	KERNEL_DEBUG("Total Synaptic updates:");
 	CUDA_CHECK_ERRORS( cudaMemcpy( current, cpu_gpuNetPtrs.current, sizeof(float)*numNReg, cudaMemcpyDeviceToHost));
 		for(int i=0; i < numNReg; i++) {
-			if (current[i] != 0.0f ) {
+			if (fabs(current[i]) > 0.0f ) {
 				KERNEL_DEBUG("I[%d] -> %f", i, current[i]);
 		}
 	}
@@ -2626,8 +2649,9 @@ void CpuSNN::deleteObjects_GPU() {
 
 	// cudaFree all device pointers
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.voltage) );
-	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.compVoltage));
-	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.prevCompVoltage));
+	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.nextVoltage) );
+	// CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.compVoltage));
+	// CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.prevCompVoltage));
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.recovery) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.current) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.extCurrent) );

@@ -999,7 +999,9 @@ private:
 	int   			numNExcPois;		//!< number of excitatory poisson neurons
 	int				numNInhPois;		//!< number of inhibitory poisson neurons
 	int				numNPois;			//!< number of poisson neurons
-	float       	*voltage, *compVoltage, *prevCompVoltage, *recovery, *Izh_C, *Izh_k, *Izh_vr, *Izh_vt, *Izh_vpeak, *Izh_a, *Izh_b, *Izh_c, *Izh_d, *current, *extCurrent;
+	float       	*voltage;			//!< membrane potential for each regular neuron
+	float           *nextVoltage;		//!< membrane potential buffer (next/future time step) for each regular neuron
+	float           *recovery, *Izh_C, *Izh_k, *Izh_vr, *Izh_vt, *Izh_vpeak, *Izh_a, *Izh_b, *Izh_c, *Izh_d, *current, *extCurrent;
 
 	//! Keeps track of all neurons that spiked at current time.
 	//! Because integration step can be < 1ms we might want to keep integrating but remember that the neuron fired,
