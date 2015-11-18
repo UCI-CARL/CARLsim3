@@ -18,134 +18,126 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 
 	float numModes;
 
-#ifdef __CPU_ONLY__
-	numModes = 0;
-#else
-	numModes = 1;
-#endif
-
 	// expected spike times for soma
-	int expectSpikeTimeSO[5][7] = {	{148, 188, 243, 339, 514, 690, 866},
-									{148, 189, 242, 328, 508, 681, 855},
-									{148, 188, 240, 328, 506, 679, 853},
-									{148, 187, 240, 326, 504, 677, 851},
-									{148, 187, 240, 326, 505, 677, 851}};
+	int expectSpikeTimeSO[5][7] = {	{148, 190, 245, 333, 515, 689, 861},
+									{148, 188, 240, 330, 507, 682, 854},
+									{148, 187, 240, 328, 508, 678, 853},
+									{148, 187, 239, 326, 505, 677, 851},
+									{148, 187, 239, 326, 505, 676, 851}};
 
-	int expectSpikeTimeSP[5][7] = {	{148, 188, 243, 339, 515, 691, 866},
-									{148, 189, 243, 329, 509, 681, 856},
-									{148, 188, 241, 328, 507, 679, 853},
-									{148, 188, 240, 327, 505, 678, 852},
-									{148, 188, 240, 326, 506, 677, 852} };
+	int expectSpikeTimeSP[5][7] = {	{148, 190, 245, 334, 515, 690, 862},
+									{148, 188, 240, 330, 507, 683, 854},
+									{148, 188, 241, 328, 508, 678, 853},
+									{149, 188, 240, 326, 506, 677, 852},
+									{149, 187, 240, 327, 505, 677, 851} };
 
-	// \FIXME: GPU side not implemented yet
-	numModes = 0;
+	for (int inver_timestep = 10; inver_timestep <= 50; inver_timestep += 10) {
+		CARLsim* sim = new CARLsim("CUBA.firingRateVsData", CPU_MODE, SILENT, 0, 42);
+		sim->setIntegrationMethod(RUNGE_KUTTA4, inver_timestep);
 
-	for (int inver_timestep = 10; inver_timestep <= 50; inver_timestep += 100) {
+		int N = 5;
 
-		for (int isGPUmode = 0; isGPUmode <= numModes; isGPUmode++) {
-			CARLsim* sim = new CARLsim("CUBA.firingRateVsData", isGPUmode ? GPU_MODE : CPU_MODE, SILENT, 0, 42);
-			sim->setIntegrationMethod(RUNGE_KUTTA4, inver_timestep);
+		int grpSP = sim->createGroup("SP soma", N, EXCITATORY_NEURON); // s
+		int grpSR = sim->createGroup("SR d1", N, EXCITATORY_NEURON); // d1
+		int grpSLM = sim->createGroup("SLM d2", N, EXCITATORY_NEURON); // d2
+		int grpSO = sim->createGroup("SO d3", N, EXCITATORY_NEURON); // d3
 
-			int N = 5;
+		sim->setNeuronParameters(grpSP, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 
+			24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
+		sim->setNeuronParameters(grpSR, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 
+			20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+		sim->setNeuronParameters(grpSLM, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 
+			13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+		sim->setNeuronParameters(grpSO, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 
+			21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
 
-			int grpSP = sim->createGroup("SP soma", N, EXCITATORY_NEURON); // s
-			int grpSR = sim->createGroup("SR d1", N, EXCITATORY_NEURON); // d1
-			int grpSLM = sim->createGroup("SLM d2", N, EXCITATORY_NEURON); // d2
-			int grpSO = sim->createGroup("SO d3", N, EXCITATORY_NEURON); // d3
+		sim->setCompartmentParameters(grpSR, 28.396f, 5.526f);//SR 28 and 5
+		sim->setCompartmentParameters(grpSLM, 50.474f, 0.0f);//SLM 50 and 0
+		sim->setCompartmentParameters(grpSO, 0.0f, 49.14f);//SO 0 and 49
+		sim->setCompartmentParameters(grpSP, 116.861f, 4.60f);// SP (somatic) 116 and 4
 
-			sim->setNeuronParameters(grpSP, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
-			sim->setNeuronParameters(grpSR, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(grpSLM, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(grpSO, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+		int gin = sim->createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
+		sim->connect(gin, grpSP, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
 
-			sim->setCompartmentParameters(grpSR, 28.396f, 5.526f);//SR 28 and 5
-			sim->setCompartmentParameters(grpSLM, 50.474f, 0.0f);//SLM 50 and 0
-			sim->setCompartmentParameters(grpSO, 0.0f, 49.14f);//SO 0 and 49
-			sim->setCompartmentParameters(grpSP, 116.861f, 4.60f);// SP (somatic) 116 and 4
+		sim->setConductances(false);//This forces use of CUBA model.
 
-			int gin = sim->createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
-			sim->connect(gin, grpSP, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
+		// Establish compartmental connections in order to form the following configuration:
+		//	d3    SO
+		//	|     |
+		//	s     SP
+		//	|     |
+		//	d1    SR
+		//	|     |
+		//	d2    SLM
+		sim->compConnect(grpSLM, grpSR);
+		sim->compConnect(grpSR, grpSP);
+		sim->compConnect(grpSP, grpSO);
 
-			sim->setConductances(false);//This forces use of CUBA model.
+		sim->setESTDP(ALL, false);
+		sim->setISTDP(ALL, false);
 
-			// Establish compartmental connections in order to form the following configuration:
-			//	d3    SO
-			//	|     |
-			//	s     SP
-			//	|     |
-			//	d1    SR
-			//	|     |
-			//	d2    SLM
-			sim->compConnect(grpSLM, grpSR);
-			sim->compConnect(grpSR, grpSP);
-			sim->compConnect(grpSP, grpSO);
+		sim->setupNetwork();
 
-			sim->setESTDP(ALL, false);
-			sim->setISTDP(ALL, false);
+		SpikeMonitor* spikeSP = sim->setSpikeMonitor(grpSP, "DEFAULT"); // put spike times into file
+		SpikeMonitor* spikeSR = sim->setSpikeMonitor(grpSR, "DEFAULT"); // put spike times into file
+		SpikeMonitor* spikeSLM = sim->setSpikeMonitor(grpSLM, "DEFAULT"); // put spike times into file
+		SpikeMonitor* spikeSO = sim->setSpikeMonitor(grpSO, "DEFAULT"); // put spike times into file
 
-			sim->setupNetwork();
+		PoissonRate in(N);
 
-			SpikeMonitor* spikeSP = sim->setSpikeMonitor(grpSP, "DEFAULT"); // put spike times into file
-			SpikeMonitor* spikeSR = sim->setSpikeMonitor(grpSR, "DEFAULT"); // put spike times into file
-			SpikeMonitor* spikeSLM = sim->setSpikeMonitor(grpSLM, "DEFAULT"); // put spike times into file
-			SpikeMonitor* spikeSO = sim->setSpikeMonitor(grpSO, "DEFAULT"); // put spike times into file
+		in.setRates(0.0f);
+		sim->setSpikeRate(gin, &in);//Inactive input group
 
-			PoissonRate in(N);
+		spikeSP->startRecording();
+		spikeSR->startRecording();
+		spikeSLM->startRecording();
+		spikeSO->startRecording();
+		sim->setExternalCurrent(grpSP, 0);
+		sim->runNetwork(0, 100);
+		sim->setExternalCurrent(grpSP, 592);
+		sim->runNetwork(0, 400);
+		sim->setExternalCurrent(grpSP, 592);
+		sim->runNetwork(0, 400);
+		sim->setExternalCurrent(grpSP, 0);
+		sim->runNetwork(0, 100);
 
-			in.setRates(0.0f);
-			sim->setSpikeRate(gin, &in);//Inactive input group
+		spikeSP->stopRecording();
+		spikeSR->stopRecording();
+		spikeSLM->stopRecording();
+		spikeSO->stopRecording();
 
-			spikeSP->startRecording();
-			spikeSR->startRecording();
-			spikeSLM->startRecording();
-			spikeSO->startRecording();
-			sim->setExternalCurrent(grpSP, 0);
-			sim->runNetwork(0, 100);
-			sim->setExternalCurrent(grpSP, 592);
-			sim->runNetwork(0, 400);
-			sim->setExternalCurrent(grpSP, 592);
-						sim->runNetwork(0, 400);
-			sim->setExternalCurrent(grpSP, 0);
-						sim->runNetwork(0, 100);
-
-			spikeSP->stopRecording();
-			spikeSR->stopRecording();
-			spikeSLM->stopRecording();
-			spikeSO->stopRecording();
-
-			// SP (somatic): expect 8 spikes at specific times
-			EXPECT_EQ(spikeSP->getPopNumSpikes(), 7*N);
-			if (spikeSP->getPopNumSpikes() == 7*N) {
-				// only execute if #spikes matches, otherwise we'll segfault
-				std::vector<std::vector<int> > spikeTimeSP = spikeSP->getSpikeVector2D();
-				for (int neurId=0; neurId<spikeTimeSP.size(); neurId++) {
-					for (int spkT=0; spkT<spikeTimeSP[neurId].size(); spkT++) {
-						EXPECT_EQ(spikeTimeSP[neurId][spkT], expectSpikeTimeSP[inver_timestep/10-1][spkT]);
-					}
+		// SP (somatic): expect 8 spikes at specific times
+		EXPECT_EQ(spikeSP->getPopNumSpikes(), 7*N);
+		if (spikeSP->getPopNumSpikes() == 7*N) {
+			// only execute if #spikes matches, otherwise we'll segfault
+			std::vector<std::vector<int> > spikeTimeSP = spikeSP->getSpikeVector2D();
+			for (int neurId=0; neurId<spikeTimeSP.size(); neurId++) {
+				for (int spkT=0; spkT<spikeTimeSP[neurId].size(); spkT++) {
+					EXPECT_EQ(spikeTimeSP[neurId][spkT], expectSpikeTimeSP[inver_timestep/10-1][spkT]);
 				}
 			}
-
-			// SR: expect silent
-			EXPECT_EQ(spikeSR->getPopNumSpikes(), 0);
-
-			// SLM: expect silent
-			EXPECT_EQ(spikeSLM->getPopNumSpikes(), 0);
-
-			// SO (grpSO dendritic): expect 8 spikes at specific times
-			EXPECT_EQ(spikeSO->getPopNumSpikes(), 7*N);
-			if (spikeSO->getPopNumSpikes() == 7*N) {
-				// only execute if #spikes matches, otherwise we'll segfault
-				std::vector<std::vector<int> > spikeTimeSO = spikeSO->getSpikeVector2D();
-				for (int neurId=0; neurId<spikeTimeSO.size(); neurId++) {
-					for (int spkT=0; spkT<spikeTimeSO[neurId].size(); spkT++) {
-						// spike times such precede SP by 1 ms
-						EXPECT_EQ(spikeTimeSO[neurId][spkT], expectSpikeTimeSO[inver_timestep/10-1][spkT]);
-					}
-				}
-			}
-
-			delete sim;
 		}
+
+		// SR: expect silent
+		EXPECT_EQ(spikeSR->getPopNumSpikes(), 0);
+
+		// SLM: expect silent
+		EXPECT_EQ(spikeSLM->getPopNumSpikes(), 0);
+
+		// SO (grpSO dendritic): expect 8 spikes at specific times
+		EXPECT_EQ(spikeSO->getPopNumSpikes(), 7*N);
+		if (spikeSO->getPopNumSpikes() == 7*N) {
+			// only execute if #spikes matches, otherwise we'll segfault
+			std::vector<std::vector<int> > spikeTimeSO = spikeSO->getSpikeVector2D();
+			for (int neurId=0; neurId<spikeTimeSO.size(); neurId++) {
+				for (int spkT=0; spkT<spikeTimeSO[neurId].size(); spkT++) {
+					// spike times such precede SP by 1 ms
+					EXPECT_EQ(spikeTimeSO[neurId][spkT], expectSpikeTimeSO[inver_timestep/10-1][spkT]);
+				}
+			}
+		}
+
+		delete sim;
 	}
 }
 

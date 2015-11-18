@@ -793,7 +793,7 @@ private:
 	void updateSpikesFromGrp(int grpId);
 	void updateSpikeGenerators();
 	void updateSpikeGeneratorsInit();
-	int  updateSpikeTables();
+	int updateSpikeTables();
 
 	//void updateStateAndFiringTable();
 	bool updateTime(); //!< updates simTime, returns true when a new second is started

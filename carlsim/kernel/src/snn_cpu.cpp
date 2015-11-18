@@ -3642,15 +3642,15 @@ float CpuSNN::getCompCurrent(int grpId, int neurId, float const0, float const1) 
 		// to the i-th neuron in grpIdOther
 		int grpIdOther = grp_Info[grpId].compNeighbors[k];
 		int neurIdOther = neurId - grp_Info[grpId].StartN + grp_Info[grpIdOther].StartN;
-		compCurrent += grp_Info[grpId].compCoupling[k] * ((prevCompVoltage[neurId] + const0)
-			- (prevCompVoltage[neurIdOther] + const1));
+		compCurrent += grp_Info[grpId].compCoupling[k] * ((prevCompVoltage[neurIdOther] + const1)
+			- (prevCompVoltage[neurId] + const0));
 	}
 
 	return compCurrent;
 }
 
 void  CpuSNN::globalStateUpdate() {
-	for (int j=0; j<simNumStepsPerMs_; j++) {
+	for (int j=1; j<=simNumStepsPerMs_; j++) {
 		for(int g=0; g<numGrp; g++) {
 			if (grp_Info[g].Type & POISSON_NEURON) {
 				continue;
@@ -3668,7 +3668,7 @@ void  CpuSNN::globalStateUpdate() {
 				float a = Izh_a[i];
 				float b = Izh_b[i];
 
-				// sum up total current = synaptic + external - compartmental
+				// sum up total current = synaptic + external + compartmental
 				float totalCurrent = extCurrent[i];
 				if (sim_with_conductances) { // COBA model
 					float tmp_gNMDA = sim_with_NMDA_rise ? gNMDA_d[i]-gNMDA_r[i] : gNMDA[i];
@@ -3683,12 +3683,12 @@ void  CpuSNN::globalStateUpdate() {
 					totalCurrent += current[i];
 				}
 				if (grp_Info[g].withCompartments) {
-					totalCurrent -= getCompCurrent(g, i);
+					totalCurrent += getCompCurrent(g, i);
 				}
 
 				switch (simIntegrationMethod_) {
 				case FORWARD_EULER:
-					if (grp_Info[g].withParamModel_9 == 0) {
+					if (!grp_Info[g].withParamModel_9) {
 						// 4-param Izhikevich
 						voltage[i] += dvdtIzhikevich4(voltage[i], recovery[i], totalCurrent, timeStep_);
 						if (voltage[i] > 30.0f) {
@@ -3719,7 +3719,7 @@ void  CpuSNN::globalStateUpdate() {
 						assert(!isinf(voltage[i]));
 					#endif
 
-					if (grp_Info[g].withParamModel_9 == 0) {
+					if (!grp_Info[g].withParamModel_9) {
 						recovery[i] += dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep_);
 					} else {
 						recovery[i] += dudtIzhikevich9(voltage[i], recovery[i], vr, a, b, timeStep_);
@@ -3728,7 +3728,7 @@ void  CpuSNN::globalStateUpdate() {
 					break;
 				case RUNGE_KUTTA4:
 					// TODO for Stas
-					if (grp_Info[g].withParamModel_9 == 0) {
+					if (!grp_Info[g].withParamModel_9) {
 						// 4-param Izhikevich
 						float k1 = dvdtIzhikevich4(voltage[i], recovery[i], totalCurrent, timeStep_);
 						float l1 = dudtIzhikevich4(voltage[i], recovery[i], a, b, timeStep_);
@@ -3744,7 +3744,7 @@ void  CpuSNN::globalStateUpdate() {
 						float k4 = dvdtIzhikevich4(voltage[i] + k3, recovery[i] + l3, totalCurrent, timeStep_);
 						float l4 = dudtIzhikevich4(voltage[i] + k3, recovery[i] + l3, a, b, timeStep_);
 
-						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2 * k2 + 2 * k3 + k4);
+						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
 						if (voltage[i] > 30.0f) {
 							voltage[i] = 30.0f;
 							curSpike[i] = true;
@@ -3762,7 +3762,7 @@ void  CpuSNN::globalStateUpdate() {
 						assert(!isinf(voltage[i]));
 						#endif
 
-						recovery[i] = recovery[i] + (1.0f / 6.0f) * (l1 + 2 * l2 + 2 * l3 + l4);
+						recovery[i] = recovery[i] + (1.0f / 6.0f) * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
 					} else {
 						// 9-param Izhikevich
 
@@ -3782,7 +3782,7 @@ void  CpuSNN::globalStateUpdate() {
 							totalCurrent, timeStep_);
 						float l4 = dudtIzhikevich9(voltage[i] + k3, recovery[i] + l3, vr, a, b, timeStep_);
 
-						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2 * k2 + 2 * k3 + k4);
+						voltage[i] = voltage[i] + (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
 
 						if (voltage[i] > Izh_vpeak[i]) {
 							voltage[i] = Izh_vpeak[i];
@@ -3795,14 +3795,14 @@ void  CpuSNN::globalStateUpdate() {
 							voltage[i] = -90.0f;
 						}
 						#if defined(WIN32) || defined(WIN64)
-								assert(!_isnan(voltage[i]));
-								assert(_finite(voltage[i]));
+						assert(!_isnan(voltage[i]));
+						assert(_finite(voltage[i]));
 						#else
-								assert(!isnan(voltage[i]));
-								assert(!isinf(voltage[i]));
+						assert(!isnan(voltage[i]));
+						assert(!isinf(voltage[i]));
 						#endif
 
-						recovery[i] = recovery[i] + (1.0f / 6.0f) * (l1 + 2 * l2 + 2 * l3 + l4);
+						recovery[i] = recovery[i] + (1.0f / 6.0f) * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
 					}
 					break;
 				case UNKNOWN_INTEGRATION:
@@ -3810,15 +3810,15 @@ void  CpuSNN::globalStateUpdate() {
 					KERNEL_ERROR("Unknown integration method.");
 					exitSimulation(1);
 				}
-
-				// update compVoltage and prevCompVoltage if necessary
-				if (grp_Info[g].withCompartments) {
-					prevCompVoltage[i] = compVoltage[i];
-					compVoltage[i] = voltage[i];
-				}
 			}  // end StartN...EndN
 		}  // end numGrp
+
+		if (sim_with_compartments) {
+			memcpy(prevCompVoltage, compVoltage, sizeof(float)*numNReg);
+			memcpy(compVoltage, voltage, sizeof(float)*numNReg);
+		}
 	}  // end simNumStepsPerMs_ loop
+
 }
 
 // initialize all the synaptic weights to appropriate values..
@@ -4328,8 +4328,7 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 // The post synaptic connections are sorted based on delay here so that we can reduce storage requirement
 // and generation of spike at the post-synaptic side.
 // We also create the delay_info array has the delay_start and delay_length parameter
-void CpuSNN::reorganizeDelay()
-{
+void CpuSNN::reorganizeDelay() {
 	for(int grpId=0; grpId < numGrp; grpId++) {
 		for(int nid=grp_Info[grpId].StartN; nid <= grp_Info[grpId].EndN; nid++) {
 			unsigned int jPos=0;					// this points to the top of the delay queue
@@ -4544,27 +4543,24 @@ void CpuSNN::resetNeuron(unsigned int neurId, int grpId) {
 		}
 	}
 
-	if (!grp_Info[grpId].withParamModel_9)//Initial values for 4 parameter model.
-	{
+	if (!grp_Info[grpId].withParamModel_9) { //Initial values for 4 parameter model.
 		voltage[neurId] = Izh_c[neurId];	// initial values for new_v
 	    recovery[neurId] = Izh_b[neurId] * voltage[neurId]; // initial values for u
-	}
-	else if (grp_Info[grpId].withParamModel_9)//Initial values for 9 parameter model.
-	{
+	} else if (grp_Info[grpId].withParamModel_9) { //Initial values for 9 parameter model.
 		voltage[neurId] = Izh_vr[neurId];
 		recovery[neurId] = 0;
 	}
 
  	if (grp_Info[grpId].WithHomeostasis) {
 		// set the baseFiring with some standard deviation.
-		if(drand48()>0.5)   {
+		if (drand48()>0.5)   {
 			baseFiring[neurId] = grp_Info2[grpId].baseFiring + grp_Info2[grpId].baseFiringSD*-log(drand48());
 		} else  {
 			baseFiring[neurId] = grp_Info2[grpId].baseFiring - grp_Info2[grpId].baseFiringSD*-log(drand48());
 			if(baseFiring[neurId] < 0.1) baseFiring[neurId] = 0.1;
 		}
 
-		if( grp_Info2[grpId].baseFiring != 0.0) {
+		if (grp_Info2[grpId].baseFiring != 0.0) {
 			avgFiring[neurId]  = baseFiring[neurId];
 		} else {
 			baseFiring[neurId] = 0.0;

@@ -904,15 +904,15 @@ __device__ float dudtIzhikevich9(float volt, float recov, float voltRest, float 
 }
 
 __device__ float getCompCurrent_GPU(int grpId, int neurId, float const0=0.0f, float const1=0.0f) {
-	float tmpCurrent = 0.0f;
+	float compCurrent = 0.0f;
 	for (int k=0; k<gpuGrpInfo[grpId].numCompNeighbors; k++) {
 		int grpIdOther = gpuGrpInfo[grpId].compNeighbors[k];
 		int neurIdOther = neurId - gpuGrpInfo[grpId].StartN + gpuGrpInfo[grpIdOther].StartN;
-		tmpCurrent += gpuGrpInfo[grpId].compCoupling[k] * ((gpuPtrs.prevCompVoltage[neurId] + const0)
-			- (gpuPtrs.prevCompVoltage[neurIdOther] + const1));
+		compCurrent += gpuGrpInfo[grpId].compCoupling[k] * ((gpuPtrs.prevCompVoltage[neurIdOther] + const1)
+			- (gpuPtrs.prevCompVoltage[neurId] + const0));
 	}
 
-	return tmpCurrent;
+	return compCurrent;
 }
 
 
@@ -929,7 +929,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 	float b = gpuPtrs.Izh_b[nid];
 	float vpeak = gpuPtrs.Izh_vpeak[nid];
 
-	// sum up total current = synaptic + external - compartmental
+	// sum up total current = synaptic + external + compartmental
 	float totalCurrent = gpuPtrs.extCurrent[nid];
 	if (gpuNetInfo.sim_with_conductances) {
 		float gNMDA = (gpuNetInfo.sim_with_NMDA_rise) ? (gpuPtrs.gNMDA_d[nid]-gpuPtrs.gNMDA_r[nid]) : gpuPtrs.gNMDA[nid];
@@ -944,7 +944,7 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 		totalCurrent += gpuPtrs.current[nid];
 	}
 	if (gpuGrpInfo[grpId].withCompartments) {
-		totalCurrent -= getCompCurrent_GPU(grpId, nid);
+		totalCurrent += getCompCurrent_GPU(grpId, nid);
 	}
 
 	switch (gpuNetInfo.simIntegrationMethod) {
@@ -1074,11 +1074,6 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 		assert(false);
 	}
 
-	if (gpuGrpInfo[grpId].withCompartments) {
-		gpuPtrs.prevCompVoltage[nid] = gpuPtrs.compVoltage[nid];
-		gpuPtrs.compVoltage[nid] = v;
-	}
-
 	if (lastIter) {
 		if (gpuNetInfo.sim_with_conductances) {
 			// gpuPtrs.current[nid] = I_sum;
@@ -1162,6 +1157,37 @@ __global__ void kernel_homeostasisDecay() {
 }
 
 
+void CpuSNN::globalStateUpdate_GPU() {
+	checkAndSetGPUDevice();
+
+	int blkSize  = 128;
+	int gridSize = 64;
+	bool lastIter = 0;
+
+	kernel_globalConductanceUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
+	CUDA_GET_LAST_ERROR("kernel_globalConductanceUpdate failed");
+
+	for (int j=1; j<=net_Info.simNumStepsPerMs; j++) {
+		if (j == net_Info.simNumStepsPerMs)
+			lastIter = 1;
+
+		// update all neuron state (i.e., voltage and recovery)
+		kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime, lastIter);
+		CUDA_GET_LAST_ERROR("kernel_globalStateUpdate failed");
+
+		if (sim_with_compartments) {
+			CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.prevCompVoltage, cpu_gpuNetPtrs.compVoltage, 
+				sizeof(float) * numNReg, cudaMemcpyDeviceToDevice));
+			CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.compVoltage, cpu_gpuNetPtrs.voltage, sizeof(float) * numNReg,
+				cudaMemcpyDeviceToDevice));
+		}
+	}
+
+	kernel_globalGroupStateUpdate <<<4, blkSize>>> (simTimeMs);
+	CUDA_GET_LAST_ERROR("kernel_globalGroupStateUpdate  failed");
+	
+}
+
 //******************************** UPDATE STP STATE  EVERY TIME STEP **********************************************
 
 ///////////////////////////////////////////////////////////
@@ -1225,7 +1251,8 @@ __global__ void kernel_STPUpdateAndDecayConductances (int t, int sec, int simTim
 //////////////////////////////////////////////////////////////////
 
 // Rewritten updateSynapticWeights to include homeostasis.  We should consider using flag.
-__device__ void updateSynapticWeights(int& nid, unsigned int& jpos, int& grpId, float& diff_firing, float& homeostasisScale, float& baseFiring, float& avgTimeScaleInv)
+__device__ void updateSynapticWeights(int& nid, unsigned int& jpos, int& grpId, float& diff_firing, 
+	float& homeostasisScale, float& baseFiring, float& avgTimeScaleInv)
 {
 	// This function does not get called if the neuron group has all fixed weights.
 	// t_twChange is adjusted by stdpScaleFactor based on frequency of weight updates (e.g., 10ms, 100ms, 1s)	
@@ -1453,8 +1480,8 @@ __device__ int generatePostSynapticSpike(int& simTime, int& firingId, int& myDel
 
 	// Error MNJ... this should have been from nid.. not firingId...
 	// int  nid  = GET_FIRING_TABLE_NID(firingId);
-//	int    post_grpId;		// STP uses pre_grpId, STDP used post_grpId...
-//	findGrpId_GPU(nid, post_grpId);
+	// int    post_grpId;		// STP uses pre_grpId, STDP used post_grpId...
+	// findGrpId_GPU(nid, post_grpId);
 	int post_grpId = gpuPtrs.grpIds[nid];
 
 	if(post_grpId == -1)
@@ -1462,11 +1489,11 @@ __device__ int generatePostSynapticSpike(int& simTime, int& firingId, int& myDel
 
 	// Got one spike from dopaminergic neuron, increase dopamine concentration in the target area
 	if (gpuGrpInfo[pre_grpId].Type & TARGET_DA) {
-#if defined(__CUDA3__) || defined(__NO_ATOMIC_ADD__)
+	#if defined(__CUDA3__) || defined(__NO_ATOMIC_ADD__)
 		atomicAddf(&(gpuPtrs.grpDA[post_grpId]), 0.04f);
-#else
+	#else
 		atomicAdd(&(gpuPtrs.grpDA[post_grpId]), 0.04f);
-#endif
+	#endif
 	}
 
 	setFiringBitSynapses(nid, syn_id);
@@ -1645,7 +1672,7 @@ __global__ void kernel_doCurrentUpdateD1(int simTimeMs, int simTimeSec, int simT
 {
 	__shared__ volatile	int sh_NeuronCnt;
 	__shared__ volatile int sh_neuronOffsetTable[NUM_THREADS/WARP_SIZE+2];
-//		__shared__	int sh_firedTimeTable[NUM_THREADS/WARP_SIZE+2];
+		// __shared__	int sh_firedTimeTable[NUM_THREADS/WARP_SIZE+2];
 	__shared__	int sh_delayLength[NUM_THREADS/WARP_SIZE+2];
 	__shared__	int sh_firingId[NUM_THREADS/WARP_SIZE+2];
 	__shared__	int sh_delayIndexStart[NUM_THREADS/WARP_SIZE+2];
@@ -2056,14 +2083,14 @@ void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpy
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->nSpikeCnt, sizeof(int) * length2));
 	CUDA_CHECK_ERRORS(cudaMemcpy( &dest->nSpikeCnt[ptrPos], &src->nSpikeCnt[ptrPos], sizeof(int) * length2, kind));
 
-	if( !allocateMem && grp_Info[grpId].Type & POISSON_NEURON)
+	if (!allocateMem && grp_Info[grpId].Type & POISSON_NEURON)
 		return;
 
-	if(allocateMem)
+	if (allocateMem)
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->recovery, sizeof(float) * length));
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->recovery[ptrPos], &src->recovery[ptrPos], sizeof(float) * length, kind));
 
-	if(allocateMem)
+	if (allocateMem)
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->voltage, sizeof(float) * length));
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->voltage[ptrPos], &src->voltage[ptrPos], sizeof(float) * length, kind));
 
@@ -2071,13 +2098,15 @@ void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpy
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->curSpike, sizeof(float) * length));
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->curSpike[ptrPos], &src->curSpike[ptrPos], sizeof(float) * length, kind));
 
-	if (allocateMem)
-		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compVoltage, sizeof(float) * length));
-	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compVoltage[ptrPos], &src->compVoltage[ptrPos], sizeof(float) * length, kind));
+	if (sim_with_compartments) {
+		if (allocateMem)
+			CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compVoltage, sizeof(float) * length));
+		CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compVoltage[ptrPos], &src->compVoltage[ptrPos], sizeof(float) * length, kind));
 
-	if (allocateMem)
-		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->prevCompVoltage, sizeof(float) * length));
-	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->prevCompVoltage[ptrPos], &src->prevCompVoltage[ptrPos], sizeof(float) * length, kind));
+		if (allocateMem)
+			CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->prevCompVoltage, sizeof(float) * length));
+		CUDA_CHECK_ERRORS(cudaMemcpy(&dest->prevCompVoltage[ptrPos], &src->prevCompVoltage[ptrPos], sizeof(float) * length, kind));
+	}
 
 	if (sim_with_conductances) {
 	    //conductance information
@@ -2263,11 +2292,11 @@ void CpuSNN::copySTPState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpyKin
 	size_t STP_Pitch;
 	size_t widthInBytes = sizeof(float)*net_Info.numN;
 
-//	if(allocateMem)		CUDA_CHECK_ERRORS( cudaMalloc( (void**) &dest->stpu, sizeof(float)*numN));
-//	CUDA_CHECK_ERRORS( cudaMemcpy( &dest->stpu[0], &src->stpu[0], sizeof(float)*numN, kind));
+	// if(allocateMem)		CUDA_CHECK_ERRORS( cudaMalloc( (void**) &dest->stpu, sizeof(float)*numN));
+	// CUDA_CHECK_ERRORS( cudaMemcpy( &dest->stpu[0], &src->stpu[0], sizeof(float)*numN, kind));
 
-//	if(allocateMem)		CUDA_CHECK_ERRORS( cudaMalloc( (void**) &dest->stpx, sizeof(float)*numN));
-//	CUDA_CHECK_ERRORS( cudaMemcpy( &dest->stpx[0], &src->stpx[0], sizeof(float)*numN, kind));
+	// if(allocateMem)		CUDA_CHECK_ERRORS( cudaMalloc( (void**) &dest->stpx, sizeof(float)*numN));
+	// CUDA_CHECK_ERRORS( cudaMemcpy( &dest->stpx[0], &src->stpx[0], sizeof(float)*numN, kind));
 
 	// allocate the stpu and stpx variable
 	if (allocateMem)
@@ -2284,7 +2313,7 @@ void CpuSNN::copySTPState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpyKin
 	if (allocateMem)
 		net_Info.STP_Pitch = net_Info.STP_Pitch/sizeof(float);
 
-//	fprintf(stderr, "STP_Pitch = %ld, STP_witdhInBytes = %d\n", net_Info.STP_Pitch, widthInBytes);
+	// fprintf(stderr, "STP_Pitch = %ld, STP_witdhInBytes = %d\n", net_Info.STP_Pitch, widthInBytes);
 
 	float* tmp_stp = new float[net_Info.numN];
 	// copy the already generated values of stpx and stpu to the GPU
@@ -2683,32 +2712,6 @@ void CpuSNN::deleteObjects_GPU() {
 		CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.spkCntBufChild[i]));
 
 	CUDA_DELETE_TIMER(timer);
-}
-
-void CpuSNN::globalStateUpdate_GPU() {
-	checkAndSetGPUDevice();
-
-	int blkSize  = 128;
-	int gridSize = 64;
-	bool lastIter = 0;
-
-	kernel_globalConductanceUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime);
-	CUDA_GET_LAST_ERROR("kernel_globalConductanceUpdate failed");
-
-	for(int i = net_Info.simNumStepsPerMs; i--;)
-	{
-		if(!i)
-			lastIter = 1;
-		// update all neuron state (i.e., voltage and recovery)
-		kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime, lastIter);
-		CUDA_GET_LAST_ERROR("kernel_globalStateUpdate failed");
-		//copy comp voltages into previous comp voltages
-		//CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.prevCompVoltage, cpu_gpuNetPtrs.compVoltage, sizeof(float) * numComp, cudaMemcpyDeviceToDevice));
-	}
-
-	kernel_globalGroupStateUpdate <<<4, blkSize>>> (simTimeMs);
-	CUDA_GET_LAST_ERROR("kernel_globalGroupStateUpdate  failed");
-	
 }
 
 void CpuSNN::assignPoissonFiringRate_GPU() {
