@@ -12,6 +12,12 @@
 /// **************************************************************************************************************** ///
 
 // simple wrapper to assert a statement and print an error message
+void UserErrors::assertFalse(bool statement, errorType errorIfAssertionFails, std::string errorFunc,
+								std::string errorMsgPrefix, std::string errorMsgSuffix) {
+	assertTrue(!statement, errorIfAssertionFails, errorFunc, errorMsgPrefix, errorMsgSuffix);
+}
+
+// simple wrapper to assert a statement and print an error message
 void UserErrors::assertTrue(bool statement, errorType errorIfAssertionFails, std::string errorFunc,
 								std::string errorMsgPrefix, std::string errorMsgSuffix) {
 	if (!statement) {
@@ -42,6 +48,10 @@ void UserErrors::throwError(std::string errorFunc, errorType error, std::string 
 		errorMsg += " cannot be called in mode "; break;
 	case CANNOT_BE_CALLED_IN_STATE:
 		errorMsg += " cannot be called in state "; break;
+	case CANNOT_BE_CONN_SYN_AND_COMP:
+		errorMsg += " cannot be both synaptically and compartmentally connected."; break;
+	case CANNOT_BE_CONN_TWICE:
+		errorMsg += " cannot be connected twice."; break;
 	case CANNOT_BE_IDENTICAL:
 		errorMsg += " cannot be identical."; break;
 	case CANNOT_BE_LARGER:
@@ -64,8 +74,6 @@ void UserErrors::throwError(std::string errorFunc, errorType error, std::string 
 		errorMsg += " cannot be of type UNKNOWN."; break;
 	case CANNOT_BE_ZERO:
 		errorMsg += " cannot be zero."; break;
-	case EXCEED_COMP_CONNECTION_LIMIT:
-		errorMsg += " exceeded compartment connection limit."; break;
 	case FILE_CANNOT_CREATE:
 		errorMsg += " could not be created."; break;
 	case FILE_CANNOT_OPEN:
@@ -98,10 +106,6 @@ void UserErrors::throwError(std::string errorFunc, errorType error, std::string 
 		errorMsg += " must have the same sign."; break;
 	case NETWORK_ALREADY_RUN:
 		errorMsg += " cannot be called after network has been run."; break;
-	case REPEATED_COMP_CONNNECTION:
-		errorMsg += " an identical or reverse compartment connection already exists."; break;
-	case SYNAPSE_COMP_CONNECTION:
-		errorMsg += " cannot have a synapse and a compartmental connection simultaneously between two groups."; break;
 	case UNKNOWN_GROUP_ID:
 		errorMsg += " is unknown."; break;
 	case WRONG_NEURON_TYPE:

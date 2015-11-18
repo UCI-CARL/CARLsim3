@@ -45,7 +45,6 @@
 #include <stdint.h>		// uint64_t, uint32_t, etc.
 #include <string>		// std::string
 #include <vector>		// std::vector
-#include <map> 			// Used to keep track of compartmental and synaptic connections.
 
 #include <callback.h>
 #include <carlsim_definitions.h>
@@ -279,7 +278,7 @@ public:
 	 * \TODO finish docu
      * \STATE CONFIG	
 	*/ 
-	void compConnect(int grpId1, int grpId2);
+	short int connectCompartments(int grpIdLower, int grpIdUpper);
 
 	/*!
 	 * \brief creates a group of Izhikevich spiking neurons
@@ -553,11 +552,11 @@ public:
 	*
 	* \TODO finish docu
 	* \STATE ::CONFIG_STATE
-	* \param[in] G_u			Coupling constant for "up" compartmental connection
-	* \param[in] G_d			Coupling constant for "down" compartmental connection
+	* \param[in] couplingUp		Coupling constant for "up" compartmental connection
+	* \param[in] couplingDown	Coupling constant for "down" compartmental connection
 	*/
 
-	void setCompartmentParameters(int grpId, float G_u, float G_d);
+	void setCompartmentParameters(int grpId, float couplingUp, float couplingDown);
 
 	/*!
 	 * \brief Sets baseline concentration and decay time constant of neuromodulators (DP, 5HT, ACh, NE) for a neuron
@@ -1379,6 +1378,14 @@ public:
 	Point3D getNeuronLocation3D(int grpId, int relNeurId);
 
 	/*!
+	 * \brief Returns the maximum number of allowed compartmental connections per group.
+	 *
+	 * A compartmentally enabled neuron group cannot have more than this number of compartmental connections.
+	 * This value is controlled by MAX_NUM_COMP_CONN in carlsim_definitions.h.
+	 */
+	int getMaxNumCompConnections();
+
+	/*!
 	 * \brief Returns the number of connections (pairs of pre-post groups) in the network
 	 *
 	 * This function returns the number of connections (pairs of pre-post groups) in the network. Each pre-post
@@ -1791,9 +1798,12 @@ private:
 	bool enablePrint_;
 	bool copyState_;
 
-	std::map<int, int> synapConnections;	// Store synaptic connections here.
-	std::map<int, int> compConnections;		// Store compartmental connections here.
-	std::map<int, int> numOfConnectionsComp;// Store number of connections per each compartmental group here.
+	//! a 2D matrix storing for each groupId (first dim) to which other groups it is connected to (second dim)
+	std::vector<std::vector<int> > connSyn_;
+
+	//! a 2D matrix storing for each groupId (first dim) to which other groups it is compartmentally connected
+	//! to (second dim)
+	std::vector<std::vector<int> > connComp_;
 
 	unsigned int numConnections_;	//!< keep track of number of allocated connections
 	std::vector<std::string> userWarnings_; // !< an accumulated list of user warnings

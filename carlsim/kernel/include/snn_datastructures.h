@@ -138,15 +138,14 @@ typedef struct connectData_s {
 } grpConnectInfo_t;
 
 typedef struct compConnectData_s {
-	int						grpSrc, grpDest;
-	struct					compConnectData_s*    next;
+	int							grpSrc, grpDest;
+	struct compConnectData_s*   next;
+	short int               	connId;
 }compConnectInfo_t;
 
 typedef struct network_ptr_s {
 	float*	voltage;			//!< membrane potential for each regular neuron
 	float*  nextVoltage;		//!< membrane potential buffer (next/future time step) for each regular neuron
-	// float*  compVoltage;
-	// float*  prevCompVoltage;
 	float*	recovery;
 	float* 	Izh_C;
 	float* 	Izh_k;
@@ -165,14 +164,6 @@ typedef struct network_ptr_s {
 	//! Because integration step can be < 1ms we might want to keep integrating but remember that the neuron fired,
 	//! so that we don't produce more than 1 spike per ms.
 	bool* curSpike;
-
-	int*		StartComp;
-	int*		CompartmentalNeighbors[4];
-	bool*		compNeighborDirec[4];
-	short*		numOfNeighbors;
-	float*		G_u;
-	float*		G_d;
-	bool*		withCompartments;
 
 	// conductances and stp values
 	float*	gNMDA;					//!< conductance of gNMDA
@@ -342,8 +333,8 @@ typedef struct group_info_s {
 	int         compNeighbors[4];
 	float       compCoupling[4];
 	short       numCompNeighbors;
-	float		G_u;
-	float		G_d;
+	float		compCouplingUp;
+	float		compCouplingDown;
 
 } group_info_t;
 

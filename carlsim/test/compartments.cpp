@@ -69,9 +69,9 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 		//	d1    SR
 		//	|     |
 		//	d2    SLM
-		sim->compConnect(grpSLM, grpSR);
-		sim->compConnect(grpSR, grpSP);
-		sim->compConnect(grpSP, grpSO);
+		sim->connectCompartments(grpSLM, grpSR);
+		sim->connectCompartments(grpSR, grpSP);
+		sim->connectCompartments(grpSP, grpSO);
 
 		sim->setESTDP(ALL, false);
 		sim->setISTDP(ALL, false);
@@ -188,9 +188,9 @@ TEST(COMPARTMENTS, spikeTimesCPUvsGPU) {
 
 				sim->setConductances(hasCOBA);
 
-				sim->compConnect(grpSLM, grpSR);
-				sim->compConnect(grpSR, grpSP);
-				sim->compConnect(grpSP, grpSO);
+				sim->connectCompartments(grpSLM, grpSR);
+				sim->connectCompartments(grpSR, grpSP);
+				sim->connectCompartments(grpSP, grpSO);
 
 				sim->setSTDP(grpSR, false);
 				sim->setSTDP(grpSLM, false);
@@ -338,9 +338,9 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_COBA_Volt_Rec) {
 
 			sim->setConductances(true);//This forces use of COBA model.
 
-			sim->compConnect(grpSLM, grpSR);
-			sim->compConnect(grpSR, grpSP);
-			sim->compConnect(grpSP, grpSO);
+			sim->connectCompartments(grpSLM, grpSR);
+			sim->connectCompartments(grpSR, grpSP);
+			sim->connectCompartments(grpSP, grpSO);
 
 			sim->setSTDP(grpSR, false);
 			sim->setSTDP(grpSLM, false);

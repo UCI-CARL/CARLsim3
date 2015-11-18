@@ -169,7 +169,7 @@ public:
 	* \param _grpId1:ID lower layer group
 	* \param _grpId2 ID upper level group
 	*/
-	void compConnect(int grpId1, int grpId2);
+	short int connectCompartments(int grpIdLower, int grpIdUpper);
 
 	//! Creates a group of Izhikevich spiking neurons
 	/*!
@@ -187,6 +187,13 @@ public:
 	 */
 	int createSpikeGeneratorGroup(const std::string& grpName, const Grid3D& grid, int neurType);
 
+	/*!
+	* \brief Coupling constants for the compartment are set using this method.
+	* \param grpId  		the symbolic name of a group
+	* \param couplingUp   	the coupling constant for upper connections
+	* \param couplingDown	the coupling constant for lower connections
+	*/
+	void setCompartmentParameters(int grpId, float couplingUp, float couplingDown);
 
 	/*!
 	 * \brief Sets custom values for conductance decay (\tau_decay) or disables conductances alltogether
@@ -261,14 +268,6 @@ public:
 								float izh_a, float izh_a_sd, float izh_b, float izh_b_sd,
 								float izh_vpeak, float izh_vpeak_sd, float izh_c, float izh_c_sd,
 								float izh_d, float izh_d_sd);
-
-	/*!
-	* \brief Coupling constants for the compartment are set using this method.
-	* \param _grpId the symbolic name of a group
-	* \param _G_u the coupling constant for upper connections
-	* \param _G_d the coupling constant for lower connections
-	*/
-	void setCompartmentParameters(int grpId, float G_u, float G_d);
 
 	//! Sets baseline concentration and decay time constant of neuromodulators (DP, 5HT, ACh, NE) for a neuron group.
 	/*!
@@ -542,6 +541,7 @@ public:
 
 	int getNumConnections() { return numConnections; }
 	int getNumSynapticConnections(short int connectionId);		//!< gets number of connections associated with a connection ID
+	int getNumCompartmentConnections() { return numCompartmentConnections; }
 	int getNumGroups() { return numGrp; }
 	int getNumNeurons() { return numN; }
 	int getNumNeuronsReg() { return numNReg; }
@@ -701,6 +701,9 @@ private:
 
 	//! performs a consistency check to see whether numN* class members have been accumulated correctly
 	void verifyNumNeurons();
+
+	//! performs consistency checks for compartmentally enabled neurons
+	void verifyCompartments();
 
 	//! creates CPU net pointers
 	void makePtrInfo();
@@ -945,6 +948,7 @@ private:
 
 	int				numGrp;
 	int				numConnections;		//!< number of connection calls (as in snn.connect(...))
+	int             numCompartmentConnections; //!< number of connectCompartment calls
 	//! keeps track of total neurons/presynapses/postsynapses currently allocated
 	unsigned int	allocatedN;
 	unsigned int	allocatedPre;

@@ -275,14 +275,28 @@ short int CpuSNN::connect(int grpId1, int grpId2, ConnectionGeneratorCore* conn,
 	return retId;
 }
 
-//make a compartmental connection between two groups by modifying CompartmentalNeighbors and numOfNeighbors fields of group_Info2s for both groups
-void CpuSNN::compConnect(int grpId1, int grpId2) {
+// make a compartmental connection between two groups
+short int CpuSNN::connectCompartments(int grpIdLower, int grpIdUpper) {
+	assert(grpIdLower >= 0 && grpIdLower < numGrp);
+	assert(grpIdUpper >= 0 && grpIdUpper < numGrp);
+	assert(grpIdLower != grpIdUpper);
+	assert(!isPoissonGroup(grpIdLower));
+	assert(!isPoissonGroup(grpIdUpper));
+
+	// this flag must be set if any compartmental connections exist
+	// note that grpId.withCompartments is not necessarily set just yet, this will be done in
+	// CpuSNN::setCompartmentParameters
 	sim_with_compartments = true;
+
+	// add entry to linked list
 	compConnectInfo_t* newInfo = (compConnectInfo_t*) calloc(1, sizeof(compConnectInfo_t));
-	newInfo->grpSrc = grpId1;
-	newInfo->grpDest = grpId2;
-	newInfo->next = compConnectBegin;  // build a linked list
+	newInfo->grpSrc = grpIdLower;
+	newInfo->grpDest = grpIdUpper;
+	newInfo->connId = numCompartmentConnections++;
+	newInfo->next = compConnectBegin;
 	compConnectBegin = newInfo;
+
+	return newInfo->connId;
 }
 
 
@@ -379,6 +393,21 @@ int CpuSNN::createSpikeGeneratorGroup(const std::string& grpName, const Grid3D& 
 
 	return (numGrp-1);
 }
+
+void CpuSNN::setCompartmentParameters(int grpId, float couplingUp, float couplingDown) {
+	if (grpId == ALL) { // shortcut for all groups
+		for (int grpId1 = 0; grpId1<numGrp; grpId1++) {
+			setCompartmentParameters(grpId1, couplingUp, couplingDown);
+		}
+	} else {
+		sim_with_compartments = true;
+		grp_Info[grpId].withCompartments = true;
+		grp_Info[grpId].compCouplingUp = couplingUp; 
+		grp_Info[grpId].compCouplingDown = couplingDown;
+		numComp += grp_Info[grpId].SizeN;
+	}
+}
+
 
 // set conductance values for a simulation (custom values or disable conductances alltogether)
 void CpuSNN::setConductances(bool isSet, int tdAMPA, int trNMDA, int tdNMDA, int tdGABAa,
@@ -543,20 +572,6 @@ void CpuSNN::setNeuronParameters(int grpId, float izh_C, float izh_C_sd, float i
 		grp_Info2[grpId].Izh_d = izh_d;
 		grp_Info2[grpId].Izh_d_sd = izh_d_sd;
 		grp_Info[grpId].withParamModel_9 = 1;
-	}
-}
-
-void CpuSNN::setCompartmentParameters(int grpId, float G_u, float G_d) {
-	if (grpId == ALL) { // shortcut for all groups
-		for (int grpId1 = 0; grpId1<numGrp; grpId1++) {
-			setCompartmentParameters(grpId1, G_u, G_d);
-		}
-	} else {
-		sim_with_compartments = true;
-		grp_Info[grpId].withCompartments = true;
-		grp_Info[grpId].G_u = G_u; 
-		grp_Info[grpId].G_d = G_d;
-		numComp += grp_Info[grpId].SizeN;
 	}
 }
 
@@ -2039,6 +2054,7 @@ void CpuSNN::CpuSNNinit() {
 
 	numGrp   = 0;
 	numConnections = 0;
+	numCompartmentConnections = 0;
 	numSpikeGenGrps  = 0;
 	NgenFunc = 0;
 	simulatorDeleted = false;
@@ -2231,11 +2247,6 @@ void CpuSNN::buildNetworkInit() {
 	// keeps track of all neurons that spiked at current time step
 	curSpike = new bool[numNReg];
 	memset(curSpike, 0, sizeof(curSpike[0])*numNReg);
-
-	// if (sim_with_compartments) {
-	// 	compVoltage = new float[numNReg];
-	// 	prevCompVoltage = new float[numNReg];
-	// }
 
 	cpuSnnSz.neuronInfoSize += (sizeof(float)*numNReg*8);
 
@@ -2442,9 +2453,6 @@ void CpuSNN::buildGroup(int grpId) {
  * \sa createGroup(), connect()
  */
 void CpuSNN::buildNetwork() {
-	grpConnectInfo_t* newInfo = connectBegin;
-	compConnectInfo_t* newInfo2 = compConnectBegin;
-
 	// find the maximum values for number of pre- and post-synaptic neurons
 	findMaxNumSynapses(&numPostSynapses_, &numPreSynapses_);
 
@@ -2529,6 +2537,10 @@ void CpuSNN::buildNetwork() {
 		assert(grpIds[nid]!=-1);
 	}
 
+
+	grpConnectInfo_t* newInfo = connectBegin;
+	compConnectInfo_t* newInfo2 = compConnectBegin;
+
 	if (loadSimFID != NULL) {
 		int loadError;
 		// we the user specified loadSimulation the synaptic weights will be restored here...
@@ -2570,7 +2582,7 @@ void CpuSNN::buildNetwork() {
 				exitSimulation(1);
 			}
 			grp_Info[grpLower].compNeighbors[i] = grpUpper;
-			grp_Info[grpLower].compCoupling[i] = grp_Info[grpUpper].G_d; // get down-coupling from upper neighbor
+			grp_Info[grpLower].compCoupling[i] = grp_Info[grpUpper].compCouplingDown; // get down-coupling from upper neighbor
 			grp_Info[grpLower].numCompNeighbors++;
 
 			int j = grp_Info[grpUpper].numCompNeighbors;
@@ -2580,7 +2592,7 @@ void CpuSNN::buildNetwork() {
 				exitSimulation(1);
 			}
 			grp_Info[grpUpper].compNeighbors[j] = grpLower;
-			grp_Info[grpUpper].compCoupling[j] = grp_Info[grpLower].G_u; // get up-coupling from lower neighbor
+			grp_Info[grpUpper].compCoupling[j] = grp_Info[grpLower].compCouplingUp; // get up-coupling from lower neighbor
 			grp_Info[grpUpper].numCompNeighbors++;
 			
 			newInfo2 = newInfo2->next;
@@ -3646,8 +3658,6 @@ float CpuSNN::getCompCurrent(int grpId, int neurId, float const0, float const1) 
 		int neurIdOther = neurId - grp_Info[grpId].StartN + grp_Info[grpIdOther].StartN;
 		compCurrent += grp_Info[grpId].compCoupling[k] * ((voltage[neurIdOther] + const1)
 			- (voltage[neurId] + const0));
-		// compCurrent += grp_Info[grpId].compCoupling[k] * ((prevCompVoltage[neurIdOther] + const1)
-		// 	- (prevCompVoltage[neurId] + const0));
 	}
 
 	return compCurrent;
@@ -3823,15 +3833,10 @@ void  CpuSNN::globalStateUpdate() {
 			}  // end StartN...EndN
 		}  // end numGrp
 
-		// if (sim_with_compartments) {
-			// memcpy(prevCompVoltage, compVoltage, sizeof(float)*numNReg);
-		// }
-
 		// Only after we are done computing nextVoltage for all neurons do we copy the new values to the voltage array.
 		// This is crucial for GPU (asynchronous kernel launch) and in the future for a multi-threaded CARLsim version.
 		memcpy(voltage, nextVoltage, sizeof(float)*numNReg);
 	}  // end simNumStepsPerMs_ loop
-
 }
 
 // initialize all the synaptic weights to appropriate values..
@@ -3889,6 +3894,9 @@ void CpuSNN::verifyNetwork() {
 	// make sure number of neuron parameters have been accumulated correctly
 	// NOTE: this used to be updateParameters
 	verifyNumNeurons();
+
+	// make sure compartment config is valid
+	verifyCompartments();
 
 	// make sure STDP post-group has some incoming plastic connections
 	verifySTDP();
@@ -3981,6 +3989,30 @@ void CpuSNN::verifyNumNeurons() {
 //	printf("numNPois=%d == %d\n",numNPois, nExcPois+nInhPois);
 }
 
+void CpuSNN::verifyCompartments() {
+	assert((sim_with_compartments && compConnectBegin!=NULL) || (!sim_with_compartments && compConnectBegin==NULL));
+
+	compConnectInfo_t* newInfo = compConnectBegin;
+	while (newInfo) {
+		int grpLower = newInfo->grpSrc;
+		int grpUpper = newInfo->grpDest;
+
+		// make sure groups are compartmentally enabled
+		if (!grp_Info[grpLower].withCompartments) {
+			KERNEL_ERROR("Group %s(%d) is not compartmentally enabled, cannot be part of a compartmental connection.",
+				grp_Info2[grpLower].Name.c_str(), grpLower);
+			exitSimulation(1);
+		}
+		if (!grp_Info[grpUpper].withCompartments) {
+			KERNEL_ERROR("Group %s(%d) is not compartmentally enabled, cannot be part of a compartmental connection.",
+				grp_Info2[grpUpper].Name.c_str(), grpUpper);
+			exitSimulation(1);
+		}
+
+		newInfo = newInfo->next;
+	}
+}
+
 // \FIXME: not sure where this should go... maybe create some helper file?
 bool CpuSNN::isPoint3DinRF(const RadiusRF& radius, const Point3D& pre, const Point3D& post) {
 	// Note: RadiusRF rad is assumed to be the fanning in to the post neuron. So if the radius is 10 pixels, it means
@@ -4022,8 +4054,6 @@ double CpuSNN::getRFDist3D(const RadiusRF& radius, const Point3D& pre, const Poi
 void CpuSNN::makePtrInfo() {
 	cpuNetPtrs.voltage			= voltage;
 	cpuNetPtrs.nextVoltage      = nextVoltage;
-	// cpuNetPtrs.compVoltage		= compVoltage;
-	// cpuNetPtrs.prevCompVoltage  = prevCompVoltage;
 	cpuNetPtrs.recovery			= recovery;
 	cpuNetPtrs.current			= current;
 	cpuNetPtrs.extCurrent       = extCurrent;
@@ -4686,12 +4716,6 @@ void CpuSNN::resetPointers(bool deallocate) {
 	if (curSpike!=NULL && deallocate) delete[] curSpike;
 	voltage=NULL; nextVoltage=NULL; recovery=NULL; current=NULL; extCurrent=NULL; curSpike = NULL;
 
-	// if (sim_with_compartments && deallocate) {
-	// 	if (compVoltage != NULL) delete[] compVoltage;
-	// 	if (prevCompVoltage != NULL) delete[] prevCompVoltage;
-	// }
-	// compVoltage = NULL; prevCompVoltage = NULL;
-
 	if (Izh_C != NULL && deallocate) delete[] Izh_C;
 	if (Izh_k != NULL && deallocate) delete[] Izh_k;
 	if (Izh_vr != NULL && deallocate) delete[] Izh_vr;
@@ -4701,10 +4725,8 @@ void CpuSNN::resetPointers(bool deallocate) {
 	if (Izh_vpeak != NULL && deallocate) delete[] Izh_vpeak;
 	if (Izh_c!=NULL && deallocate) delete[] Izh_c;
 	if (Izh_d!=NULL && deallocate) delete[] Izh_d;
-	// if (G_u != NULL && deallocate) delete[] G_u;
-	// if (G_d != NULL && deallocate) delete[] G_d;
 	Izh_C = NULL; Izh_k = NULL; Izh_vr = NULL; Izh_vt = NULL; Izh_a = NULL; Izh_b = NULL; Izh_vpeak = NULL;
-	Izh_c = NULL; Izh_d = NULL; // G_u = NULL; G_d = NULL;
+	Izh_c = NULL; Izh_d = NULL;
 
 	if (Npre!=NULL && deallocate) delete[] Npre;
 	if (Npre_plastic!=NULL && deallocate) delete[] Npre_plastic;
@@ -4909,7 +4931,8 @@ inline post_info_t CpuSNN::SET_CONN_ID(int nid, int sid, int grpId) {
 
 //! set one specific connection from neuron id 'src' to neuron id 'dest'
 inline void CpuSNN::setConnection(int srcGrp,  int destGrp,  unsigned int src, unsigned int dest, float synWt,
-									float maxWt, uint8_t dVal, int connProp, short int connId) {
+	float maxWt, uint8_t dVal, int connProp, short int connId)
+{
 	assert(dest<=CONN_SYN_NEURON_MASK);			// total number of neurons is less than 1 million within a GPU
 	assert((dVal >=1) && (dVal <= maxDelay_));
 

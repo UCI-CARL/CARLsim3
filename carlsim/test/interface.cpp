@@ -57,49 +57,92 @@ TEST(Interface, connectDeath) {
 	delete sim;
 }
 
-
-
-//! trigger all UserErrors
-// TODO: add more error checking
-TEST(Interface, compConnectDeath) {
+TEST(Interface, connectCompartmentsDeath) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 	
-	CARLsim* sim = new CARLsim("Interface.compConnectDeath",CPU_MODE,SILENT,0,42);
+	CARLsim* sim = new CARLsim("Interface.connectCompartmentsDeath", CPU_MODE, SILENT, 0, 42);
 
 	int N = 5; //number of neurons
-
 	int s = sim->createGroup("soma", N, EXCITATORY_NEURON);
 	int d1 = sim->createGroup("d1", N, EXCITATORY_NEURON);
 	int d2 = sim->createGroup("d2", N, EXCITATORY_NEURON);
 	int d3 = sim->createGroup("d3", N, EXCITATORY_NEURON);
 	int d4 = sim->createGroup("d4", N, EXCITATORY_NEURON);
 	int d5 = sim->createGroup("d5", N, EXCITATORY_NEURON);
+	int d6 = sim->createGroup("d56", 2*N, EXCITATORY_NEURON);
+	sim->setNeuronParameters(s, 550.0f, 2.0, -59.0, -50.0, 0.0, -0.0, 24.0, -53.0, 109.0f);
+	sim->setNeuronParameters(d1, 367.0f, 1.0, -59.0, -44.0, 0.0, 3.0, 20.0, -46.0, 24.0f);
+	sim->setNeuronParameters(d2, 425.0f, 2.0, -59.0, -25.0, 0.0, 0.0, 13.0, -38.0, 69.0f);
+	sim->setNeuronParameters(d3, 225.0f, 1.0, -59.0, -36.0, 0.0, -4.0, 21.0, -40.0, 21.0f);
+	sim->setNeuronParameters(d4, 225.0f, 1.0, -59.0, -36.0, 0.0, -4.0, 21.0, -40.0, 21.0f);
+	sim->setNeuronParameters(d5, 225.0f, 1.0, -59.0, -36.0, 0.0, -4.0, 21.0, -40.0, 21.0f);
+	sim->setNeuronParameters(d6, 225.0f, 1.0, -59.0, -36.0, 0.0, -4.0, 21.0, -40.0, 21.0f);
 
-	sim->setNeuronParameters(s, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);
-	sim->setNeuronParameters(d1, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);
-	sim->setNeuronParameters(d2, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);
-	sim->setNeuronParameters(d3, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);
-	sim->setNeuronParameters(d4, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);
-	sim->setNeuronParameters(d5, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);
+	int gen = sim->createSpikeGeneratorGroup("SpikeGen", N, EXCITATORY_NEURON);
 
-	int gin = sim->createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
+	// grpIDs must be valid, cannot be identical
+	EXPECT_DEATH({sim->connectCompartments(sim->getNumGroups(), d1);},"");
+	EXPECT_DEATH({sim->connectCompartments(s, 10);},"");
+	EXPECT_DEATH({sim->connectCompartments(s, -1);},"");
+	EXPECT_DEATH({sim->connectCompartments(-1, s);},"");
+	EXPECT_DEATH({sim->connectCompartments(d3, d3);},"");
 
-	sim->setConductances(false);
+	// no spike generators in connect call
+	EXPECT_DEATH({sim->connectCompartments(gen, s);},"");
+	EXPECT_DEATH({sim->connectCompartments(d2, gen);},"");
+	EXPECT_DEATH({sim->connectCompartments(gen, gen);},"");
 
-	sim->connect(gin, s, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
+	// groups must be of same size
+	EXPECT_DEATH({sim->connectCompartments(s, d6);},"");
 
-	sim->compConnect(d1, s);
-	sim->compConnect(s, d2);
-	sim->compConnect(s, d3);
-	sim->compConnect(s, d4);
 
-	EXPECT_DEATH(sim->compConnect(s, d5); ,"");//Not allowed to have > 4 compartment connections
-	EXPECT_DEATH(sim->compConnect(s, d1); ,"");//Not allowed to have reverse comp connections.
-	EXPECT_DEATH(sim->compConnect(d1, s); ,"");//Not allowed to have identical comp connections.
-	EXPECT_DEATH(sim->compConnect(gin, s);, "");//Not allowed to have synaptic and comp connections on same pair of groups.
-	
-	delete sim;
+	// connectCompartments is bidirectional: connecting same groups twice is illegal
+	sim->connectCompartments(s, d1);
+	EXPECT_DEATH({sim->connectCompartments(s, d1);},"");
+	EXPECT_DEATH({sim->connectCompartments(d1, s);},"");
+
+	// can't have both synaptic and compartmental connections on the same groups
+	EXPECT_DEATH({sim->connect(s, d1, "full", RangeWeight(1.0f), 1.0f);},"");
+	EXPECT_DEATH({sim->connect(d1, s, "full", RangeWeight(1.0f), 1.0f);},"");
+	sim->connect(d3, d2, "full", RangeWeight(1.0f), 1.0f);
+	EXPECT_DEATH({sim->connectCompartments(d3, d2);},"");
+	EXPECT_DEATH({sim->connectCompartments(d2, d3);},"");
+
+	// can't be involved in more than 4 connections (d1-d4), d5 must break
+	sim->connectCompartments(d2, s);
+	sim->connectCompartments(d3, s);
+	sim->connectCompartments(s, d4);
+	EXPECT_DEATH({sim->connectCompartments(d5, s);},"");
+	EXPECT_DEATH({sim->connectCompartments(s, d5);},"");
 }
+
+
+//! trigger all UserErrors
+// TODO: add more error checking
+// TEST(Interface, compConnectDeath) {
+// 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
+	
+// 	CARLsim* sim = new CARLsim("Interface.compConnectDeath",CPU_MODE,SILENT,0,42);
+
+
+// 	int gin = sim->createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
+
+// 	sim->setConductances(false);
+
+// 	sim->connect(gin, s, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
+
+// 	sim->compConnect(d1, s);
+// 	sim->compConnect(s, d2);
+// 	sim->compConnect(s, d3);
+// 	sim->compConnect(s, d4);
+
+// 	EXPECT_DEATH(sim->compConnect(s, d5); ,"");//Not allowed to have > 4 compartment connections
+// 	EXPECT_DEATH(sim->compConnect(s, d1); ,"");//Not allowed to have reverse comp connections.
+// 	EXPECT_DEATH(sim->compConnect(d1, s); ,"");//Not allowed to have identical comp connections.
+// 	EXPECT_DEATH(sim->compConnect(gin, s);, "");//Not allowed to have synaptic and comp connections on same pair of groups.
+	
+// 	delete sim;
+// }
 
 
 //! Death tests for createGroup (test all possible silly values)

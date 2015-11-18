@@ -910,8 +910,6 @@ __device__ float getCompCurrent_GPU(int grpId, int neurId, float const0=0.0f, fl
 		int neurIdOther = neurId - gpuGrpInfo[grpId].StartN + gpuGrpInfo[grpIdOther].StartN;
 		compCurrent += gpuGrpInfo[grpId].compCoupling[k] * ((gpuPtrs.voltage[neurIdOther] + const1)
 			- (gpuPtrs.voltage[neurId] + const0));
-		// compCurrent += gpuGrpInfo[grpId].compCoupling[k] * ((gpuPtrs.prevCompVoltage[neurIdOther] + const1)
-		// 	- (gpuPtrs.prevCompVoltage[neurId] + const0));
 	}
 
 	return compCurrent;
@@ -1186,12 +1184,6 @@ void CpuSNN::globalStateUpdate_GPU() {
 		kernel_globalStateUpdate <<<gridSize, blkSize>>> (simTimeMs, simTimeSec, simTime, lastIter);
 		CUDA_GET_LAST_ERROR("kernel_globalStateUpdate failed");
 
-		// if (sim_with_compartments) {
-		// 	CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.prevCompVoltage, cpu_gpuNetPtrs.compVoltage, 
-		// 		sizeof(float) * numNReg, cudaMemcpyDeviceToDevice));
-		// 	CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.compVoltage, cpu_gpuNetPtrs.voltage, sizeof(float) * numNReg,
-		// 		cudaMemcpyDeviceToDevice));
-		// }
 		// the above kernel should end with a syncthread statement to be on the safe side
 		CUDA_CHECK_ERRORS(cudaMemcpy(cpu_gpuNetPtrs.voltage, cpu_gpuNetPtrs.nextVoltage, 
 			sizeof(float) * numNReg, cudaMemcpyDeviceToDevice));
@@ -2116,16 +2108,6 @@ void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpy
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->curSpike, sizeof(float) * length));
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->curSpike[ptrPos], &src->curSpike[ptrPos], sizeof(float) * length, kind));
 
-	// if (sim_with_compartments) {
-	// 	if (allocateMem)
-	// 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->compVoltage, sizeof(float) * length));
-	// 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->compVoltage[ptrPos], &src->compVoltage[ptrPos], sizeof(float) * length, kind));
-
-	// 	if (allocateMem)
-	// 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->prevCompVoltage, sizeof(float) * length));
-	// 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->prevCompVoltage[ptrPos], &src->prevCompVoltage[ptrPos], sizeof(float) * length, kind));
-	// }
-
 	if (sim_with_conductances) {
 	    //conductance information
 	    copyConductanceState(dest, src, kind, allocateMem, grpId);
@@ -2264,14 +2246,6 @@ void CpuSNN::copyNeuronParametersFromHostToDevice(network_ptr_t* dest, bool allo
 	if(allocateMem)
 		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->Izh_d, sizeof(float) * length));
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->Izh_d[ptrPos], &Izh_d[ptrPos], sizeof(float) * length, kind));
-
-	// if (allocateMem)
-	// 	CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->G_u, sizeof(float) * length));
-	// CUDA_CHECK_ERRORS(cudaMemcpy(&dest->G_u[ptrPos2], &G_u[ptrPos2], sizeof(float) * length2, kind));
-
-	// if (allocateMem)
-	// 	CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->G_d, sizeof(float) * length));
-	// CUDA_CHECK_ERRORS(cudaMemcpy(&dest->G_d[ptrPos2], &G_d[ptrPos2], sizeof(float) * length2, kind));
 
 	if (sim_with_homeostasis) {
 		//Included to enable homeostatic plasticity in GPU_MODE. 
@@ -2650,8 +2624,6 @@ void CpuSNN::deleteObjects_GPU() {
 	// cudaFree all device pointers
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.voltage) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.nextVoltage) );
-	// CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.compVoltage));
-	// CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.prevCompVoltage));
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.recovery) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.current) );
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.extCurrent) );
@@ -2697,8 +2669,6 @@ void CpuSNN::deleteObjects_GPU() {
 	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.Izh_vt));
 	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.Izh_k));
 	CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.Izh_vpeak));
-	// CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.G_u));
-	// CUDA_CHECK_ERRORS(cudaFree(cpu_gpuNetPtrs.G_d));
 	CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.gAMPA) );
 	if (sim_with_NMDA_rise) {
 		CUDA_CHECK_ERRORS( cudaFree(cpu_gpuNetPtrs.gNMDA_r) );

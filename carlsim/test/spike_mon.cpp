@@ -254,7 +254,7 @@ TEST(SpikeMon, clear) {
 		int inputGroup = sim->createSpikeGeneratorGroup("Input",GRP_SIZE,EXCITATORY_NEURON);
 
 		sim->setConductances(true,COND_tAMPA,COND_tNMDA,COND_tGABAa,COND_tGABAb);
-		double initWeight = 0.05f;
+		double initWeight = 0.5f;
 
 		// input
         PeriodicSpikeGenerator spkGenG0(inputTargetFR);
