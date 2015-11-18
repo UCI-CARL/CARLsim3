@@ -231,7 +231,7 @@ TEST(SpikeMon, clear) {
 
 	CARLsim* sim;
 	const int GRP_SIZE = 5;
-    const int inputTargetFR = 10.0f;
+    const int inputTargetFR = 20.0f;
 	int runTimeMs = 2000;
 
 #ifdef __CPU_ONLY__

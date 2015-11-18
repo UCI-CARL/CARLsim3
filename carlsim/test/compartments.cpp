@@ -144,19 +144,21 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 
 
 /*!
-* \brief testing CARLsim compartments + CUBA CPU vs GPU
+* \brief Testing CPU vs GPU consistency for compartment model
 *
-* This test makes sure that firing rate of CUBA compartmental groups are similar accross CPU and GPU.
+* This test makes sure that CPU mode and GPU mode of the compartment model produce the exact same spike times,
+* even with RK4 at 50 time steps.
 */
-TEST(COMPARTMENTS, firingRateCPUvsGPU_CUBA) {
+TEST(COMPARTMENTS, spikeTimesCPUvsGPU) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-	for (int inver_timestep = 10; inver_timestep < 50; inver_timestep += 10) {
-		float cpu_firingRate, cpu_firingRate_1, cpu_firingRate_2, cpu_firingRate_3;
+	for (int hasCOBA=0; hasCOBA<=1; hasCOBA++) {
+		int cpu_numSpikesSP, cpu_numSpikesSR, cpu_numSpikesSLM, cpu_numSpikesSO;
+		std::vector<std::vector<int> > cpu_spkTimesSP, cpu_spkTimesSR, cpu_spkTimesSLM, cpu_spkTimesSO;
 
 		for (int isGPUmode = 0; isGPUmode <= 1; isGPUmode++) {
 			CARLsim* sim = new CARLsim("CUBA.firingRateVsData", isGPUmode ? GPU_MODE : CPU_MODE, SILENT, 0, 42);
-			sim->setIntegrationMethod(RUNGE_KUTTA4, inver_timestep);
+			sim->setIntegrationMethod(RUNGE_KUTTA4, 50);
 
 			int N = 5;
 
@@ -165,10 +167,14 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_CUBA) {
 			int grpSLM = sim->createGroup("excit", N, EXCITATORY_NEURON);
 			int grpSO = sim->createGroup("excit", N, EXCITATORY_NEURON);
 
-			sim->setNeuronParameters(grpSP, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
-			sim->setNeuronParameters(grpSR, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(grpSLM, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(grpSO, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSP, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, 
+			-0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
+			sim->setNeuronParameters(grpSR, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 
+			3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSLM, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 
+			0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+			sim->setNeuronParameters(grpSO, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, 
+			-4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
 
 			sim->setCompartmentParameters(grpSR, 28.396f, 5.526f);//SR 28 and 5
 			sim->setCompartmentParameters(grpSLM, 50.474f, 0.0f);//SLM 50 and 0
@@ -178,7 +184,7 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_CUBA) {
 			int gin = sim->createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
 			sim->connect(gin, grpSP, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
 
-			sim->setConductances(false);//This forces use of CUBA model.
+			sim->setConductances(hasCOBA);
 
 			sim->compConnect(grpSLM, grpSR);
 			sim->compConnect(grpSR, grpSP);
@@ -191,37 +197,76 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_CUBA) {
 
 			sim->setupNetwork();
 
-			SpikeMonitor* SM = sim->setSpikeMonitor(grpSP, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_1 = sim->setSpikeMonitor(grpSR, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_2 = sim->setSpikeMonitor(grpSLM, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_3 = sim->setSpikeMonitor(grpSO, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spkMonSP = sim->setSpikeMonitor(grpSP, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spkMonSR = sim->setSpikeMonitor(grpSR, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spkMonSLM = sim->setSpikeMonitor(grpSLM, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spkMonSO = sim->setSpikeMonitor(grpSO, "DEFAULT"); // put spike times into file
 
 			PoissonRate in(N);
 
 			in.setRates(0.0f);
 			sim->setSpikeRate(gin, &in);//Inactive input group
 
-			SM->startRecording();
-			SM_1->startRecording();
-			SM_2->startRecording();
-			SM_3->startRecording();
+			spkMonSP->startRecording();
+			spkMonSR->startRecording();
+			spkMonSLM->startRecording();
+			spkMonSO->startRecording();
 			sim->setExternalCurrent(grpSP, 600);
 			sim->runNetwork(1, 0);
-			SM->stopRecording();
-			SM_1->stopRecording();
-			SM_2->stopRecording();
-			SM_3->stopRecording();
+			spkMonSP->stopRecording();
+			spkMonSR->stopRecording();
+			spkMonSLM->stopRecording();
+			spkMonSO->stopRecording();
 
 			if (isGPUmode == 0) {
-				cpu_firingRate = SM->getPopMeanFiringRate();
-				cpu_firingRate_1 = SM_1->getPopMeanFiringRate();
-				cpu_firingRate_2 = SM_2->getPopMeanFiringRate();
-				cpu_firingRate_3 = SM_3->getPopMeanFiringRate();
+				cpu_numSpikesSP = spkMonSP->getPopNumSpikes();
+				cpu_numSpikesSR = spkMonSR->getPopNumSpikes();
+				cpu_numSpikesSLM = spkMonSLM->getPopNumSpikes();
+				cpu_numSpikesSO = spkMonSO->getPopNumSpikes();
+				cpu_spkTimesSP = spkMonSP->getSpikeVector2D();
+				cpu_spkTimesSR = spkMonSR->getSpikeVector2D();
+				cpu_spkTimesSLM = spkMonSLM->getSpikeVector2D();
+				cpu_spkTimesSO = spkMonSO->getSpikeVector2D();
 			} else {
-				EXPECT_FLOAT_EQ(SM->getPopMeanFiringRate(), cpu_firingRate);
-				EXPECT_FLOAT_EQ(SM_1->getPopMeanFiringRate(), cpu_firingRate_1);
-				EXPECT_FLOAT_EQ(SM_2->getPopMeanFiringRate(), cpu_firingRate_2);
-				EXPECT_FLOAT_EQ(SM_3->getPopMeanFiringRate(), cpu_firingRate_3);
+				EXPECT_EQ(spkMonSP->getPopNumSpikes(), cpu_numSpikesSP);
+				if (spkMonSP->getPopNumSpikes() == cpu_numSpikesSP) {
+					std::vector<std::vector<int> > gpu_spkTimesSP = spkMonSP->getSpikeVector2D();
+					for (int i=0; i<cpu_spkTimesSP.size(); i++) {
+						for (int j=0; j<cpu_spkTimesSP[0].size(); j++) {
+							EXPECT_EQ(gpu_spkTimesSP[i][j], cpu_spkTimesSP[i][j]);
+						}
+					}
+				}
+
+				EXPECT_EQ(spkMonSR->getPopNumSpikes(), cpu_numSpikesSR);
+				if (spkMonSR->getPopNumSpikes() == cpu_numSpikesSR) {
+					std::vector<std::vector<int> > gpu_spkTimesSR = spkMonSR->getSpikeVector2D();
+					for (int i=0; i<cpu_spkTimesSR.size(); i++) {
+						for (int j=0; j<cpu_spkTimesSR[0].size(); j++) {
+							EXPECT_EQ(gpu_spkTimesSR[i][j], cpu_spkTimesSR[i][j]);
+						}
+					}
+				}
+
+				EXPECT_EQ(spkMonSLM->getPopNumSpikes(), cpu_numSpikesSLM);
+				if (spkMonSLM->getPopNumSpikes() == cpu_numSpikesSLM) {
+					std::vector<std::vector<int> > gpu_spkTimesSR = spkMonSLM->getSpikeVector2D();
+					for (int i=0; i<cpu_spkTimesSLM.size(); i++) {
+						for (int j=0; j<cpu_spkTimesSLM[0].size(); j++) {
+							EXPECT_EQ(gpu_spkTimesSR[i][j], cpu_spkTimesSLM[i][j]);
+						}
+					}
+				}
+
+				EXPECT_EQ(spkMonSO->getPopNumSpikes(), cpu_numSpikesSO);
+				if (spkMonSO->getPopNumSpikes() == cpu_numSpikesSO) {
+					std::vector<std::vector<int> > gpu_spkTimesSO = spkMonSO->getSpikeVector2D();
+					for (int i=0; i<cpu_spkTimesSO.size(); i++) {
+						for (int j=0; j<cpu_spkTimesSO[0].size(); j++) {
+							EXPECT_EQ(gpu_spkTimesSO[i][j], cpu_spkTimesSO[i][j]);
+						}
+					}
+				}
 			}
 
 			delete sim;
@@ -229,91 +274,6 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_CUBA) {
 	}
 }
 
-
-/*!
-* \brief testing CARLsim compartments + COBA CPU vs GPU
-*
-* This test makes sure that firing rate of COBA compartmental groups are similar accross CPU and GPU.
-*/
-TEST(COMPARTMENTS, firingRateCPUvsGPU_COBA) {
-	::testing::FLAGS_gtest_death_test_style = "threadsafe";
-
-	for (int inver_timestep = 10; inver_timestep < 50; inver_timestep += 10) {
-		float cpu_firingRate, cpu_firingRate_1, cpu_firingRate_2, cpu_firingRate_3;
-
-		for (int isGPUmode = 0; isGPUmode <= 1; isGPUmode++) {
-			CARLsim* sim = new CARLsim("CUBA.firingRateVsData", isGPUmode ? GPU_MODE : CPU_MODE, SILENT, 0, 42);
-			sim->setIntegrationMethod(RUNGE_KUTTA4, inver_timestep);
-
-			int N = 5;
-
-			int grpSP = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int grpSR = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int grpSLM = sim->createGroup("excit", N, EXCITATORY_NEURON);
-			int grpSO = sim->createGroup("excit", N, EXCITATORY_NEURON);
-
-			sim->setNeuronParameters(grpSP, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
-			sim->setNeuronParameters(grpSR, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(grpSLM, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-			sim->setNeuronParameters(grpSO, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
-
-			sim->setCompartmentParameters(grpSR, 28.396f, 5.526f);//SR 28 and 5
-			sim->setCompartmentParameters(grpSLM, 50.474f, 0.0f);//SLM 50 and 0
-			sim->setCompartmentParameters(grpSO, 0.0f, 49.14f);//SO 0 and 49
-			sim->setCompartmentParameters(grpSP, 116.861f, 4.60f);// SP (somatic) 116 and 4
-
-			int gin = sim->createSpikeGeneratorGroup("input", N, EXCITATORY_NEURON);
-			sim->connect(gin, grpSP, "one-to-one", RangeWeight(0.0f), 1.0f, RangeDelay(1), RadiusRF(-1));
-
-			sim->setConductances(true);//This forces use of COBA model.
-
-			sim->compConnect(grpSLM, grpSR);
-			sim->compConnect(grpSR, grpSP);
-			sim->compConnect(grpSP, grpSO);
-
-			sim->setSTDP(grpSR, false);
-			sim->setSTDP(grpSLM, false);
-			sim->setSTDP(grpSO, false);
-			sim->setSTDP(grpSP, false);
-
-			sim->setupNetwork();
-
-			SpikeMonitor* SM = sim->setSpikeMonitor(grpSP, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_1 = sim->setSpikeMonitor(grpSR, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_2 = sim->setSpikeMonitor(grpSLM, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_3 = sim->setSpikeMonitor(grpSO, "DEFAULT"); // put spike times into file
-
-			PoissonRate in(N);
-
-			in.setRates(0.0f);
-			sim->setSpikeRate(gin, &in);//Inactive input group
-
-			SM->startRecording();
-			SM_1->startRecording();
-			SM_2->startRecording();
-			SM_3->startRecording();
-			sim->setExternalCurrent(grpSP, 600);
-			sim->runNetwork(1, 0);
-			SM->stopRecording();
-			SM_1->stopRecording();
-			SM_2->stopRecording();
-			SM_3->stopRecording();
-
-			if (isGPUmode == 0) {
-				cpu_firingRate = SM->getPopMeanFiringRate();
-				cpu_firingRate_1 = SM_1->getPopMeanFiringRate();
-				cpu_firingRate_2 = SM_2->getPopMeanFiringRate();
-				cpu_firingRate_3 = SM_3->getPopMeanFiringRate();
-			} else {
-				EXPECT_FLOAT_EQ(SM->getPopMeanFiringRate(), cpu_firingRate);
-				EXPECT_FLOAT_EQ(SM_1->getPopMeanFiringRate(), cpu_firingRate_1);
-				EXPECT_FLOAT_EQ(SM_2->getPopMeanFiringRate(), cpu_firingRate_2);
-				EXPECT_FLOAT_EQ(SM_3->getPopMeanFiringRate(), cpu_firingRate_3);
-			}
-			delete sim;
-		}
-	}
-}
 
 /*!
 * \brief testing CARLsim compartments via voltage recording
@@ -338,7 +298,7 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_COBA_Volt_Rec) {
 		CPU_Soma_Volt_Rec = new float[voltRecordBufferSize];
 		GPU_Soma_Volt_Rec = new float[voltRecordBufferSize];
 
-		float cpu_firingRate, cpu_firingRate_1, cpu_firingRate_2, cpu_firingRate_3;
+		float cpu_numSpikesSP, cpu_numSpikesSR, cpu_numSpikesSLM, cpu_numSpikesSO;
 
 		for (int isGPUmode = 0; isGPUmode <= 1; isGPUmode++) {
 			CARLsim* sim = new CARLsim("CUBA.firingRateVsData", isGPUmode ? GPU_MODE : CPU_MODE, SILENT, 0, 42);
@@ -377,26 +337,26 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_COBA_Volt_Rec) {
 
 			sim->setupNetwork();
 
-			SpikeMonitor* SM = sim->setSpikeMonitor(grpSP, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_1 = sim->setSpikeMonitor(grpSR, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_2 = sim->setSpikeMonitor(grpSLM, "DEFAULT"); // put spike times into file
-			SpikeMonitor* SM_3 = sim->setSpikeMonitor(grpSO, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spkMonSP = sim->setSpikeMonitor(grpSP, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spkMonSR = sim->setSpikeMonitor(grpSR, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spkMonSLM = sim->setSpikeMonitor(grpSLM, "DEFAULT"); // put spike times into file
+			SpikeMonitor* spkMonSO = sim->setSpikeMonitor(grpSO, "DEFAULT"); // put spike times into file
 
 			PoissonRate in(N);
 
 			in.setRates(0.0f);
 			sim->setSpikeRate(gin, &in);//Inactive input group
 
-			SM->startRecording();
-			SM_1->startRecording();
-			SM_2->startRecording();
-			SM_3->startRecording();
+			spkMonSP->startRecording();
+			spkMonSR->startRecording();
+			spkMonSLM->startRecording();
+			spkMonSO->startRecording();
 			sim->setExternalCurrent(grpSP, 600);
 			sim->runNetwork(0, 100);
-			SM->stopRecording();
-			SM_1->stopRecording();
-			SM_2->stopRecording();
-			SM_3->stopRecording();
+			spkMonSP->stopRecording();
+			spkMonSR->stopRecording();
+			spkMonSLM->stopRecording();
+			spkMonSO->stopRecording();
 
 			if (isGPUmode == 0)
 			{
@@ -405,10 +365,10 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_COBA_Volt_Rec) {
 				{
 					CPU_Soma_Volt_Rec[j] = CPU_Soma_VREC[j];
 				}
-				cpu_firingRate = SM->getPopMeanFiringRate();
-				cpu_firingRate_1 = SM_1->getPopMeanFiringRate();
-				cpu_firingRate_2 = SM_2->getPopMeanFiringRate();
-				cpu_firingRate_3 = SM_3->getPopMeanFiringRate();
+				cpu_numSpikesSP = spkMonSP->getPopNumSpikes();
+				cpu_numSpikesSR = spkMonSR->getPopNumSpikes();
+				cpu_numSpikesSLM = spkMonSLM->getPopNumSpikes();
+				cpu_numSpikesSO = spkMonSO->getPopNumSpikes();
 			}
 			else
 			{
@@ -417,10 +377,10 @@ TEST(COMPARTMENTS, firingRateCPUvsGPU_COBA_Volt_Rec) {
 				{
 					GPU_Soma_Volt_Rec[j] = GPU_Soma_VREC[j];
 				}
-				EXPECT_FLOAT_EQ(SM->getPopMeanFiringRate(), cpu_firingRate);
-				EXPECT_FLOAT_EQ(SM_1->getPopMeanFiringRate(), cpu_firingRate_1);
-				EXPECT_FLOAT_EQ(SM_2->getPopMeanFiringRate(), cpu_firingRate_2);
-				EXPECT_FLOAT_EQ(SM_3->getPopMeanFiringRate(), cpu_firingRate_3);
+				EXPECT_FLOAT_EQ(spkMonSP->getPopNumSpikes(), cpu_numSpikesSP);
+				EXPECT_FLOAT_EQ(spkMonSR->getPopNumSpikes(), cpu_numSpikesSR);
+				EXPECT_FLOAT_EQ(spkMonSLM->getPopNumSpikes(), cpu_numSpikesSLM);
+				EXPECT_FLOAT_EQ(spkMonSO->getPopNumSpikes(), cpu_numSpikesSO);
 			}
 			delete sim;
 		}
