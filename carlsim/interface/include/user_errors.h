@@ -79,8 +79,8 @@ public:
 	 * \param[in] errorMsgPrefix			a prefix for the error message
 	 * \param[in] errorMsgSuffix 			a suffix for the error message
 	 */
-	static void assertFalse(bool statement, errorType errorIfAssertionFails, std::string errorFunc,
-								std::string errorMsgPrefix="", std::string errorMsgSuffix="");
+	static void assertFalse(bool statement, errorType errorIfAssertionFails, const std::string& errorFunc,
+								const std::string& errorMsgPrefix="", const std::string& errorMsgSuffix="");
 
 	/*!
 	 * \brief Checks whether assertion statement is true, else throws error
@@ -96,8 +96,8 @@ public:
 	 * \param[in] errorMsgPrefix			a prefix for the error message
 	 * \param[in] errorMsgSuffix 			a suffix for the error message
 	 */
-	static void assertTrue(bool statement, errorType errorIfAssertionFails, std::string errorFunc,
-								std::string errorMsgPrefix="", std::string errorMsgSuffix="");
+	static void assertTrue(bool statement, errorType errorIfAssertionFails, const std::string& errorFunc,
+								const std::string& errorMsgPrefix="", const std::string& errorMsgSuffix="");
 
 //	static void userAssertNonZero();
 //	static void userAssertNonNegative();
@@ -113,8 +113,8 @@ private:
 	 * \param[in] errorFunc 	a string to indicate the location where the error occurred
 	 * \param[in] error 		the type of error to throw (from enum errorType)
 	 */
-	static void throwError(std::string errorFunc, errorType error, std::string errorMsgPrefix="",
-		std::string errorMsgSuffix="");
+	static void throwError(const std::string& errorFunc, errorType error, const std::string& errorMsgPrefix="",
+		const std::string& errorMsgSuffix="");
 };
 
 #endif

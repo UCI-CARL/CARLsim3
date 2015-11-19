@@ -49,7 +49,7 @@ public:
 	}
 
 	// starts/continues the timer
-	void start(std::string tag) {
+	void start(const std::string& tag) {
 		if (_isTimerOn) {
 			CARLSIM_WARN("Stopwatch::start", "Cannot start timer when timer is already on.");
 			return;
@@ -122,7 +122,7 @@ public:
 
 	// lap is equivalent to stop-start
 	// returns current lap time
-	uint64_t lap(std::string tag) {
+	uint64_t lap(const std::string& tag) {
 		if (!_isTimerOn) {
 			CARLSIM_WARN("Stopwatch::lap", "Cannot use lap when timer is off.");
 			return 0;
@@ -217,9 +217,9 @@ private:
 Stopwatch::Stopwatch(bool startTimer) : _impl( new Impl(startTimer) ) {}
 Stopwatch::~Stopwatch() { delete _impl; }
 
-void Stopwatch::start(std::string tag) { _impl->start(tag); }
+void Stopwatch::start(const std::string& tag) { _impl->start(tag); }
 uint64_t Stopwatch::stop(bool printMessage, FILE* printFile) { return _impl->stop(printMessage, printFile); }
-uint64_t Stopwatch::lap(std::string tag) { return _impl->lap(tag); }
+uint64_t Stopwatch::lap(const std::string& tag) { return _impl->lap(tag); }
 void Stopwatch::reset() { _impl->reset(); }
 
 uint64_t Stopwatch::getLapTime(const std::string& tag) const { return _impl->getLapTime(tag); }

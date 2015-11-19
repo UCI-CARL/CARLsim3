@@ -99,7 +99,7 @@ public:
 	 * \see Stopwatch::reset
 	 * \since v3.1
 	 */
-	void start(std::string tag = "");
+	void start(const std::string& tag = "");
 
 	/*!
 	 * \brief Stops the timer
@@ -143,7 +143,7 @@ public:
 	 * \see Stopwatch::reset
 	 * \since v3.1
 	 */
-	uint64_t lap(std::string tag = "");
+	uint64_t lap(const std::string& tag = "");
 
 	/*!
 	 * \brief Resets the timer

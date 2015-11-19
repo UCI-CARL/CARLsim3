@@ -12,14 +12,16 @@
 /// **************************************************************************************************************** ///
 
 // simple wrapper to assert a statement and print an error message
-void UserErrors::assertFalse(bool statement, errorType errorIfAssertionFails, std::string errorFunc,
-								std::string errorMsgPrefix, std::string errorMsgSuffix) {
+void UserErrors::assertFalse(bool statement, errorType errorIfAssertionFails, const std::string& errorFunc,
+	const std::string& errorMsgPrefix, const std::string& errorMsgSuffix)
+{
 	assertTrue(!statement, errorIfAssertionFails, errorFunc, errorMsgPrefix, errorMsgSuffix);
 }
 
 // simple wrapper to assert a statement and print an error message
-void UserErrors::assertTrue(bool statement, errorType errorIfAssertionFails, std::string errorFunc,
-								std::string errorMsgPrefix, std::string errorMsgSuffix) {
+void UserErrors::assertTrue(bool statement, errorType errorIfAssertionFails, const std::string& errorFunc,
+	const std::string& errorMsgPrefix, const std::string& errorMsgSuffix)
+{
 	if (!statement) {
 		throwError(errorFunc,errorIfAssertionFails,errorMsgPrefix,errorMsgSuffix); // display standard error message
 	}
@@ -31,8 +33,8 @@ void UserErrors::assertTrue(bool statement, errorType errorIfAssertionFails, std
 /// **************************************************************************************************************** ///
 
 // simple wrapper for displaying standard message per error type
-void UserErrors::throwError(std::string errorFunc, errorType error, std::string errorMsgPrefix,
-	std::string errorMsgSuffix) {
+void UserErrors::throwError(const std::string& errorFunc, errorType error, const std::string& errorMsgPrefix,
+	const std::string& errorMsgSuffix) {
 
 	std::string errorMsg = errorMsgPrefix;
 	
