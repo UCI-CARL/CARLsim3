@@ -277,19 +277,6 @@ short int CARLsim::connect(int grpId1, int grpId2, const std::string& connType, 
 	// add synaptic connection to 2D matrix
 	connSyn_[grpId1].push_back(grpId2);
 
-		fprintf(stderr,"connect\nconnSyn_ = %d [",connSyn_.size());
-	for (int i=0; i<connSyn_.size(); i++) {
-		fprintf(stderr,"%d ",connSyn_[i].size());
-	}
-	fprintf(stderr,"]\n");
-
-	fprintf(stderr,"connComp_ = %d [",connComp_.size());
-	for (int i=0; i<connComp_.size(); i++) {
-		fprintf(stderr,"%d ",connComp_[i].size());
-	}
-	fprintf(stderr,"]\n\n");
-
-
 	return snn_->connect(grpId1, grpId2, connType, wt.init, wt.max, connProb, delay.min, delay.max,
 		radRF.radX, radRF.radY, radRF.radZ, mulSynFast,	mulSynSlow, synWtType);
 }
@@ -320,20 +307,6 @@ short int CARLsim::connect(int grpId1, int grpId2, ConnectionGenerator* conn, bo
 
 	// add synaptic connection to 2D matrix
 	connSyn_[grpId1].push_back(grpId2);
-
-		fprintf(stderr,"connect\nconnSyn_ = %d [",connSyn_.size());
-	for (int i=0; i<connSyn_.size(); i++) {
-		fprintf(stderr,"%d ",connSyn_[i].size());
-	}
-	fprintf(stderr,"]\n");
-
-	fprintf(stderr,"connComp_ = %d [",connComp_.size());
-	for (int i=0; i<connComp_.size(); i++) {
-		fprintf(stderr,"%d ",connComp_[i].size());
-	}
-	fprintf(stderr,"]\n\n");
-
-
 
 	// TODO: check for sign of weights
 	ConnectionGeneratorCore* CGC = new ConnectionGeneratorCore(this, conn);
@@ -371,19 +344,6 @@ short int CARLsim::connect(int grpId1, int grpId2, ConnectionGenerator* conn, fl
 
 	// add synaptic connection to 2D matrix
 	connSyn_[grpId1].push_back(grpId2);
-
-		fprintf(stderr,"connect\nconnSyn_ = %d [",connSyn_.size());
-	for (int i=0; i<connSyn_.size(); i++) {
-		fprintf(stderr,"%d ",connSyn_[i].size());
-	}
-	fprintf(stderr,"]\n");
-
-	fprintf(stderr,"connComp_ = %d [",connComp_.size());
-	for (int i=0; i<connComp_.size(); i++) {
-		fprintf(stderr,"%d ",connComp_[i].size());
-	}
-	fprintf(stderr,"]\n\n");
-
 
 	ConnectionGeneratorCore* CGC = new ConnectionGeneratorCore(this, conn);
 	connGen_.push_back(CGC);
@@ -479,18 +439,6 @@ int CARLsim::createGroup(const std::string& grpName, const Grid3D& grid, int neu
 	connSyn_.resize(grpIds_.size());
 	connComp_.resize(grpIds_.size());
 
-	fprintf(stderr,"createGroup\nconnSyn_ = %d [",connSyn_.size());
-	for (int i=0; i<connSyn_.size(); i++) {
-		fprintf(stderr,"%d ",connSyn_[i].size());
-	}
-	fprintf(stderr,"]\n");
-
-	fprintf(stderr,"connComp_ = %d [",connComp_.size());
-	for (int i=0; i<connComp_.size(); i++) {
-		fprintf(stderr,"%d ",connComp_[i].size());
-	}
-	fprintf(stderr,"]\n\n");
-
 	return grpId;
 }
 
@@ -515,18 +463,6 @@ int CARLsim::createSpikeGeneratorGroup(const std::string& grpName, const Grid3D&
 	// extend 2D connection matrices to number of groups
 	connSyn_.resize(grpIds_.size());
 	connComp_.resize(grpIds_.size());
-
-	fprintf(stderr,"createSpikeGeneratorGroup\nconnSyn_ = %d [",connSyn_.size());
-	for (int i=0; i<connSyn_.size(); i++) {
-		fprintf(stderr,"%d ",connSyn_[i].size());
-	}
-	fprintf(stderr,"]\n");
-
-	fprintf(stderr,"connComp_ = %d [",connComp_.size());
-	for (int i=0; i<connComp_.size(); i++) {
-		fprintf(stderr,"%d ",connComp_[i].size());
-	}
-	fprintf(stderr,"]\n\n");
 
 	return grpId;
 }
