@@ -882,24 +882,24 @@ __global__ void kernel_globalConductanceUpdate (int t, int sec, int simTime) {
 //************************ UPDATE GLOBAL STATE EVERY TIME STEP *******************************************************//
 
 // single integration step for voltage equation of 4-param Izhikevich
-__device__ float dvdtIzhikevich4(float volt, float recov, float totCurrent, float timeStep=1.0f) {
+__device__ inline float dvdtIzhikevich4(float volt, float recov, float totCurrent, float timeStep=1.0f) {
 	return ( ((0.04f * volt + 5.0f) * volt + 140.0f - recov + totCurrent) * timeStep );
 }
 
 // single integration step for recovery equation of 4-param Izhikevich
-__device__ float dudtIzhikevich4(float volt, float recov, float izhA, float izhB, float timeStep=1.0f) {
+__device__ inline float dudtIzhikevich4(float volt, float recov, float izhA, float izhB, float timeStep=1.0f) {
 	return ( izhA * (izhB * volt - recov) * timeStep );
 }
 
 // single integration step for voltage equation of 9-param Izhikevich
-__device__ float dvdtIzhikevich9(float volt, float recov, float invCapac, float izhK, float voltRest,
+__device__ inline float dvdtIzhikevich9(float volt, float recov, float invCapac, float izhK, float voltRest,
 	float voltInst, float totCurrent, float timeStep=1.0f)
 {
 	return ( (izhK * (volt - voltRest) * (volt - voltInst) - recov + totCurrent) * invCapac * timeStep );
 }
 
 // single integration step for recovery equation of 9-param Izhikevich
-__device__ float dudtIzhikevich9(float volt, float recov, float voltRest, float izhA, float izhB, float timeStep=1.0f) {
+__device__ inline float dudtIzhikevich9(float volt, float recov, float voltRest, float izhA, float izhB, float timeStep=1.0f) {
 	return ( izhA * (izhB * (volt - voltRest) - recov) * timeStep );
 }
 
@@ -982,13 +982,6 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 		if (vNext < -90.0f) {
 			vNext = -90.0f;
 		}
-		#if defined(WIN32) || defined(WIN64)
-		assert(!_isnan(vNext));
-		assert(_finite(vNext));
-		#else
-		assert(!isnan(vNext));
-		assert(!isinf(vNext));
-		#endif
 
 		// To maintain consistency with Izhikevich' original Matlab code, u is based on vNext.
 		if (!gpuGrpInfo[grpId].withParamModel_9) {
@@ -1026,13 +1019,6 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 			if (vNext < -90.0f) {
 				vNext = -90.0f;
 			}
-			#if defined(WIN32) || defined(WIN64)
-			assert(!_isnan(vNext));
-			assert(_finite(vNext));
-			#else
-			assert(!isnan(vNext));
-			assert(!isinf(vNext));
-			#endif
 
 			u += one_sixth * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
 		} else {
@@ -1066,13 +1052,6 @@ __device__ void updateNeuronState(unsigned int& nid, int& grpId, bool lastIter) 
 			if (vNext < -90.0f) {
 				vNext = -90.0f;
 			}
-			#if defined(WIN32) || defined(WIN64)
-			assert(!_isnan(vNext));
-			assert(_finite(vNext));
-			#else
-			assert(!isnan(vNext));
-			assert(!isinf(vNext));
-			#endif
 
 			u += one_sixth * (l1 + 2.0f * l2 + 2.0f * l3 + l4);
 		}

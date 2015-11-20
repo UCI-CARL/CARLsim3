@@ -281,7 +281,7 @@ TEST(STDP, DASTDPWeightBoost) {
 				sim->setSpikeRate(gin, &in);
 				sim->setSpikeRate(g1noise, &in);
 
-				for (int t = 0; t < 200; t++) {
+				for (int t = 0; t < 250; t++) {
 					spikeMonPost->startRecording();
 					spikeMonPre->startRecording();
 					sim->runNetwork(1, 0, false, false);
