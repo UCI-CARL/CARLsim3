@@ -73,6 +73,7 @@ public:
 	 * \param[in] nid current neuron ID for which to schedule spikes
 	 * \param[in] currentTime current time (ms) at which spike scheduler is called
 	 * \param[in] lastScheduledSpikeTime the last time (ms) at which a spike was scheduled for this nid, grpId
+	 * \param[in] endOfTimeSlice the end of the time slice (ms) for which to schedule spikes
 	 * \returns the next spike time (ms)
 	 */
 	unsigned int nextSpikeTime(CARLsim* sim, int grpId, int nid, unsigned int currentTime, 

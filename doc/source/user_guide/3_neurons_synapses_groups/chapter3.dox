@@ -308,7 +308,7 @@ synapses are supported with the ::INHIBITORY_NEURON keyword.
 To refer to this group in later method calls, the CARLsim::createGroup method returns a group ID, <tt>gOut</tt>.
 
 Next, specify the Izhikevich parameters, in this case for class 1 excitability (regular spiking) neurons
-(see \ref ch3s1s1_izhikevich_neurons):
+(see \ref ch3s1s1_izhikevich_neurons4):
 \code
 sim.setNeuronParameters(gOut, 0.02f, 0.2f, -65.0f, 8.0f);
 \endcode

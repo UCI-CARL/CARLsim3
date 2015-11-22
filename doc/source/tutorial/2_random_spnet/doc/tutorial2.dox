@@ -57,7 +57,7 @@ int main(int argc, const char* argv[]) {
 
 From then on, the simulation is in ::CONFIG_STATE, allowing the properties of the neural network to be specified.
 In this tutorial, we consider a network of 800 excitatory (regular spiking; RS)
-and 200 inhibitory neurons (fast spiking; FS) (see \ref ch3s1s1_izhikevich_neurons).
+and 200 inhibitory neurons (fast spiking; FS) (see \ref ch3s1s1_izhikevich_neurons4).
 Each neuron shall have roughly 100 incoming synapses (<tt>nSynPerNeur</tt>) with axonal delays
 between 1ms and 20ms (<tt>maxDelay</tt>).
 We first set a number of parameters:

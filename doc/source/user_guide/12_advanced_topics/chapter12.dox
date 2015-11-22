@@ -42,7 +42,7 @@ By default, the simulation uses forward-Euler with a basic integration step of 0
 The specified integration method will apply to all neurons in the network.
 Future CARLsim versions might allow to specify the integration method on a per-group basis.
 
-In contrast to the \em integration time step, the \simulation time step is always 1ms, meaning that spike times cannot
+In contrast to the \em integration time step, the \em simulation time step is always 1ms, meaning that spike times cannot
 be retrieved with sub-millisecond precision.
 Future CARLsim versions might allow for sub-millisecond spike times.
 
