@@ -4363,7 +4363,7 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 		}
 	}
 
-	fseek(loadSimFID,file_position,SEEK_SET);
+	fseek(loadSimFID, file_position, SEEK_SET);
 
 	return 0;
 }
@@ -4373,25 +4373,30 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 // and generation of spike at the post-synaptic side.
 // We also create the delay_info array has the delay_start and delay_length parameter
 void CpuSNN::reorganizeDelay() {
-	for(int grpId=0; grpId < numGrp; grpId++) {
-		for(int nid=grp_Info[grpId].StartN; nid <= grp_Info[grpId].EndN; nid++) {
+	for (int grpId=0; grpId < numGrp; grpId++) {
+		for (int nid=grp_Info[grpId].StartN; nid <= grp_Info[grpId].EndN; nid++) {
 			unsigned int jPos=0;					// this points to the top of the delay queue
 			unsigned int cumN=cumulativePost[nid];	// cumulativePost[] is unsigned int
 			unsigned int cumDelayStart=0; 			// Npost[] is unsigned short
-			for(int td = 0; td < maxDelay_; td++) {
+
+			// in a network without connections, where maxDelay_==0, we still need to enter the loop in order
+			// to set the appropriate postDelayInfo entries to zero
+			// otherwise the simulation might segfault because delay_length and delay_index_start are not
+			// correctly initialized
+			for (int td = 0; td < std::max(maxDelay_, 1); td++) {
 				unsigned int j=jPos;				// start searching from top of the queue until the end
 				unsigned int cnt=0;					// store the number of nodes with a delay of td;
-				while(j < Npost[nid]) {
+				while (j < Npost[nid]) {
 					// found a node j with delay=td and we put
 					// the delay value = 1 at array location td=0;
-					if(td==(tmp_SynapticDelay[cumN+j]-1)) {
+					if (td == (tmp_SynapticDelay[cumN+j]-1)) {
 						assert(jPos<Npost[nid]);
 						swapConnections(nid, j, jPos);
 
-						jPos=jPos+1;
-						cnt=cnt+1;
+						jPos++;
+						cnt++;
 					}
-					j=j+1;
+					j++;
 				}
 
 				// update the delay_length and start values...
@@ -4404,9 +4409,9 @@ void CpuSNN::reorganizeDelay() {
 
 			// total cumulative delay should be equal to number of post-synaptic connections at the end of the loop
 			assert(cumDelayStart == Npost[nid]);
-			for(unsigned int j=1; j < Npost[nid]; j++) {
+			for (unsigned int j=1; j < Npost[nid]; j++) {
 				unsigned int cumN=cumulativePost[nid]; // cumulativePost[] is unsigned int
-				if( tmp_SynapticDelay[cumN+j] < tmp_SynapticDelay[cumN+j-1]) {
+				if (tmp_SynapticDelay[cumN+j] < tmp_SynapticDelay[cumN+j-1]) {
 	  				KERNEL_ERROR("Post-synaptic delays not sorted correctly... id=%d, delay[%d]=%d, delay[%d]=%d",
 						nid, j, tmp_SynapticDelay[cumN+j], j-1, tmp_SynapticDelay[cumN+j-1]);
 					assert( tmp_SynapticDelay[cumN+j] >= tmp_SynapticDelay[cumN+j-1]);
