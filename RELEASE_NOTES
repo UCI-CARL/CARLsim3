@@ -6,7 +6,13 @@ CARLSIM RELEASE NOTES
 CARLsim 3.1
 -------------------------------------------------------------------------------
 
-tbd
+Highlights:
+	9-parameter Izhikevich model.
+	Multi-compartmental neuron model (with gap junctions).
+	CPU-only mode.
+	4-th order Runge-Kutta method.
+	Bugfixes.
+
 
 
 -------------------------------------------------------------------------------
@@ -30,10 +36,25 @@ Highlights:
 	Bugfixes.
 
 Description:
-	tbd
+	Spiking neural network (SNN) models describe key aspects of neural function in
+	a computationally efficient manner and have been used to construct large-scale
+	brain models. Large-scale SNNs are challenging to implement, as they demand
+	high-bandwidth communication, a large amount of memory, and are computationally
+	intensive. Additionally, tuning parameters of these models becomes more difficult
+	and time-consuming with the addition of biologically accurate descriptions.
+	To meet these challenges, we have developed CARLsim 3, a user-friendly,
+	GPU-accelerated SNN library written in C/C++ that is capable of simulating
+	biologically detailed neural models. The present release of CARLsim provides a
+	number of improvements over our prior SNN library to allow the user to easily
+	analyze simulation data, explore synaptic plasticity rules, and automate
+	parameter tuning. In the present paper, we provide examples and performance
+	benchmarks highlighting the library’s features.
 
 Publication:
-	tbd
+	Beyeler, M.*, Carlson, K.D.*, Chou, T.-S.*, Dutt, N., and Krichmar, J.L. (2015).
+	A User-Friendly and Highly Optimized Library for the Creation of Neurobiologically
+	Detailed Spiking Neural Networks. Paper presented at: International Joint
+	Conference on Neural Networks (Killarney, Ireland). (*co-first authors)
 
 Tested platforms and devices:
 	* Platforms:
