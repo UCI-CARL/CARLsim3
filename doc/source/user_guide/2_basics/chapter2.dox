@@ -119,7 +119,7 @@ to provide users with a method of tuning the large number of open parameters.
 To this end, CARLsim 3 provides a paramer tuning interface that uses evolutionary algorithms to optimize a generic
 fitness function (see \ref ch10_ecj).
 A more modest approach is to use the SimpleWeightTuner utility that changes weights on-the-fly such that a certain
-group fires at a predefined target firing rate (see \ref ch12s3_online_weight_tuning).
+group fires at a predefined target firing rate (see \ref ch12s4_online_weight_tuning).
 
 As mentioned before, once a network has been run, its activity and structure can be visualized using an
 Offline Analysis Toolbox (OAT) written in MATLAB (see \ref ch9_matlab_oat).

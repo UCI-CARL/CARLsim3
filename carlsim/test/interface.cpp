@@ -62,6 +62,7 @@ TEST(Interface, connectCompartmentsDeath) {
 	
 	CARLsim* sim = new CARLsim("Interface.connectCompartmentsDeath", CPU_MODE, SILENT, 0, 42);
 
+	// set up compartmental groups
 	int N = 5; //number of neurons
 	int s = sim->createGroup("soma", N, EXCITATORY_NEURON);
 	int d1 = sim->createGroup("d1", N, EXCITATORY_NEURON);
@@ -69,7 +70,13 @@ TEST(Interface, connectCompartmentsDeath) {
 	int d3 = sim->createGroup("d3", N, EXCITATORY_NEURON);
 	int d4 = sim->createGroup("d4", N, EXCITATORY_NEURON);
 	int d5 = sim->createGroup("d5", N, EXCITATORY_NEURON);
-	int d6 = sim->createGroup("d56", 2*N, EXCITATORY_NEURON);
+	int d6 = sim->createGroup("d6", 2*N, EXCITATORY_NEURON);
+
+	// some regular neuron groups
+	int reg0 = sim->createGroup("reg0", 2*N, EXCITATORY_NEURON);
+	int reg1 = sim->createGroup("reg1", 2*N, EXCITATORY_NEURON);
+
+	// make them 9-param Izzy neurons
 	sim->setNeuronParameters(s, 550.0f, 2.0, -59.0, -50.0, 0.0, -0.0, 24.0, -53.0, 109.0f);
 	sim->setNeuronParameters(d1, 367.0f, 1.0, -59.0, -44.0, 0.0, 3.0, 20.0, -46.0, 24.0f);
 	sim->setNeuronParameters(d2, 425.0f, 2.0, -59.0, -25.0, 0.0, 0.0, 13.0, -38.0, 69.0f);
@@ -77,6 +84,17 @@ TEST(Interface, connectCompartmentsDeath) {
 	sim->setNeuronParameters(d4, 225.0f, 1.0, -59.0, -36.0, 0.0, -4.0, 21.0, -40.0, 21.0f);
 	sim->setNeuronParameters(d5, 225.0f, 1.0, -59.0, -36.0, 0.0, -4.0, 21.0, -40.0, 21.0f);
 	sim->setNeuronParameters(d6, 225.0f, 1.0, -59.0, -36.0, 0.0, -4.0, 21.0, -40.0, 21.0f);
+	sim->setNeuronParameters(reg0, 225.0f, 1.0, -59.0, -36.0, 0.0, -4.0, 21.0, -40.0, 21.0f);
+	sim->setNeuronParameters(reg1, 225.0f, 1.0, -59.0, -36.0, 0.0, -4.0, 21.0, -40.0, 21.0f);
+
+	// enable compartments
+	sim->setCompartmentParameters(s, 1.0f, 1.0f);
+	sim->setCompartmentParameters(d1, 1.0f, 1.0f);
+	sim->setCompartmentParameters(d2, 1.0f, 1.0f);
+	sim->setCompartmentParameters(d3, 1.0f, 1.0f);
+	sim->setCompartmentParameters(d4, 1.0f, 1.0f);
+	sim->setCompartmentParameters(d5, 1.0f, 1.0f);
+	sim->setCompartmentParameters(d6, 1.0f, 1.0f);
 
 	int gen = sim->createSpikeGeneratorGroup("SpikeGen", N, EXCITATORY_NEURON);
 
@@ -114,6 +132,11 @@ TEST(Interface, connectCompartmentsDeath) {
 	sim->connectCompartments(s, d4);
 	EXPECT_DEATH({sim->connectCompartments(d5, s);},"");
 	EXPECT_DEATH({sim->connectCompartments(s, d5);},"");
+
+	// use compartment connections on regular neurons
+	// must break during setupNetwork (in verifyCompartments)
+	sim->connectCompartments(reg0, reg1);
+	EXPECT_DEATH({sim->setupNetwork();},"");
 }
 
 

@@ -34,7 +34,7 @@ struct RangeWeight;
  *	}
  * \endcode
  *
- * \see Tutorial: \ref ch12s3s1_simple_weight_tuner
+ * \see Tutorial: \ref ch12s4s1_simple_weight_tuner
  * \see Code example: <tt>tutorial/12_advanced_topics/simple_weight_tuner/main_simple_weight_tuner.cpp</tt>
  * \since v3.0
  */
