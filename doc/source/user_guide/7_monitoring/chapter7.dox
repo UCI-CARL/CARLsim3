@@ -118,7 +118,7 @@ SpikeMonitor::getAllFiringRatesSorted returns the vector of firing rates for eve
 Another useful function is SpikeMonitor::getNumNeuronsWithFiringRate which allows users to find out
 how many neurons had an average firing rate within a specific user-specified range. These metrics
 become particularly useful when we begin to tune SNNs as we will see in \ref ch10_ecj and \ref
-ch12s3_online_weight_tuning.
+ch12s4_online_weight_tuning.
 
 
 Users may want to get the AER 2D spike vector described in AER mode to do their own metrics or

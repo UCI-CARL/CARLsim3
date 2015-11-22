@@ -12,8 +12,16 @@
 /// **************************************************************************************************************** ///
 
 // simple wrapper to assert a statement and print an error message
-void UserErrors::assertTrue(bool statement, errorType errorIfAssertionFails, std::string errorFunc,
-								std::string errorMsgPrefix, std::string errorMsgSuffix) {
+void UserErrors::assertFalse(bool statement, errorType errorIfAssertionFails, const std::string& errorFunc,
+	const std::string& errorMsgPrefix, const std::string& errorMsgSuffix)
+{
+	assertTrue(!statement, errorIfAssertionFails, errorFunc, errorMsgPrefix, errorMsgSuffix);
+}
+
+// simple wrapper to assert a statement and print an error message
+void UserErrors::assertTrue(bool statement, errorType errorIfAssertionFails, const std::string& errorFunc,
+	const std::string& errorMsgPrefix, const std::string& errorMsgSuffix)
+{
 	if (!statement) {
 		throwError(errorFunc,errorIfAssertionFails,errorMsgPrefix,errorMsgSuffix); // display standard error message
 	}
@@ -25,8 +33,8 @@ void UserErrors::assertTrue(bool statement, errorType errorIfAssertionFails, std
 /// **************************************************************************************************************** ///
 
 // simple wrapper for displaying standard message per error type
-void UserErrors::throwError(std::string errorFunc, errorType error, std::string errorMsgPrefix,
-	std::string errorMsgSuffix) {
+void UserErrors::throwError(const std::string& errorFunc, errorType error, const std::string& errorMsgPrefix,
+	const std::string& errorMsgSuffix) {
 
 	std::string errorMsg = errorMsgPrefix;
 	
@@ -42,6 +50,10 @@ void UserErrors::throwError(std::string errorFunc, errorType error, std::string 
 		errorMsg += " cannot be called in mode "; break;
 	case CANNOT_BE_CALLED_IN_STATE:
 		errorMsg += " cannot be called in state "; break;
+	case CANNOT_BE_CONN_SYN_AND_COMP:
+		errorMsg += " cannot be both synaptically and compartmentally connected."; break;
+	case CANNOT_BE_CONN_TWICE:
+		errorMsg += " cannot be connected twice."; break;
 	case CANNOT_BE_IDENTICAL:
 		errorMsg += " cannot be identical."; break;
 	case CANNOT_BE_LARGER:

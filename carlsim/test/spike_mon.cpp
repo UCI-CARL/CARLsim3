@@ -231,7 +231,7 @@ TEST(SpikeMon, clear) {
 
 	CARLsim* sim;
 	const int GRP_SIZE = 5;
-    const int inputTargetFR = 10.0f;
+    const int inputTargetFR = 20.0f;
 	int runTimeMs = 2000;
 
 #ifdef __CPU_ONLY__
@@ -254,7 +254,7 @@ TEST(SpikeMon, clear) {
 		int inputGroup = sim->createSpikeGeneratorGroup("Input",GRP_SIZE,EXCITATORY_NEURON);
 
 		sim->setConductances(true,COND_tAMPA,COND_tNMDA,COND_tGABAa,COND_tGABAb);
-		double initWeight = 0.05f;
+		double initWeight = 0.5f;
 
 		// input
         PeriodicSpikeGenerator spkGenG0(inputTargetFR);

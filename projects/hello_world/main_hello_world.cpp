@@ -75,7 +75,8 @@ int main() {
 	// build the network
 	watch.lap("setupNetwork");
 	sim.setupNetwork();
-
+	
+	printf("Network setup successfully!");
 	// set some monitors
 	sim.setSpikeMonitor(gin,"DEFAULT");
 	sim.setSpikeMonitor(gout,"DEFAULT");

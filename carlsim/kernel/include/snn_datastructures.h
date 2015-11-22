@@ -85,6 +85,7 @@ typedef struct network_info_s  {
 	unsigned int	numNPois;
 	unsigned int	numGrp;
 	int             numConnections;
+	bool            sim_with_compartments;
 	bool 			sim_with_fixedwts;
 	bool 			sim_with_conductances;
 	bool 			sim_with_stdp;
@@ -97,6 +98,7 @@ typedef struct network_info_s  {
 
 	integrationMethod_t simIntegrationMethod;
 	int simNumStepsPerMs;
+	float timeStep;
 
 	bool 			sim_with_NMDA_rise;	//!< a flag to inform whether to compute NMDA rise time
 	bool 			sim_with_GABAb_rise;	//!< a flag to inform whether to compute GABAb rise time
@@ -135,8 +137,15 @@ typedef struct connectData_s {
 	struct connectData_s*    next;
 } grpConnectInfo_t;
 
+typedef struct compConnectData_s {
+	int							grpSrc, grpDest;
+	struct compConnectData_s*   next;
+	short int               	connId;
+}compConnectInfo_t;
+
 typedef struct network_ptr_s {
-	float*	voltage;
+	float*	voltage;			//!< membrane potential for each regular neuron
+	float*  nextVoltage;		//!< membrane potential buffer (next/future time step) for each regular neuron
 	float*	recovery;
 	float* 	Izh_C;
 	float* 	Izh_k;
@@ -148,7 +157,13 @@ typedef struct network_ptr_s {
 	float*	Izh_c;
 	float*	Izh_d;
 	float*	current;
+	float*  compCurrent;
 	float*  extCurrent;
+
+	//! Keeps track of all neurons that spiked at current time.
+	//! Because integration step can be < 1ms we might want to keep integrating but remember that the neuron fired,
+	//! so that we don't produce more than 1 spike per ms.
+	bool* curSpike;
 
 	// conductances and stp values
 	float*	gNMDA;					//!< conductance of gNMDA
@@ -228,7 +243,6 @@ typedef struct network_ptr_s {
 	float* grpNEBuffer[MAX_GRP_PER_SNN];
 
 	unsigned int*	spikeGenBits;
-	bool*		curSpike;
 } network_ptr_t;
 
 typedef struct group_info_s {
@@ -314,6 +328,13 @@ typedef struct group_info_s {
 	SpikeGeneratorCore*	spikeGen;
 	bool		newUpdates;  //!< FIXME this flag has mixed meaning and is not rechecked after the simulation is started
 	bool		withParamModel_9;//Value of 0 represents 4 param model, and value of 1 represents 9 param model.
+
+	bool		withCompartments;
+	int         compNeighbors[4];
+	float       compCoupling[4];
+	short       numCompNeighbors;
+	float		compCouplingUp;
+	float		compCouplingDown;
 
 } group_info_t;
 

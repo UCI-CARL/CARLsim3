@@ -27,6 +27,8 @@ public:
 		CAN_ONLY_BE_CALLED_IN_STATE,//!< function can only be called in certain state
 		CANNOT_BE_CALLED_IN_MODE,	//!< function cannot be called in certain mode
 		CANNOT_BE_CALLED_IN_STATE,	//!< function cannot be called in certain state
+		CANNOT_BE_CONN_SYN_AND_COMP, //!< cannot be both synaptically and compartmentally connected
+		CANNOT_BE_CONN_TWICE,	//!< cannot be connected twice
 		CANNOT_BE_IDENTICAL,	//!< parameters cannot be identical
 		CANNOT_BE_NEGATIVE,		//!< parameter cannot have negative value (opposite to "must be", but includes zero)
 		CANNOT_BE_NULL,			//!< parameter cannot have NULL value
@@ -64,9 +66,10 @@ public:
 	// +++++ PUBLIC METHODS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
 	/*!
-	 * \brief simple wrapper for assert statement
+	 * \brief Checks whether assertion statement is false, else throws error
 	 *
-	 * This function evaluates a certain statement to true or false, and if it false, it will throw an error.
+	 * This function evaluates a certain statement to true or false. If the statement is false, everything is fine.
+	 * But, if the statement is true, the function will throw an error and the simulation will abort.
 	 * There is a standard error message for each user error type. This message can be extended by using a prefix and/or
 	 * a suffix. For example: errorIfAssertionFails=CANNOT_BE_IDENTICAL, errorMsgPrefix="A", errorMsgSuffix="B" will
 	 * print "A cannot be identical to B.".
@@ -76,8 +79,25 @@ public:
 	 * \param[in] errorMsgPrefix			a prefix for the error message
 	 * \param[in] errorMsgSuffix 			a suffix for the error message
 	 */
-	static void assertTrue(bool statement, errorType errorIfAssertionFails, std::string errorFunc,
-								std::string errorMsgPrefix="", std::string errorMsgSuffix="");
+	static void assertFalse(bool statement, errorType errorIfAssertionFails, const std::string& errorFunc,
+								const std::string& errorMsgPrefix="", const std::string& errorMsgSuffix="");
+
+	/*!
+	 * \brief Checks whether assertion statement is true, else throws error
+	 *
+	 * This function evaluates a certain statement to true or false. If the statement is true, everything is fine.
+	 * But, if the statement is false, the function will throw an error and the simulation will abort.
+	 * There is a standard error message for each user error type. This message can be extended by using a prefix and/or
+	 * a suffix. For example: errorIfAssertionFails=CANNOT_BE_IDENTICAL, errorMsgPrefix="A", errorMsgSuffix="B" will
+	 * print "A cannot be identical to B.".
+	 * \param[in] statement					the logical statement to evaluate
+	 * \param[in] errorIfAssertionFails		the type of error to throw if assertion fails (from enum errorType)
+	 * \param[in] errorFunc					a string to indicate the location where the error occured
+	 * \param[in] errorMsgPrefix			a prefix for the error message
+	 * \param[in] errorMsgSuffix 			a suffix for the error message
+	 */
+	static void assertTrue(bool statement, errorType errorIfAssertionFails, const std::string& errorFunc,
+								const std::string& errorMsgPrefix="", const std::string& errorMsgSuffix="");
 
 //	static void userAssertNonZero();
 //	static void userAssertNonNegative();
@@ -93,8 +113,8 @@ private:
 	 * \param[in] errorFunc 	a string to indicate the location where the error occurred
 	 * \param[in] error 		the type of error to throw (from enum errorType)
 	 */
-	static void throwError(std::string errorFunc, errorType error, std::string errorMsgPrefix="",
-		std::string errorMsgSuffix="");
+	static void throwError(const std::string& errorFunc, errorType error, const std::string& errorMsgPrefix="",
+		const std::string& errorMsgSuffix="");
 };
 
 #endif

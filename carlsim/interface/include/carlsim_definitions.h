@@ -77,4 +77,7 @@
 
 #define MAX_NUM_CUDA_DEVICES 8
 
+// maximum number of compartmental connections allowed per group
+#define MAX_NUM_COMP_CONN 4
+
 #endif

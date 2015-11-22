@@ -164,6 +164,13 @@ public:
 	short int connect(int gIDpre, int gIDpost, ConnectionGeneratorCore* conn, float mulSynFast, float mulSynSlow,
 		bool synWtType,	int maxM, int maxPreM);
 
+	/* Creates synaptic projections using a callback mechanism.
+	*
+	* \param _grpId1:ID lower layer group
+	* \param _grpId2 ID upper level group
+	*/
+	short int connectCompartments(int grpIdLower, int grpIdUpper);
+
 	//! Creates a group of Izhikevich spiking neurons
 	/*!
 	 * \param name the symbolic name of a group
@@ -180,6 +187,13 @@ public:
 	 */
 	int createSpikeGeneratorGroup(const std::string& grpName, const Grid3D& grid, int neurType);
 
+	/*!
+	* \brief Coupling constants for the compartment are set using this method.
+	* \param grpId  		the symbolic name of a group
+	* \param couplingUp   	the coupling constant for upper connections
+	* \param couplingDown	the coupling constant for lower connections
+	*/
+	void setCompartmentParameters(int grpId, float couplingUp, float couplingDown);
 
 	/*!
 	 * \brief Sets custom values for conductance decay (\tau_decay) or disables conductances alltogether
@@ -527,6 +541,7 @@ public:
 
 	int getNumConnections() { return numConnections; }
 	int getNumSynapticConnections(short int connectionId);		//!< gets number of connections associated with a connection ID
+	int getNumCompartmentConnections() { return numCompartmentConnections; }
 	int getNumGroups() { return numGrp; }
 	int getNumNeurons() { return numN; }
 	int getNumNeuronsReg() { return numNReg; }
@@ -595,6 +610,7 @@ public:
 	double getRFDist3D(const RadiusRF& radius, const Point3D& pre, const Point3D& post);
 	bool isPoint3DinRF(const RadiusRF& radius, const Point3D& pre, const Point3D& post);
 
+	bool isSimulationWithCompartments() { return sim_with_compartments; }
 	bool isSimulationWithCOBA() { return sim_with_conductances; }
 	bool isSimulationWithCUBA() { return !sim_with_conductances; }
 	bool isSimulationWithNMDARise() { return sim_with_NMDA_rise; }
@@ -685,6 +701,9 @@ private:
 
 	//! performs a consistency check to see whether numN* class members have been accumulated correctly
 	void verifyNumNeurons();
+
+	//! performs consistency checks for compartmentally enabled neurons
+	void verifyCompartments();
 
 	//! creates CPU net pointers
 	void makePtrInfo();
@@ -777,10 +796,15 @@ private:
 	void updateSpikesFromGrp(int grpId);
 	void updateSpikeGenerators();
 	void updateSpikeGeneratorsInit();
-	int  updateSpikeTables();
+	int updateSpikeTables();
 
 	//void updateStateAndFiringTable();
 	bool updateTime(); //!< updates simTime, returns true when a new second is started
+
+	float getCompCurrent(int grpId, int neurId, float const0=0.0f, float const1=0.0f);
+
+
+	// float updateTotalCurrent(bool cEval, int cId, int I, int G, float* COUPL_CONSTANTS, int* cNeighbors, int nNeighbors, float const_1, float const_2);
 
 	void updateWeights();
 
@@ -924,11 +948,15 @@ private:
 
 	int				numGrp;
 	int				numConnections;		//!< number of connection calls (as in snn.connect(...))
+	int             numCompartmentConnections; //!< number of connectCompartment calls
 	//! keeps track of total neurons/presynapses/postsynapses currently allocated
 	unsigned int	allocatedN;
 	unsigned int	allocatedPre;
 	unsigned int	allocatedPost;
+	//! keeps track of allocated compartmentalNeurons
+	unsigned int    allocatedComp;
 
+	compConnectInfo_t* compConnectBegin;
 	grpConnectInfo_t* connectBegin;
 	short int 	*cumConnIdPre;		//!< connId, per synapse, presynaptic cumulative indexing
 	float 		*mulSynFast;	//!< scaling factor for fast synaptic currents, per connection
@@ -951,6 +979,7 @@ private:
 	double dGABAb;				//!< multiplication factor for decay time of GABAb
 	double sGABAb;				//!< scaling factor for GABAb amplitude
 
+	bool sim_with_compartments;
 	bool sim_with_fixedwts;
 	bool sim_with_stdp;
 	bool sim_with_modulated_stdp;
@@ -960,6 +989,7 @@ private:
 
 	integrationMethod_t simIntegrationMethod_;	//!< integration method
 	int simNumStepsPerMs_;	//!< number of integration steps per 1ms simulation time step
+	float timeStep_; //!< the inverse of simNumStepsPerMs_
 
 	// spiking neural network related information, including neurons, synapses and network parameters
 	int	        	numN;				//!< number of neurons in the spiking neural network
@@ -967,12 +997,19 @@ private:
 	int				numPreSynapses_;		//!< maximum number of pre-syanptic connections in groups
 	int				maxDelay_;					//!< maximum axonal delay in groups
 	int				numNReg;			//!< number of regular (spking) neurons
+	int				numComp;			//!< number of compartmental neurons
 	int				numNExcReg;			//!< number of regular excitatory neurons
 	int				numNInhReg;			//!< number of regular inhibitory neurons
 	int   			numNExcPois;		//!< number of excitatory poisson neurons
 	int				numNInhPois;		//!< number of inhibitory poisson neurons
 	int				numNPois;			//!< number of poisson neurons
-	float       	*voltage, *recovery, *Izh_C, *Izh_k, *Izh_vr, *Izh_vt, *Izh_vpeak, *Izh_a, *Izh_b, *Izh_c, *Izh_d, *current, *extCurrent;
+	float       	*voltage;			//!< membrane potential for each regular neuron
+	float           *nextVoltage;		//!< membrane potential buffer (next/future time step) for each regular neuron
+	float           *recovery, *Izh_C, *Izh_k, *Izh_vr, *Izh_vt, *Izh_vpeak, *Izh_a, *Izh_b, *Izh_c, *Izh_d, *current, *extCurrent;
+
+	//! Keeps track of all neurons that spiked at current time.
+	//! Because integration step can be < 1ms we might want to keep integrating but remember that the neuron fired,
+	//! so that we don't produce more than 1 spike per ms.
 	bool			*curSpike;
 	int         	*nSpikeCnt;     //!< spike counts per neuron
 	unsigned short       	*Npre;			//!< stores the number of input connections to the neuron

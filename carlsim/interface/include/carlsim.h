@@ -273,6 +273,15 @@ public:
 
 
 	/*!
+	 * \brief make a compartmental connection between two compartmentally enabled groups
+	 *
+	 * first group is in the lower layer; second group is in the upper layer
+	 * \TODO finish docu
+     * \STATE CONFIG	
+	*/ 
+	short int connectCompartments(int grpIdLower, int grpIdUpper);
+
+	/*!
 	 * \brief creates a group of Izhikevich spiking neurons
 	 * \TODO finish doc
 	 * \STATE ::CONFIG_STATE
@@ -522,15 +531,25 @@ public:
 	 * \STATE CONFIG
 	 * \param[in] grpId			the group ID of a group for which these settings are applied
 	 * \param[in] izh_C			Membrane capacitance parameter
+	 * \param[in] izh_C_sd		Standard deviation for membrane capacitance parameter
 	 * \param[in] izh_k			Coefficient present in equation for voltage
+	 * \param[in] izh_k_sd		Standard deviation for coefficient present in equation for voltage
 	 * \param[in] izh_vr		Resting membrane potential parameter
+	 * \param[in] izh_vr_sd		Standard deviation for resting membrane potential parameter
 	 * \param[in] izh_vt		Instantaneous threshold potential parameter
+	 * \param[in] izh_vt_sd		Standard deviation for instantaneous threshold potential parameter
 	 * \param[in] izh_a			Recovery time constant
+	 * \param[in] izh_a_sd		Standard deviation for recovery time constant
 	 * \param[in] izh_b			Coefficient present in equation for voltage
+	 * \param[in] izh_b_sd		Standard deviation for coefficient present in equation for voltage
 	 * \param[in] izh_vpeak		The spike cutoff value parameter
+	 * \param[in] izh_vpeak_sd	Standard deviation for the spike cutoff value parameter
 	 * \param[in] izh_c			The voltage reset value parameter
+	 * \param[in] izh_c_sd		Standard deviation for the voltage reset value parameter
 	 * \param[in] izh_d			Parameter describing the total amount of outward minus inward currents activated
 	 *                          during the spike and affecting the after spike behavior
+	 * \param[in] izh_d_sd		Standard deviation for the parameter describing the total amount of outward minus
+	 *                          inward currents activated during the spike and affecting the after spike behavior
 	 * \since v3.1
 	 */
 	void setNeuronParameters(int grpId, float izh_C, float izh_C_sd, float izh_k, float izh_k_sd,
@@ -538,6 +557,17 @@ public:
 		float izh_a, float izh_a_sd, float izh_b, float izh_b_sd,
 		float izh_vpeak, float izh_vpeak_sd, float izh_c, float izh_c_sd,
 		float izh_d, float izh_d_sd);
+
+	/*!
+	* \brief Sets coupling constants G_u and G_d for hte compartment
+	*
+	* \TODO finish docu
+	* \STATE ::CONFIG_STATE
+	* \param[in] couplingUp		Coupling constant for "up" compartmental connection
+	* \param[in] couplingDown	Coupling constant for "down" compartmental connection
+	*/
+
+	void setCompartmentParameters(int grpId, float couplingUp, float couplingDown);
 
 	/*!
 	 * \brief Sets baseline concentration and decay time constant of neuromodulators (DP, 5HT, ACh, NE) for a neuron
@@ -1359,6 +1389,14 @@ public:
 	Point3D getNeuronLocation3D(int grpId, int relNeurId);
 
 	/*!
+	 * \brief Returns the maximum number of allowed compartmental connections per group.
+	 *
+	 * A compartmentally enabled neuron group cannot have more than this number of compartmental connections.
+	 * This value is controlled by MAX_NUM_COMP_CONN in carlsim_definitions.h.
+	 */
+	int getMaxNumCompConnections();
+
+	/*!
 	 * \brief Returns the number of connections (pairs of pre-post groups) in the network
 	 *
 	 * This function returns the number of connections (pairs of pre-post groups) in the network. Each pre-post
@@ -1770,6 +1808,13 @@ private:
 	int ithGPU_;					//!< on which device to establish a context
 	bool enablePrint_;
 	bool copyState_;
+
+	//! a 2D matrix storing for each groupId (first dim) to which other groups it is connected to (second dim)
+	std::vector<std::vector<int> > connSyn_;
+
+	//! a 2D matrix storing for each groupId (first dim) to which other groups it is compartmentally connected
+	//! to (second dim)
+	std::vector<std::vector<int> > connComp_;
 
 	unsigned int numConnections_;	//!< keep track of number of allocated connections
 	std::vector<std::string> userWarnings_; // !< an accumulated list of user warnings
