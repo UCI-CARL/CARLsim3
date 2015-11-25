@@ -4383,7 +4383,7 @@ void CpuSNN::reorganizeDelay() {
 			// to set the appropriate postDelayInfo entries to zero
 			// otherwise the simulation might segfault because delay_length and delay_index_start are not
 			// correctly initialized
-			for (int td = 0; td < std::max(maxDelay_, 1); td++) {
+			for (int td = 0; td < max(maxDelay_, 1); td++) {
 				unsigned int j=jPos;				// start searching from top of the queue until the end
 				unsigned int cnt=0;					// store the number of nodes with a delay of td;
 				while (j < Npost[nid]) {
