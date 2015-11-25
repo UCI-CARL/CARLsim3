@@ -11,7 +11,7 @@ computation system written in Java (ECJ) (Luke et al., 2006) to provide an
 automated parameter tuning framework. We found that an automated tuning framework became
 increasingly useful as our SNN models became more complex. Evolutionary
 Algorithms (EAs) enable flexible parameter tuning by means
-of optimizing a generic fitness function. The first version of the automated paramter-tuning
+of optimizing a generic fitness function. The first version of the automated parameter-tuning
 framework used an EA library called Evolving Objects (EO) as the EA engine (Carlson et al., 2014).
 ECJ was chosen to supercede EO because it is under active development (Linux), supports
 multi-threading, has excellent documentation, and implements a variety of EAs (Luke at al., 2006).
@@ -27,23 +27,31 @@ the EA is executed by ECJ except for the evaluation of the
 fitness function, which is completed by CARLsim. CARLsim
 evaluates the fitness function in parallel by running multiple
 SNN individuals simultaneously on the GPU, where the bulk
-of the computations occur. ECJ is written in Java, which is
-slower than C, but the majority of the execution time is spent
-running CARLsim’s optimized C++/CUDA code. At the
-beginning of every generation, the parameters to be tuned are
-passed from ECJ to CARLsim using standard input/output
-streams in Linux. CARLsim evaluates individuals in parallel
-and returns the resulting fitness values to ECJ via standard
-streams. The tuning framework allows users to tune virtually
-any SNN parameter, while the fitness functions can be written
-to depend on the neuronal activity or synaptic weights of the
-SNN.
+of the computations occur. The majority of the execution time is spent
+running CARLsim’s optimized C++/CUDA code, and the overhead created
+by ECJ's operations is negligible.
+
+PTI consists of two components which serve to define a standard interface for executing CARLsim models  
+with ECJ.  On the C++ side, PTI provides a small library that helps load a population of parameter
+vectors, and provides a standard mechanism for returning information about their performance (such as a
+fitness value) after the simulation has completed.  On the ECJ side, PTI provides a Jar file with a
+number of ECJ extensions.  These extensions allow ECJ to easily invoke and communicate with an external 
+simulator when an evolutionary algorithm is launched.  Communcation between the ECJ process and the
+simulator processes it launches is effected automatically via standard UNIX input/output streams.
+
+In a typical usage scenario, at the beginning of every generation of the evolutionary algorithm, 
+the parameters to be tuned are passed from ECJ to an SNN model that has been implemented in CARLsim, and 
+which uses the PTI interface to define its input-output behavior. 
+The model evaluates individuals in parallel and returns the resulting fitness values to ECJ via standard
+streams. The tuning framework allows users to tune virtually any SNN parameter, while the fitness functions 
+can be written to depend on the neuronal activity or synaptic weights of the SNN.
+
 
 \since v3.0
 
 \section ch10s2_installation 10.2 Installation
 
-The current version of the CARLsim paramter-tuning framework uses Evolutionary
+The current version of the CARLsim paramter-tuning interface (PTI) uses Evolutionary
 Computations in Java (ECJ) (version 22 or greater is required). For information
 on how to install ECJ, please go  <a href="http://cs.gmu.edu/~eclab/projects/ecj/">here</a>.
 
@@ -85,22 +93,32 @@ Once the environment variables have been set. Navigate to tools/ecj_pti and run:
 make && sudo make install
 \endcode
 
-This will install the CARLsim-ECJ PTI static library into the location pointed to by
-<tt>ECJ_PTI_DIR</tt>. To uninstall the CARLsim-ECJ-PTI
+This will install the CARLsim-ECJ PTI library into the location pointed to by
+<tt>ECJ_PTI_DIR</tt>.  Both the static C++ library and the Jar with the Java extensions 
+for ECJ will be installed in this directory.
 
 \since v3.0
 
-\section ch10s3_usage 10.3 ECJ Usage
-In general, users will create their own project directory and model it after the tutorial program
-found in \ref tut5_pti. Users configure a ECJ parameter file and implement a CARLsim fitness
-evaluation function. ECJ performs the EA utilizing the user-defined parameter file and runs the
-CARLsim 'main' program every generation to evaluate the fitness for all individuals in parallel.
-Each individual represents a different SNN with a unique set of parameter values. ECJ outputs the
-fitness and parameter files to log files every generation. Parameter values from high-fitness SNNs
-can then be used in SNN modeling and simulation.
+\section ch10s3_usage 10.3 Example ECJ Parameter File
 
-First the ECJ configuration file must be edited. Parts of the ECJ
-configuration file are shown below:
+To operate an evolutionary algorithm with ECJ, users define a parameter file that details all the
+algorithm components, parameters, and data-logging mechanisms that will go into the experiment.  Creating 
+experiments in this way is a form of declarative programming or <a href="https://en.wikipedia.org/wiki/Inversion_of_control">inversion 
+of control</a>. This paradigm offers a great deal of flexibility and makes automation of experiments easy in many ways, 
+but it can have a steep learning curve for users who aren't accustomed to programming in this way.
+
+A thorough introduction to using ECJ and its parameter language is beyond the scope of CARLsim's documentation.  We 
+encourage CARLsim users to make use of the ECJ tutorials and the fantastic manual that Sean Luke maintains over on 
+the <a href="http://cs.gmu.edu/~eclab/projects/ecj/">ECJ website</a>.
+
+In general, to use the CARLsim-ECJ PTI, users will create an SNN modeled after the tutorial program found
+in \ref tut5_pti.  This program is responsible for reading a collection of parameters, instantiating a number of neural
+ networks, executing them, and returning information about the behavior of each parameterized network (typically a 
+scalar fitness value).
+
+The user then must configure an ECJ parameter file defining the evolutionary search mechanism that will be used
+to search the parameter space for high-performing network configurations.  Here we give a few relevant parts of 
+an example parameter file that you may customize to your own purposes:
 
 \code
 parent.0 =                              @ec.simple.SimpleEvolutionState simple.params
@@ -228,6 +246,146 @@ outputStream << fitness[i] << endl;
 \see \ref tut5_pti
 
 \since v3.0
+
+\section ch10s_ecj_options 10.4 ECJ Extensions
+
+Most of what you need to know to write an ECJ parameter file is covered in the ECJ manual.  PTI does add 
+some non-standard extensions to ECJ, however, which can be used by setting parameters appropriately.  This section serves 
+as the canonical reference for these extensions.
+
+\subsection ch10s_ecj_options_simpleGroupedEvaluator 10.4.1 SimpleGroupedEvaluator
+
+The core extention that PTI adds to ECJ is a mechanism that allows us to evaluate multiple individuals 
+via a single call to an external simulator.  This allows us to, for instance, execute multiple individuals 
+in parallel on a GPU (something that is not possible with ECJ's built-in mechanisms).
+
+To use PTI's grouped evaluation feature, set the <tt>eval</tt> parameter in the ECJ parameter file like so:
+\code
+eval =	ecjapp.eval.SimpleGroupedEvaluator
+\endcode
+The <tt>SimpleGroupedEvaluator</tt> class is a version of ECJ's <tt>SimpleEvaluator</tt> that has been modified so 
+that individuals are evaluated in batches.  It accepts the following additional parameters:
+
+  - <tt>eval.chunk-size</tt> (optional):\n
+    The maximum number of individuals that should be evaluated in each call to the external simulator.  
+    You might choose this value, for instance, to the the number of neural networks your GPU card is capable of executing simulataneously.\n
+
+  - <tt>eval.measureEvalTimes</tt> (optional):\n
+    If set to <tt>true</tt>, the number of milliseconds that elapse between generations will be printed.  
+    The output is in CSV format.  Each row shows the job number, generation, and milliseconds, in that order.\n
+
+  - <tt>eval.evalTimesFile</tt> (optional):\n
+    If specified, the times recorded by the <tt>measureEvalTimes</tt> mechanism will be written to this file 
+    instead of to <tt>stdout</tt>.
+
+<tt>SimpleGroupedEvaluator</tt> also responds to the same parameters as <tt>SimpleEvaluator</tt>, such as <tt>num-tests</tt> and, importantly, 
+<tt>problem</tt> (see the ECJ manual).
+
+\since v3.1
+
+\subsection ch10s_ecj_options_commandProblem 10.4.2 CommandProblem
+
+In ECJ, objective functions are defined by custom implementations of the <tt>Problem</tt> class.  The CARLsim-ECJ 
+jar file includes a special <tt>Problem</tt> that is meant to be used in conjunction with <tt>SimpleGroupedEvaluator</tt> to 
+launch an external simulator.  This is called <tt>CommandProblem</tt>, since it launches an external command:
+\code
+eval.problem =	ecjapp.problem.CommandProblem
+\endcode
+
+This object accepts a number of crucially important parameters:
+
+  - <tt>eval.problem.simulationCommand</tt>:\n
+    Path to the binary executable for the external simulation.  This should be your compiled CARLsim model.\n
+
+  - <tt>eval.problem.errorGenesFile</tt>:\n
+    If the external simulation crashes at any point or produces invalid output, the input (individuals) that
+    caused the error will be recorded to this file.  This can be very important for debugging models that behave incorrectly during parameter tuning.\n
+
+  - <tt>eval.problem.errorResultsFile</tt>:\n
+    If the external simulation crashes at any point or produces invalid output, the output that cause the 
+    error will be recorded to this file.  This can be very important for debugging models that behave incorrectly during parameter tuning.\n
+
+  - <tt>eval.problem.objective</tt>:\n
+    The <tt>ObjectiveFunction</tt> that is used to convert the output of the external simulation into a scalar fitness value (See \ref ch10s_ecj_options_objective).
+
+  - <tt>eval.problem.simulationCommandArguent</tt> (optional):\n
+    Additional command-line arguments you would like passed to every invocation of the command.  These arguments are constant, and do not change.
+
+  - <tt>eval.problem.dynamicArguments</tt> (optional):\n
+    A <tt>DynamicArguments</tt> for passing information about the evolutionary algorithm's state to the external simulation as command-line arguments (See \ref ch10s_ecj_options_dynamicArguments).
+
+  - <tt>eval.problem.reevaluate</tt> (optional):\n
+    If set to <tt>true</tt>, individuals will have their fitness re-evaluated each generation.  You may want to 
+    reevaluate fitnesses if there is noise in your objective function, for instance. Defaults to <tt>false</tt>.
+
+\since v3.1
+
+\subsection ch10s_ecj_options_objective 10.4.3 ObjectiveFunction
+
+In some applications, it's useful to think of the external simulator as performing a genotype-to-phenotype mapping: 
+the genotype of each individual (a vector of parameters) is mapped to a phenotype that describes the resulting behavior 
+of the simulation.  An <tt>ObjectiveFunction</tt> in PTI's extension of ECJ performs the final step of converting the phenotype value into 
+a scalar fitness value.
+
+Preferably, the phenotype returned by the simulator is just a single scalar value: the individual's fitness.  In CARLsim 
+models, this means that we expect any extraction of features or other data from the SNN execution, and its synthesis into 
+a fitness value, to be performed in the C++ model implementation.
+
+When this is the case, the <tt>StringToDoubleObjective</tt> object allows ECJ to recognize the output of your model as a stream of fitness values:
+\code
+eval.problem.objective =	ecjapp.eval.problem.objective.StringToDoubleObjective
+\endcode
+This objective accepts one optional parameter:
+  - <tt>eval.problem.objective.idealFitnessValue</tt> (optional):\n
+    When set, an individual will be considered optimal if its fitness is equal to or greater than the specified value.
+
+There may be some cases where you wish to perform some post-processing in Java to convert more complex information on a network's behavior into a fitness value.  
+If this is the case, then you may create your own ECJ extention by defining a subclass of <tt>ObjectiveFunction</tt>.  Creating custom classes and 
+using them with ECJ is beyond the scope of this documentation, however.
+
+\since v3.1
+
+\subsection ch10s_ecj_options_dynamicArguments 10.4.4 DynamicArguments and Multi-GPU Evolution
+
+In some applications, your CARLsim model may need to know some specific information about the evolutionary algorithm state, 
+beyond the genomes of individuals.  In PTI's ECJ extension, a <tt>DynamicArguments</tt> object plays the role of taking data from variables 
+in ECJ and sending it to the simulator as command-line arguments.
+
+One important use of <tt>DynamicArguments</tt> is to invoke different simultaneous CARLsim instances on different GPU cards.  The
+<tt>ThreadDynamicArguments</tt> object makes this possible by passing a thread ID to each instance of the simulator that is launched 
+in a generation.
+
+Say, for example, that your evolutionary algorithm produces 100 children, but that you can only evaluated 50 individuals at a time in 
+your simulation.  If you have set <tt>eval.chunk-size = 50</tt>, and if you have configured ECJ to use 2 evaluation threads, then two 
+threads will be launched, each of which will send its 50 individuals to your CARLsim model to be evaluated on a GPU.  <tt>ThreadDynamicArguments</tt> 
+will assign one of these simulations a thread ID of 0, and the other one a thread ID of 1.
+\code
+eval.problem.dynamicArguments =	ecjapp.eval.problem.ThreadDynamicArguments
+\endcode
+The following parameters are available when using this mechanism:
+  - <tt>eval.problem.dynamicArguments.option</tt>:\n
+    The name of the command-line option to pass the thread ID to.
+
+  - <tt>eval.problem.dynamicArguments.modulo</tt> (optional):\n
+    If specified, the thread ID modulo this value will be passed.  Use this if you are using more evaluation threads than the number of GPUs you have available.
+
+  - <tt>eval.problem.dynamicArguments.dynamicArguments</tt> (optional):\n
+    Another <tt>DynamicArguments</tt> object.  Use this if you want to chain arguments together to pass more information to the simulator.
+
+If, for instance, <tt>option</tt> is set to '<tt>-device</tt>', then the simulator launched by thread 1 will have the argument '<tt>-device 1</tt>' passed to it as a command-line option.
+
+PTI's ECJ extension also includes a <tt>DynamicArguments</tt> for telling the simulator what generation the evolutionary algorithm is on:
+\code
+eval.problem.dynamicArguments =	ecjapp.eval.problem.GenerationDynamicArguments
+\endcode
+It accepts the following parameters:
+  - <tt>eval.problem.dynamicArguments.option</tt>:\n
+    The name of the command-line option to pass the generation number to.
+
+  - <tt>eval.problem.dynamicArguments.dynamicArguments</tt> (optional):\n
+    Another <tt>DynamicArguments</tt> object.  Use this if you want to chain arguments together to pass more information to the simulator.
+
+\since v3.1
 
 References
 \section ch10s4_references References
