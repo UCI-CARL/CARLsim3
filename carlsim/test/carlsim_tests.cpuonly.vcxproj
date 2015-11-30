@@ -60,7 +60,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}</ProjectGuid>
     <RootNamespace>carlsim_test</RootNamespace>
-    <ProjectName>carlsim_tests</ProjectName>
+    <ProjectName>carlsim_tests.cpuonly</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

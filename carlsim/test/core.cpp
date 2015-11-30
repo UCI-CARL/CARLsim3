@@ -623,21 +623,87 @@ TEST(CORE, saveLoadSimulation) {
 
 	for (int mode=0; mode<numModes; mode++) {
 		for (int coba=0; coba<=1; coba++) {
-			for (int isPlastic=0; isPlastic<=1; isPlastic++) {
+			for (int connType = 0; connType < 5; connType++) {
 				for (int loadSim=0; loadSim<=1; loadSim++) {
 					// Run and save simulation ------------------------------ //
 					CARLsim* sim = new CARLsim("CORE.saveSimulation", mode?GPU_MODE:CPU_MODE, SILENT, 0, 42);
 					FILE* simFid = NULL;
+					PoissonRate* poisRate = new PoissonRate(100, false);
 
-					gPost = sim->createGroup("pre-ex", 10, EXCITATORY_NEURON);
+					gPost = sim->createGroup("post-ex", Grid3D(10, 10), EXCITATORY_NEURON);
 					sim->setNeuronParameters(gPost, 0.02f, 0.2f, -65.0f, 8.0f);
-					gPre = sim->createSpikeGeneratorGroup("post-ex", 10, EXCITATORY_NEURON);
-					sim->setSpikeGenerator(gPre, &spkGenG0);
+					gPre = sim->createSpikeGeneratorGroup("pre-ex", Grid3D(10, 10), EXCITATORY_NEURON);
 
-					sim->connect(gPre, gPost, "full", RangeWeight(0.0, 20.0f/100, 20.0f/100), 1.0f, RangeDelay(1, 5),
-						RadiusRF(-1), isPlastic?SYN_PLASTIC:SYN_FIXED);
-					sim->setSTDP(gPost, isPlastic, STANDARD, alphaPlus/100, tauPlus, alphaMinus/100, tauMinus);
-					sim->setConductances(coba>0);
+					switch (connType) {
+					case 0:
+						if (coba > 0) {
+							sim->connect(gPre, gPost, "full", RangeWeight(0.0, 2.0f/100, 20.0f/100), 1.0f, RangeDelay(1, 20),
+									RadiusRF(-1), SYN_PLASTIC);
+							sim->setSTDP(gPost, true, STANDARD, alphaPlus/100, tauPlus, alphaMinus/100, tauMinus);
+							sim->setConductances(true);
+						} else {
+							sim->connect(gPre, gPost, "full", RangeWeight(0.0, 2.0f, 20.0f), 1.0f, RangeDelay(1, 20),
+									RadiusRF(-1), SYN_PLASTIC);
+							sim->setSTDP(gPost, true, STANDARD, alphaPlus, tauPlus, alphaMinus, tauMinus);
+							sim->setConductances(false);
+						}
+						break;
+					case 1:
+						if (coba > 0) {
+							sim->connect(gPre, gPost, "full-no-direct", RangeWeight(0.0, 2.0f/100, 20.0f/100), 1.0f, RangeDelay(1, 20),
+									RadiusRF(-1), SYN_PLASTIC);
+							sim->setSTDP(gPost, true, STANDARD, alphaPlus/100, tauPlus, alphaMinus/100, tauMinus);
+							sim->setConductances(true);
+						} else {
+							sim->connect(gPre, gPost, "full-no-direct", RangeWeight(0.0, 2.0f, 20.0f), 1.0f, RangeDelay(1, 20),
+									RadiusRF(-1), SYN_PLASTIC);
+							sim->setSTDP(gPost, true, STANDARD, alphaPlus, tauPlus, alphaMinus, tauMinus);
+							sim->setConductances(false);
+						}
+						break;
+					case 2:
+						if (coba > 0) {
+							sim->connect(gPre, gPost, "one-to-one", RangeWeight(0.0, 10.0f/100, 20.0f/100), 1.0f, RangeDelay(1, 20),
+									RadiusRF(-1), SYN_PLASTIC);
+							sim->setSTDP(gPost, true, STANDARD, alphaPlus/100, tauPlus, alphaMinus/100, tauMinus);
+							sim->setConductances(true);
+						} else {
+							sim->connect(gPre, gPost, "one-to-one", RangeWeight(0.0, 10.0f, 20.0f), 1.0f, RangeDelay(1, 20),
+									RadiusRF(-1), SYN_PLASTIC);
+							sim->setSTDP(gPost, true, STANDARD, alphaPlus, tauPlus, alphaMinus, tauMinus);
+							sim->setConductances(false);
+						}
+						break;
+					case 3:
+						if (coba > 0) {
+							sim->connect(gPre, gPost, "random", RangeWeight(0.0, 5.0f/100, 20.0f/100), 0.2f, RangeDelay(1, 20),
+									RadiusRF(-1), SYN_PLASTIC);
+							sim->setSTDP(gPost, true, STANDARD, alphaPlus/100, tauPlus, alphaMinus/100, tauMinus);
+							sim->setConductances(true);
+						} else {
+							sim->connect(gPre, gPost, "random", RangeWeight(0.0, 5.0f, 20.0f), 0.2f, RangeDelay(1, 20),
+									RadiusRF(-1), SYN_PLASTIC);
+							sim->setSTDP(gPost, true, STANDARD, alphaPlus, tauPlus, alphaMinus, tauMinus);
+							sim->setConductances(false);
+						}
+						break;
+					case 4:
+						if (coba > 0) {
+							sim->connect(gPre, gPost, "gaussian", RangeWeight(0.0, 5.0f/100, 20.0f/100), 0.4f, RangeDelay(1, 20),
+									RadiusRF(8, 8, 0), SYN_PLASTIC);
+							sim->setSTDP(gPost, true, STANDARD, alphaPlus/100, tauPlus, alphaMinus/100, tauMinus);
+							sim->setConductances(true);
+						} else {
+							sim->connect(gPre, gPost, "gaussian", RangeWeight(0.0, 5.0f, 20.0f), 0.4f, RangeDelay(1, 20),
+									RadiusRF(8, 8, 0), SYN_PLASTIC);
+							sim->setSTDP(gPost, true, STANDARD, alphaPlus, tauPlus, alphaMinus, tauMinus);
+							sim->setConductances(false);
+						}
+						break;
+					default:
+						EXPECT_TRUE(false);
+						break;
+					}
 
 					if (loadSim) {
 					// load previous simulation
@@ -646,6 +712,9 @@ TEST(CORE, saveLoadSimulation) {
 					}
 
 					sim->setupNetwork();
+
+					poisRate->setRates(10.0f);
+					sim->setSpikeRate(gPre, poisRate);
 
 					if (!loadSim) {
 						// first run: save network at the end
@@ -663,10 +732,11 @@ TEST(CORE, saveLoadSimulation) {
 						// test weights we saved are the same as weights we loaded
 						for (int i = 0; i < sim->getGroupNumNeurons(gPre); i++) {
 							for (int j = 0; j < sim->getGroupNumNeurons(gPost); j++) {
-								if (coba) {
+								if(isnan(weightsSave[i][j]))
+									EXPECT_TRUE(isnan(weightsLoad[i][j]));
+								else {						
 									EXPECT_FLOAT_EQ(weightsSave[i][j], weightsLoad[i][j]);
-								} else {
-									EXPECT_FLOAT_EQ(weightsSave[i][j], weightsLoad[i][j]);
+									//printf("(%f,%f) ", weightsSave[i][j], weightsLoad[i][j]);
 								}
 							}
 						}
@@ -674,6 +744,7 @@ TEST(CORE, saveLoadSimulation) {
 
 					// close sim.dat
 					if (simFid != NULL) fclose(simFid);
+					delete poisRate;
 					delete sim;
 				}
 			}

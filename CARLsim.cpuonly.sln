@@ -1,33 +1,33 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "carlsim", "carlsim\kernel\carlsim.cpuonly.vcxproj", "{713714BD-0AFF-4832-BF1B-29CB68F1CE39}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "carlsim.cpuonly", "carlsim\kernel\carlsim.cpuonly.vcxproj", "{713714BD-0AFF-4832-BF1B-29CB68F1CE39}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "interface", "carlsim\interface\interface.cpuonly.vcxproj", "{FBD68119-1A8C-4A1A-96CE-522B651209BC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "interface.cpuonly", "carlsim\interface\interface.cpuonly.vcxproj", "{FBD68119-1A8C-4A1A-96CE-522B651209BC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spike_monitor", "carlsim\spike_monitor\spike_monitor.cpuonly.vcxproj", "{5AA9A99D-3439-4C97-9949-C4C0AE5B855A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spike_monitor.cpuonly", "carlsim\spike_monitor\spike_monitor.cpuonly.vcxproj", "{5AA9A99D-3439-4C97-9949-C4C0AE5B855A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spike_generators", "tools\spike_generators\spike_generators.cpuonly.vcxproj", "{5C02490D-8C39-4C36-A3C9-CD683BDF43E0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spike_generators.cpuonly", "tools\spike_generators\spike_generators.cpuonly.vcxproj", "{5C02490D-8C39-4C36-A3C9-CD683BDF43E0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "connection_monitor", "carlsim\connection_monitor\connection_monitor.cpuonly.vcxproj", "{6B9E864C-A1B9-48CE-B88B-41CA17B4B1A9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "connection_monitor.cpuonly", "carlsim\connection_monitor\connection_monitor.cpuonly.vcxproj", "{6B9E864C-A1B9-48CE-B88B-41CA17B4B1A9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "group_monitor", "carlsim\group_monitor\group_monitor.cpuonly.vcxproj", "{A0612F05-1613-4D4A-8BE6-37FDE1E33843}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "group_monitor.cpuonly", "carlsim\group_monitor\group_monitor.cpuonly.vcxproj", "{A0612F05-1613-4D4A-8BE6-37FDE1E33843}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hello_world", "projects\hello_world\hello_world.cpuonly.vcxproj", "{49974217-7B15-464E-A97A-E97D2D1550E7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hello_world.cpuonly", "projects\hello_world\hello_world.cpuonly.vcxproj", "{49974217-7B15-464E-A97A-E97D2D1550E7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "carlsim_tests", "carlsim\test\carlsim_tests.cpuonly.vcxproj", "{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simple_weight_tuner.cpuonly", "tools\simple_weight_tuner\simple_weight_tuner.cpuonly.vcxproj", "{788E328D-89A7-44DF-9EEC-BC30CFC7658E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simple_weight_tuner", "tools\simple_weight_tuner\simple_weight_tuner.cpuonly.vcxproj", "{788E328D-89A7-44DF-9EEC-BC30CFC7658E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_1_basic_concepts.cpuonly", "doc\source\tutorial\1_basic_concepts\tutorial_1_basic_concepts.cpuonly.vcxproj", "{3B1E7EE9-B2EB-4D1A-97BD-86747AB439B5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_1_basic_concepts", "doc\source\tutorial\1_basic_concepts\tutorial_1_basic_concepts.cpuonly.vcxproj", "{3B1E7EE9-B2EB-4D1A-97BD-86747AB439B5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_2_random_spnet.cpuonly", "doc\source\tutorial\2_random_spnet\tutorial_2_random_spnet.cpuonly.vcxproj", "{AC28A77C-1D49-4060-93B7-20B48BC7B872}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_2_random_spnet", "doc\source\tutorial\2_random_spnet\tutorial_2_random_spnet.cpuonly.vcxproj", "{AC28A77C-1D49-4060-93B7-20B48BC7B872}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_3_plasticity.cpuonly", "doc\source\tutorial\3_plasticity\tutorial_3_plasticity.cpuonly.vcxproj", "{B33263C5-0468-4132-AE6B-098F642BA570}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_3_plasticity", "doc\source\tutorial\3_plasticity\tutorial_3_plasticity.cpuonly.vcxproj", "{B33263C5-0468-4132-AE6B-098F642BA570}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_4_simple_weight_tuner.cpuonly", "doc\source\tutorial\4_simple_weight_tuner\tutorial_4_simple_weight_tuner.cpuonly.vcxproj", "{332BE526-A286-45A1-925E-0D6FAFCAF1B7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_4_simple_weight_tuner", "doc\source\tutorial\4_simple_weight_tuner\tutorial_4_simple_weight_tuner.cpuonly.vcxproj", "{332BE526-A286-45A1-925E-0D6FAFCAF1B7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stopwatch.cpuonly", "tools\stopwatch\stopwatch.cpuonly.vcxproj", "{9032D439-A99B-4479-947D-431E000FC9FB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stopwatch", "tools\stopwatch\stopwatch.cpuonly.vcxproj", "{9032D439-A99B-4479-947D-431E000FC9FB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "carlsim_tests.cpuonly", "carlsim\test\carlsim_tests.cpuonly.vcxproj", "{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -123,18 +123,6 @@ Global
 		{49974217-7B15-464E-A97A-E97D2D1550E7}.Release|Win32.Build.0 = Release|Win32
 		{49974217-7B15-464E-A97A-E97D2D1550E7}.Release|x64.ActiveCfg = Release|x64
 		{49974217-7B15-464E-A97A-E97D2D1550E7}.Release|x64.Build.0 = Release|x64
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|Mixed Platforms.ActiveCfg = Debug|x64
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|Mixed Platforms.Build.0 = Debug|x64
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|Win32.ActiveCfg = Debug|Win32
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|Win32.Build.0 = Debug|Win32
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|x64.ActiveCfg = Debug|x64
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|x64.Build.0 = Debug|x64
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|Mixed Platforms.ActiveCfg = Release|x64
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|Mixed Platforms.Build.0 = Release|x64
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|Win32.ActiveCfg = Release|Win32
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|Win32.Build.0 = Release|Win32
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|x64.ActiveCfg = Release|x64
-		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|x64.Build.0 = Release|x64
 		{788E328D-89A7-44DF-9EEC-BC30CFC7658E}.Debug|Mixed Platforms.ActiveCfg = Debug|x64
 		{788E328D-89A7-44DF-9EEC-BC30CFC7658E}.Debug|Mixed Platforms.Build.0 = Debug|x64
 		{788E328D-89A7-44DF-9EEC-BC30CFC7658E}.Debug|Win32.ActiveCfg = Debug|Win32
@@ -206,6 +194,18 @@ Global
 		{9032D439-A99B-4479-947D-431E000FC9FB}.Release|Win32.Build.0 = Release|Win32
 		{9032D439-A99B-4479-947D-431E000FC9FB}.Release|x64.ActiveCfg = Release|x64
 		{9032D439-A99B-4479-947D-431E000FC9FB}.Release|x64.Build.0 = Release|x64
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|Win32.Build.0 = Debug|Win32
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|x64.ActiveCfg = Debug|x64
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Debug|x64.Build.0 = Debug|x64
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|Win32.ActiveCfg = Release|Win32
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|Win32.Build.0 = Release|Win32
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|x64.ActiveCfg = Release|x64
+		{D55C5CBD-B843-4DF9-BB1E-683E2D78E9E1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
