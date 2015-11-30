@@ -4373,6 +4373,7 @@ int CpuSNN::loadSimulation_internal(bool onlyPlastic) {
 // and generation of spike at the post-synaptic side.
 // We also create the delay_info array has the delay_start and delay_length parameter
 void CpuSNN::reorganizeDelay() {
+	int tdMax = maxDelay_ > 1 ? maxDelay_ : 1;
 	for (int grpId=0; grpId < numGrp; grpId++) {
 		for (int nid=grp_Info[grpId].StartN; nid <= grp_Info[grpId].EndN; nid++) {
 			unsigned int jPos=0;					// this points to the top of the delay queue
@@ -4383,7 +4384,7 @@ void CpuSNN::reorganizeDelay() {
 			// to set the appropriate postDelayInfo entries to zero
 			// otherwise the simulation might segfault because delay_length and delay_index_start are not
 			// correctly initialized
-			for (int td = 0; td < max(maxDelay_, 1); td++) {
+			for (int td = 0; td < tdMax; td++) {
 				unsigned int j=jPos;				// start searching from top of the queue until the end
 				unsigned int cnt=0;					// store the number of nodes with a delay of td;
 				while (j < Npost[nid]) {

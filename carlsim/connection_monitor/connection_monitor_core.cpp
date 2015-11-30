@@ -330,7 +330,7 @@ void ConnectionMonitorCore::printSparse(int neurPostId, int maxConn, int connPer
 
 	std::stringstream line;
 	int nConn = 0;
-	int maxIntDigits = ceil(log10((double)max(nNeurPre_,nNeurPost_)));
+	int maxIntDigits = ceil(log10((double)fmax(nNeurPre_,nNeurPost_)));
 	for (int i=0; i<nNeurPre_; i++) {
 		for (int j=postA; j<postZ; j++) {
 			// display only so many connections
