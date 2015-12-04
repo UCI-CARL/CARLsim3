@@ -340,7 +340,7 @@ Each neuron in the network (labeled 0-19) is considered a compartment, with all 
 same type of compartment (e.g., somatic compartment, <tt>grpSoma</tt>).
 All the n-th neurons in a group together form one multi-compartment neuron (e.g., neuron 0, 5, 10, and 15).
 
-According to (9) in \ref ch3s1s3_compartments, the dendritic current of neuron 10, \f$i_10\f$, is thus given as:
+According to (9) in \ref ch3s1s3_compartments, the dendritic current of neuron 10, \f$i_{10}\f$, is thus given as:
 
 \f{align*}{
 i_{10} =  &  G_0^{down} (v_{10} - v_{0}) + G_5^{down} (v_{10} - v_{5}) + G_{15}^{up} (v_{10} - v_{15}), & \text{(1)}
