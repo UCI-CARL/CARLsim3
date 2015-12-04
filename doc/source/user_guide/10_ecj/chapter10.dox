@@ -308,7 +308,7 @@ This object accepts a number of crucially important parameters:
   - <tt>eval.problem.objective</tt>:\n
     The <tt>ObjectiveFunction</tt> that is used to convert the output of the external simulation into a scalar fitness value (See \ref ch10s_ecj_options_objective).
 
-  - <tt>eval.problem.simulationCommandArguent</tt> (optional):\n
+  - <tt>eval.problem.simulationCommandArguments</tt> (optional):\n
     Additional command-line arguments you would like passed to every invocation of the command.  These arguments are constant, and do not change.
 
   - <tt>eval.problem.dynamicArguments</tt> (optional):\n
