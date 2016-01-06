@@ -625,6 +625,7 @@ __global__ 	void kernel_findFiring (int t, int sec, int simTime) {
 	if (0==threadIdx.x) {
 		fireCnt	  = 0; // initialize total cnt to 0
 		fireCntD1  = 0; // initialize inh. cnt to 0
+		fireCntTest = 0; 
 	}
 
 	const int totBuffers=loadBufferCount;
