@@ -387,7 +387,91 @@ It accepts the following parameters:
 
 \since v3.1
 
-References
+
+\subsection ch10s_ecj_options_statistics 10.4.5 Recording Statistics
+
+By default, ECJ produces an <tt>out.stat</tt> file that records the genome and fitness of the best individual in each generation, and of the best individual from the entire run.  When it comes time to analyze the results of an EA, this file can be difficult to parse, and it may not contain all the information you need.
+
+PTI's extension provides two addition ECJ <tt>Statistics</tt> objects that you may use to collect and store commonly-needed EA data in CSV format: <tt>ecjapp.statistics.FitnessStatistics</tt> and <tt>ecjapp.statistics.DoubleVectorGenomeStatistics</tt>.
+
+To add a <tt>Statistics</tt> class to an EA configuration, we add them as <i>children</i> of the default <tt>stat</tt> object.  To do so, first specify the number of children you wish to add, and then define the parameters for each child.  In the following example we configure ECJ to collect both <tt>FitnessStatistics</tt> and <tt>DoubleVectorGenomeStatistics</tt>.
+
+\code
+stat.num-children = 2
+stat.child.0 =                          ecjapp.statistics.FitnessStatistics
+stat.child.0.file =                     $fitness.csv
+stat.child.1 =                          ecjapp.statistics.DoubleVectorGenomeStatistics
+stat.child.1.pVectorLength =	 	pop.subpop.0.species.genome-size
+stat.child.1.file =                     $genomes.csv
+\endcode
+
+<tt>FitnessStatistics</tt> records the minimum, maximum, and average fitness, and the standard deviation of fitnesses in the entire population at each generation.  It also records the time (in milliseconds) that each generation finished evaluating.  Alternatively, <tt>FitnessStatistics</tt> can be used to record the fitness of every individual in the population (see the <tt>individuals</tt> option below).
+
+The following parameters are available for configuring <tt>FitnessStatistics</tt>:
+  -  <tt>stat.child.0.file</tt>:\n
+     Name of the output file to write CSV data to.  The fill will be created if it does not already exist.  Prefixing the file name with a dollar sign ('$') indicates that it should be saved in the current directory.  If you are running multiple runs of the EA (i.e. via the <tt>jobs</tt> parameter), then the filename will be prefixed with 'job.[jobnumber].', and one file will be created for each job.
+
+  -  <tt>stat.child.0.gzip</tt> (optional):\n
+     If true, the data will be compressed with <tt>gzip</tt>.
+
+  -  <tt>stat.child.0.individuals</tt> (optional):\n
+     If true, the fitness of every individual in the population will be recorded, instead of summary statistics.  The resulting CSV will have 4 columns instead of the usual 7, with one row per individual per generation.
+
+<tt>DoubleVectorGenomeStatistics</tt> records the genome and fitness of <i>all</i> individuals in the population.  The following parameters are available:
+  -  <tt>stat.child.1.file</tt>\n
+     Name of the output file to write CSV data to.  The fill will be created if it does not already exist.  Prefixing the file name with a dollar sign ('$') indicates that it should be saved in the current directory.  If you are running multiple runs of the EA (i.e. via the <tt>jobs</tt> parameter), then the filename will be prefixed with '<tt>job.[jobnumber].</tt>', and one file will be created for each job.
+
+  -  <tt>stat.child.1.pVectorLength</tt>:\n
+     The name of a <i>parameter</i> whose value indicates the number of parameters in the genome.  This tells <tt>DoubleVectorGenomeStatistics</tt> how many parameter columns need to be in its output.  Typically you'll want to point this to the <tt>genome-size</tt> parameter of your species.
+
+  -  <tt>stat.child.1.compress</tt> (optional):\n
+     If true, the data will be compressed with <tt>gzip</tt>.
+
+  -  <tt>stat.child.1.initOnly</tt> (optional):\n
+     If true, only the genomes of the initial population will be recorded.
+
+
+\since v3.1
+
+\section ch10s_ecj_tricks 10.5 Tips and Tricks
+
+\subsection ch10s_ecj_tricks_getBest 10.5.1 Retrieving Genomes of the Best Individuals
+
+After running an evolutionary algorithm a number of times to tune a spiking neural network, we often wish to retrieve the best individual found in each run for further analysis.  This can be done by examining the output recorded by <tt>DoubleVectorGenomeStatistics</tt> and finding the individual with the highest fitness.
+
+Alternatively, the following shell script can be copied and pasted to automatically extract the best individual.  It assumes that we have run ECJ for 10 jobs, and that the output of <tt>DoubleVectorGenomeStatistics</tt> has been written to files named '<tt>job.[num].genomes.csv</tt>', where <tt>[num]</tt> ranges from 0 to 9:
+
+\code
+for j in {0..9}; do
+    (echo ‘cat job.$j.genomes.csv | tail -n+2 | sort -rk3 -t, | head -n1 | cut -d, -f4-‘ > bestInd$j.csv);
+done;
+\endcode
+
+
+\subsection ch10s_ecj_tricks_withoutECJ 10.5.2 Evaluating Individuals Outside of ECJ
+
+Equally often, we want to run and analyze a simulation using high-fitness parameters that were found by ECJ.
+
+Because PTI models use the stanard input stream to receive simulation parameters, you can always execute your simulation with any set of parameters by piping the vector of parameters into the simulation.  For instance, if I want to use the parameters '<tt>0.1, 0.2, 0.3, 0.4, 0.5</tt>' to run a simulation whose binary is named '<tt>carlsim_myModel</tt>', then I can do so like this:
+
+\code
+echo "0.1,0.2,0.3,0.4,0.5" | ./carlsim_myModel
+\endcode
+
+Similarly, if I would like to run several networks in parallel with the same parameters, I can repeat the parameter vector several times:
+\code
+(for i in {1..40}; do echo "0.1,0.2,0.3,0.4,0.5"; done) | ./carlsim_myModel
+\endcode
+
+Say that I have stored the best genome found from each run in a file, as described in the previous section.  Perhaps my fitness evaluation is rather noisy, and I want to get a good estimate of the true expected fitness value of each job's best individual.  With the following script, I can take 40 fitness samples from each job's best individual in parallel:
+\code
+for j in {0..9}; do
+    (for i in {1..40}; do cat bestInd$j.csv; done) | ./carlsim_myModel
+done;
+\endcode
+
+
+
 \section ch10s4_references References
 
 Beyeler, M., Carlson, K. D., Chou, T. S., Dutt, N., Krichmar, J. L., CARLsim 3: A user-friendly

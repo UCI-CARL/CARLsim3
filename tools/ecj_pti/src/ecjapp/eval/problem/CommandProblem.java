@@ -166,9 +166,12 @@ public class CommandProblem extends Problem implements SimpleGroupedProblemForm 
             try {
                 final String simulationResult = controller.execute(chunk, extraArguments);
                 final String[] lines = simulationResult.split("\n");
-                if (lines.length != chunk.size()) {
+                if (simulationResult.isEmpty() || lines.length != chunk.size()) {
                     writeGenomesAndResults(state, chunk, lines);
-                    throw new IllegalStateException(String.format("%s: Sent %d individuals to external command %s, but the returned simulation results had %d lines.", this.getClass().getSimpleName(), chunk.size(), controller.getCommandPath(), lines.length));
+                    if (simulationResult.isEmpty())
+                        throw new IllegalStateException(String.format("%s: Sent %d individuals to external command '%s', but the returns simulation results were empty.", this.getClass().getSimpleName(), chunk.size(), controller.getCommandPath()));
+                    else
+                        throw new IllegalStateException(String.format("%s: Sent %d individuals to external command '%s', but the returned simulation results had %d lines.", this.getClass().getSimpleName(), chunk.size(), controller.getCommandPath(), lines.length));
                 }
                 for (int i = 0; i < lines.length; i++) {
                     final Individual ind = individuals[from + i];
