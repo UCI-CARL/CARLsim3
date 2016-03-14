@@ -55,13 +55,13 @@ public class CommandController {
         if (remoteInfo.isDefined())
             carlsimShellCommand = remoteInfo.get().getSSHCommand(carlsimShellCommand);
         
-        final Process p = Runtime.getRuntime().exec(carlsimShellCommand);
+        //final Process p = Runtime.getRuntime().exec(carlsimShellCommand);
+        final Process p = new ProcessBuilder(carlsimShellCommand.split(" ")).redirectError(ProcessBuilder.Redirect.INHERIT).start();
         final Writer carlSimInput = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
         PopulationToFile.DoubleVectorPopulationToFile(individuals, carlSimInput);
         carlSimInput.close(); // Sends EOF
         p.waitFor();
         
-        System.err.println(streamToString(p.getErrorStream()));
         return streamToString(p.getInputStream());
     }
 

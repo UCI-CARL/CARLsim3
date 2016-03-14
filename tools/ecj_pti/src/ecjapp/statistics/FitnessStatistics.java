@@ -91,7 +91,6 @@ public class FitnessStatistics extends Statistics {
         this.startTime = System.currentTimeMillis();
     }
      
-    /** Logs the average value of the first gene across all subpopulations. */
     @Override
     public void postEvaluationStatistics(final EvolutionState state) {
         assert(state != null);
