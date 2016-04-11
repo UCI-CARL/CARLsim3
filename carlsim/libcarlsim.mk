@@ -1,6 +1,6 @@
 carlsim_major_num := 3
 carlsim_minor_num := 1
-carlsim_build_num := 0
+carlsim_build_num := 2
 
 num_ver := $(carlsim_major_num).$(carlsim_minor_num)
 

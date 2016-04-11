@@ -8,6 +8,39 @@ Release 3.1
 ===============================================================================
 
 ---------------------
+Build 3.1.2
+---------------------
+
+2016-04-11     Michael Beyeler <mbeyeler@uci.edu>
+  * Fix initialization of 2D weight matrix in ConnectionMonitor.
+
+2016-03-14     Eric 'Siggy' Scott <escott8@gmu.edu>
+  * ECJ-PTI now prints any messages that the client simulation writes to
+    stderr live, as they occur.
+
+2016-03-08     Stanislav Listopad <slistopa@uci.edu>
+  - Remove lastIter boolean from kernel_globalStateUpdate.
+
+2016-03-08     Eric 'Siggy' Scott <escott8@gmu.edu>
+  + Add material to User Guide on ECJ Statistics extensions and Bash commands.
+
+2016-02-22     Eric 'Siggy' Scott <escott8@gmu.edu>
+  * Fix ECJ-PTI's error-logging mechanism from recording the genomes of 
+    individuals.
+
+2016-01-06     Stanislav Listopad <slistopa@uci.edu>
+  * Fix SpikeMonitor writing issue in kernel_findFiring.
+
+
+---------------------
+Build 3.1.1
+---------------------
+
+2015-11-30     Ting-Shuo Chou <tingshu@uci.edu>
+  * Fix std::max compilation issue in CPU_ONLY mode
+
+
+---------------------
 Build 3.1.0
 ---------------------
 
