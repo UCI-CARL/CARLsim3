@@ -18,9 +18,9 @@ namespace CARLsim_PTI {
         std::ostream &outputStream;
         const std::auto_ptr<ParameterInstances> instances;
         
-        PTIImpl(const char* const fileName, std::istream &defaultInputStream, std::ostream &outputStream):
+        PTIImpl(const char* const fileName, const bool firstColumnIsSubPopulation, std::istream &defaultInputStream, std::ostream &outputStream):
                 outputStream(outputStream),
-                instances(loadParameterInstances(fileName, defaultInputStream)) {
+                instances(loadParameterInstances(fileName, firstColumnIsSubPopulation, defaultInputStream)) {
         }
         
         static const char* getStringArgument(const char* const option, const int argc, const char* const argv[]) {
@@ -45,9 +45,20 @@ namespace CARLsim_PTI {
             return -1;
         }
         
+        static bool getFlagArgument(const char * const flag, const int argc, const char * const argv[]) {
+            assert(flag != NULL);
+            assert(argc >= 0);
+            assert(argv != NULL);
+            for (int i = 0; i < argc; i++) {
+                if (0 == strcmp(flag, argv[i]))
+                    return true;
+            }
+            return false;
+        }
+        
         /*! Parse command line arguments and read in the parameter values to be
          * used in an Experiment, allocating a ParameterInstances on the heap. */
-        static ParameterInstances* loadParameterInstances(const char* const fileName, std::istream &defaultInputStream) {
+        static ParameterInstances* loadParameterInstances(const char* const fileName, const bool firstColumnIsSubPopulation, std::istream &defaultInputStream) {
             // I asked the following SO question while deciding how to write this method: http://stackoverflow.com/questions/23049166/initialize-polymorphic-variable-on-stack
             std::istream * const input(fileName ? new std::ifstream(fileName, std::ifstream::in) : &defaultInputStream); 
             
@@ -56,7 +67,7 @@ namespace CARLsim_PTI {
                     throw std::invalid_argument(std::string("PTI::PTIImpl: Failed to open file") + std::string(fileName) + std::string("."));
             }
             
-            ParameterInstances* const result = new ParameterInstances(*input);
+            ParameterInstances* const result = new ParameterInstances(*input, firstColumnIsSubPopulation);
             
             if (fileName) {
                 dynamic_cast<std::ifstream*>(input)->close();
@@ -72,13 +83,13 @@ namespace CARLsim_PTI {
 }
 
 PTI::PTI(const int argc, const char* const argv[], std::ostream &outputStream):
-        impl(new PTIImpl(PTIImpl::getStringArgument("-f", argc, argv), std::cin, outputStream)) {
+        impl(new PTIImpl(PTIImpl::getStringArgument("-f", argc, argv), PTIImpl::getFlagArgument("-subPops", argc, argv), std::cin, outputStream)) {
     
     assert(repOK());
 }
 
 PTI::PTI(const int argc, const char* const argv[], std::ostream &outputStream, std::istream &defaultInputStream):
-        impl(new PTIImpl(PTIImpl::getStringArgument("-f", argc, argv), defaultInputStream, outputStream)) {
+        impl(new PTIImpl(PTIImpl::getStringArgument("-f", argc, argv), PTIImpl::getFlagArgument("-subPops", argc, argv), defaultInputStream, outputStream)) {
     
     assert(repOK());
 }

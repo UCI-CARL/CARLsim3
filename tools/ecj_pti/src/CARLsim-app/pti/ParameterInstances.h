@@ -19,7 +19,7 @@ namespace CARLsim_PTI {
          * of columns, or if the first column in each pair has a value greater
          * than the second column (since we must have min <= max).
          */
-        ParameterInstances(std::istream &inputStream);
+        ParameterInstances(std::istream &inputStream, const bool firstColumnIsSubPopulation = false);
         
         ~ParameterInstances();
 
@@ -27,12 +27,14 @@ namespace CARLsim_PTI {
 
         std::vector<double> getInstance(const unsigned int instance) const;
         
+        unsigned int getSubPopulation(const unsigned int instance) const;
+        
         /*! The number of rows that were found in the input. */
         unsigned int getNumInstances() const;
 
         /*! Half the number of columns that were found in the input. */
         unsigned int getNumParameters() const;
-
+        
         /*! This returns false only if this is in an inconsistent state. Under
          * correct usage, this should always return true. */
         bool repOK() const;

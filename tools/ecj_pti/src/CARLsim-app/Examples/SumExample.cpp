@@ -25,6 +25,8 @@ namespace CARLsim_PTI {
 	}
 	// Add some random noise
 	sum += ((float) (rand()%parameters.getNumParameters()))/10.0f;
+        // Add a subpopulation-specific constant
+        //sum += parameters.getSubPopulation(i)*5;
 	outputStream << sum << endl;
       }
     }

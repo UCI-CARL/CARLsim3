@@ -17,29 +17,41 @@ using namespace CARLsim_PTI;
 namespace CARLsim_PTI {
     struct ParameterInstances::ParameterInstancesImpl {
         vector< vector< double > > instanceVectors;
+        vector< unsigned int > subPopulations;
         
-        ParameterInstancesImpl(istream &inputStream) {
-            readCSV(inputStream, instanceVectors);
+        ParameterInstancesImpl(istream &inputStream, const bool firstColumnIsSubPopulation) {
+            readCSV(inputStream, instanceVectors, subPopulations, firstColumnIsSubPopulation);
             assert(repOK());
         }
 
-        void readCSV(istream &inputStream, vector< vector<double> > &instanceVectors) {
+        void readCSV(istream &inputStream, vector< vector<double> > &instanceVectors, vector< unsigned int > &subPopulations, const bool firstColumnIsSubPopulation) {
             string strLine;
-            while (getline(inputStream, strLine))
-                instanceVectors.push_back(readCSVLine(strLine));
+            // Iterate through each individual (row))
+            while (getline(inputStream, strLine)) {
+                // Determine which subPopulation this individual belongs to
+                if (firstColumnIsSubPopulation) {
+                    std::string subPop = strLine.substr(0, strLine.find(','));
+                    subPopulations.push_back(stoi(subPop));
+                }
+                else
+                    subPopulations.push_back(0);
+                // The rest of the row is its genome
+                instanceVectors.push_back(readCSVLine(strLine, firstColumnIsSubPopulation));
+            }
             if (!allRowsEqualLength(instanceVectors))
                 throw invalid_argument(string(typeid(*this).name()) + string(": rows are not of equal length."));
         }
 
-        vector<double> readCSVLine(const string &strLine) {
+        vector<double> readCSVLine(const string &strLine, const bool ignoreFirstColumn) {
             string doubleString;
             stringstream strLineStream(strLine);
 
             vector<double> lineVector;
-
-            while (getline(strLineStream, doubleString, ',')) {
+            
+            if (ignoreFirstColumn)
+                getline(strLineStream, doubleString, ',');
+            while (getline(strLineStream, doubleString, ','))
                 lineVector.push_back(stringToDouble(doubleString));
-            }
 
             return lineVector;
         }
@@ -78,11 +90,16 @@ namespace CARLsim_PTI {
         bool repOK() const {
             return allRowsEqualLength(instanceVectors);
         }
+
+        unsigned int getSubPopulation(const unsigned int instance) const {
+            assert(instance < getNumInstances());
+            return subPopulations[instance];
+        }
     };
 }
 
-ParameterInstances::ParameterInstances(istream &inputStream):
- impl(*new ParameterInstancesImpl(inputStream)) {
+ParameterInstances::ParameterInstances(istream &inputStream, const bool firstColumnIsSubPopulation):
+ impl(*new ParameterInstancesImpl(inputStream, firstColumnIsSubPopulation)) {
     assert(repOK());
 }
 
@@ -111,4 +128,9 @@ unsigned int ParameterInstances::getNumParameters() const {
 
 bool ParameterInstances::repOK() const {
     return impl.repOK();
+}
+
+
+unsigned int ParameterInstances::getSubPopulation(const unsigned int instance) const {
+    return impl.getSubPopulation(instance);
 }
