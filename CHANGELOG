@@ -11,6 +11,10 @@ Release 3.1
 Build 3.1.2
 ---------------------
 
+2016-06-03     Eric 'Siggy' Scott <escott8@gmu.edu>
+  * Add features to ECJ-PTI for running multiple EA runs simultaneously on
+    a single GPU.
+
 2016-04-11     Michael Beyeler <mbeyeler@uci.edu>
   * Fix initialization of 2D weight matrix in ConnectionMonitor.
 
