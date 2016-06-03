@@ -49,7 +49,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 0;
         final String expResult = String.format(" %s %s", OPT1, thread);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
 
@@ -59,7 +59,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 100;
         final String expResult = String.format(" %s %s", OPT1, thread);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
 
@@ -69,7 +69,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = Integer.MAX_VALUE;
         final String expResult = String.format(" %s %s", OPT1, thread);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
 
@@ -80,7 +80,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 0;
         final String expResult = String.format(" %s %s", OPT1, thread);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
 
@@ -91,7 +91,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 4;
         final String expResult = String.format(" %s %s", OPT1, thread);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
 
@@ -102,7 +102,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 5;
         final String expResult = String.format(" %s %s", OPT1, 0);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
 
@@ -113,7 +113,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 15;
         final String expResult = String.format(" %s %s", OPT1, 0);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
 
@@ -124,7 +124,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 100;
         final String expResult = String.format(" %s %s", OPT1, 0);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
 
@@ -135,7 +135,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 156;
         final String expResult = String.format(" %s %s", OPT1, 1);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
     
@@ -148,7 +148,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 156;
         final String expResult = String.format(" %s %s %s %s", OPT2, 1, OPT1, thread);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
     
@@ -161,7 +161,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 5;
         final String expResult = String.format(" %s %s %s %s", OPT2, 0, OPT1, thread);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
     
@@ -174,7 +174,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 17;
         final String expResult = String.format(" %s %s %s %s", OPT2, 2, OPT1, thread);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
     
@@ -187,7 +187,7 @@ public class ThreadDynamicArgumentsTest {
         sut.setup(state, BASE);
         final int thread = 2;
         final String expResult = String.format(" %s %s %s %s", OPT2, 2, OPT1, thread);
-        String result = sut.get(state, null, 0, 0, 0, thread);
+        String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
    

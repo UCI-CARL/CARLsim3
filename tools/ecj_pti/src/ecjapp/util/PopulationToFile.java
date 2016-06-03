@@ -23,25 +23,25 @@ final public class PopulationToFile {
     
     /** Take a list of DoubleVectorIndividuals and output them to a tab-delimited file.
      * 
-     * @param population A non-empty population of Individuals.  If any element is null an IAE is thrown.
+     * @param individuals A non-empty population of Individuals.  If any element is null an IAE is thrown.
      * @param outWriter A non-null Writer to output the CSV to.  When this method returns it does *not* close the outWriter.
      * @return Nothing.  Side effects: Writes a tab-delimited CSV to outWriter, one row per individual, one column per gene.
      * @throws IOException 
      */
-    public static void DoubleVectorPopulationToFile(final List<? extends DoubleVectorIndividual> population, final Writer outWriter) throws IOException{
-        if (outWriter == null)
-            throw new IllegalArgumentException(PopulationToFile.class.getSimpleName() + ": outWriter is null.");
-        if (population == null)
-            throw new IllegalArgumentException(PopulationToFile.class.getSimpleName() + ": population is null.");
-        if (population.isEmpty())
-            throw new IllegalArgumentException(PopulationToFile.class.getSimpleName() + ": population is empty.");
+    public static void DoubleVectorIndividualsToFile(final List<DoubleVectorIndividual> individuals, final Option<List<Integer>> subPopulations, final Writer outWriter) throws IOException{
+        assert(outWriter != null);
+        assert(individuals != null);
+        assert(!individuals.isEmpty());
+        assert(!(subPopulations.isDefined() && subPopulations.get().size() != individuals.size()));
         
-        for (final Individual ind : population) {
-            final double[] genome = ((DoubleVectorIndividual) ind).genome;
+        for (int i = 0; i < individuals.size(); i++) {
+            if (subPopulations.isDefined())
+                outWriter.write(String.format("%d%s", subPopulations.get().get(i), DELIMITER));
+            final double[] genome = individuals.get(i).genome;
             assert(genome.length > 0);
             outWriter.write(String.valueOf(genome[0]));
-            for (int i = 1; i < genome.length; i++)
-                outWriter.write(String.format("%s%f", DELIMITER, genome[i]));
+            for (int j = 1; j < genome.length; j++)
+                outWriter.write(String.format("%s%f", DELIMITER, genome[j]));
             outWriter.write(String.format("%n"));
         }
     }

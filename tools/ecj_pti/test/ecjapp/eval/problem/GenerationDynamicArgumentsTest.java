@@ -49,7 +49,7 @@ public class GenerationDynamicArgumentsTest {
         System.out.println("get");
         sut.setup(state, BASE);
         final String expResult = String.format(" %s %s", OPT1, state.generation);
-        final String result = sut.get(state, null, 0, 0, 0, 0);
+        final String result = sut.get(state, 0);
         assertEquals(expResult, result);
     }
     
@@ -59,7 +59,7 @@ public class GenerationDynamicArgumentsTest {
         state.generation = 15;
         sut.setup(state, BASE);
         final String expResult = String.format(" %s %s", OPT1, state.generation);
-        final String result = sut.get(state, null, 0, 0, 0, 0);
+        final String result = sut.get(state, 0);
         assertEquals(expResult, result);
     }
     
@@ -69,7 +69,7 @@ public class GenerationDynamicArgumentsTest {
         state.generation = Integer.MAX_VALUE;
         sut.setup(state, BASE);
         final String expResult = String.format(" %s %s", OPT1, state.generation);
-        final String result = sut.get(state, null, 0, 0, 0, 0);
+        final String result = sut.get(state, 0);
         assertEquals(expResult, result);
     }
     
@@ -83,7 +83,7 @@ public class GenerationDynamicArgumentsTest {
         final int thread = state.generation;
         sut.setup(state, BASE);
         final String expResult = String.format(" %s %s %s %s", OPT2, 0, OPT1, state.generation);
-        final String result = sut.get(state, null, 0, 0, 0, thread);
+        final String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
     
@@ -97,7 +97,7 @@ public class GenerationDynamicArgumentsTest {
         final int thread = state.generation;
         sut.setup(state, BASE);
         final String expResult = String.format(" %s %s %s %s", OPT2, 0, OPT1, state.generation);
-        final String result = sut.get(state, null, 0, 0, 0, thread);
+        final String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
     
@@ -111,7 +111,7 @@ public class GenerationDynamicArgumentsTest {
         final int thread = state.generation;
         sut.setup(state, BASE);
         final String expResult = String.format(" %s %s %s %s", OPT2, 1, OPT1, state.generation);
-        final String result = sut.get(state, null, 0, 0, 0, thread);
+        final String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
     
@@ -125,7 +125,7 @@ public class GenerationDynamicArgumentsTest {
         final int thread = state.generation;
         sut.setup(state, BASE);
         final String expResult = String.format(" %s %s %s %s", OPT2, 4, OPT1, state.generation);
-        final String result = sut.get(state, null, 0, 0, 0, thread);
+        final String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
     
@@ -139,7 +139,7 @@ public class GenerationDynamicArgumentsTest {
         final int thread = state.generation;
         sut.setup(state, BASE);
         final String expResult = String.format(" %s %s %s %s", OPT2, 4, OPT1, state.generation);
-        final String result = sut.get(state, null, 0, 0, 0, thread);
+        final String result = sut.get(state, thread);
         assertEquals(expResult, result);
     }
 

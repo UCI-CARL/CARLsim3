@@ -162,9 +162,9 @@ public class CommandProblem extends Problem implements SimpleGroupedProblemForm 
 			add((DoubleVectorIndividual)individuals[i]);
         }};
         if (!chunk.isEmpty()) {
-            final String extraArguments = (dynamicArguments.isDefined()) ? dynamicArguments.get().get(state, individuals, from, to, subpopulation, threadnum) : "";
+            final String extraArguments = (dynamicArguments.isDefined()) ? dynamicArguments.get().get(state, threadnum) : "";
             try {
-                final String simulationResult = controller.execute(chunk, extraArguments);
+                final String simulationResult = controller.execute(chunk, Option.NONE, extraArguments);
                 final String[] lines = simulationResult.split("\n");
                 if (simulationResult.isEmpty() || lines.length != chunk.size()) {
                     writeGenomesAndResults(state, chunk, lines);

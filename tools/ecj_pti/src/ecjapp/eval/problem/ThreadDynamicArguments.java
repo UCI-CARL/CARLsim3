@@ -35,6 +35,7 @@ public class ThreadDynamicArguments implements DynamicArguments {
     private Option<Integer> modulo;
     private Option<DynamicArguments> dynamicArguments;
     
+    @Override
     public void setup(final EvolutionState state, final Parameter base) {
         assert(state != null);
         assert(base != null);
@@ -55,9 +56,9 @@ public class ThreadDynamicArguments implements DynamicArguments {
     }
     
     @Override
-    public String get(final EvolutionState state, final Individual[] individuals, final int from, final int to, final int subpopulation, final int threadnum) {
+    public String get(final EvolutionState state, final int threadnum) {
         assert(threadnum >= 0);
-        final String childArguments = dynamicArguments.isDefined() ? dynamicArguments.get().get(state, individuals, from, to, subpopulation, threadnum) : "";
+        final String childArguments = dynamicArguments.isDefined() ? dynamicArguments.get().get(state, threadnum) : "";
         if (modulo.isDefined())
             return String.format("%s %s %s", childArguments, option, Integer.toString(threadnum % modulo.get()));
         else

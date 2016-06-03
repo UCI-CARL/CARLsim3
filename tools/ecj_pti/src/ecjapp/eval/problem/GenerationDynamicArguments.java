@@ -44,9 +44,9 @@ public class GenerationDynamicArguments implements DynamicArguments {
     }
     
     @Override
-    public String get(final EvolutionState state, final Individual[] individuals, final int from, final int to, final int subpopulation, final int threadnum) {
+    public String get(final EvolutionState state, final int threadnum) {
         assert(threadnum >= 0);
-        final String childArguments = dynamicArguments.isDefined() ? dynamicArguments.get().get(state, individuals, from, to, subpopulation, threadnum) : "";
+        final String childArguments = dynamicArguments.isDefined() ? dynamicArguments.get().get(state, threadnum) : "";
         return String.format("%s %s %s", childArguments, option, Integer.toString(state.generation));
     }
     

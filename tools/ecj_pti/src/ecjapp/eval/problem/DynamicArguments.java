@@ -1,7 +1,6 @@
 package ecjapp.eval.problem;
 
 import ec.EvolutionState;
-import ec.Individual;
 import ec.util.Parameter;
 
 /**
@@ -15,5 +14,5 @@ import ec.util.Parameter;
  */
 public interface DynamicArguments {
     void setup(final EvolutionState state, final Parameter base);
-    String get(final EvolutionState state, final Individual[] individuals, final int from, final int to, final int subpopulation, final int threadnum);
+    String get(final EvolutionState state, final int threadnum);
 }

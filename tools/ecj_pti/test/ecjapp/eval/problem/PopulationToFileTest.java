@@ -3,6 +3,7 @@ package ecjapp.eval.problem;
 import ecjapp.util.PopulationToFile;
 import ec.vector.DoubleVectorIndividual;
 import ecjapp.util.Misc;
+import ecjapp.util.Option;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public class PopulationToFileTest {
         final List<DoubleVectorIndividual> population = getDoubleVectorPopulation();
         final StringWriter outWriter = new StringWriter();
         
-        PopulationToFile.DoubleVectorPopulationToFile(population, outWriter);
+        PopulationToFile.DoubleVectorIndividualsToFile(population, Option.NONE, outWriter);
         
         final List<double[]> expected = getInputData();
         final List<double[]> parsedResult = parseCSV(outWriter.toString(), ",");
@@ -66,7 +67,7 @@ public class PopulationToFileTest {
         final List<DoubleVectorIndividual> population = getDoubleVectorPopulation();
         final StringWriter outWriter = null;
         
-        PopulationToFile.DoubleVectorPopulationToFile(population, outWriter);
+        PopulationToFile.DoubleVectorIndividualsToFile(population, Option.NONE, outWriter);
     }
 
     /** Test of DoubleVectorPopulationToFile method, of class PopulationToFile. */
@@ -76,7 +77,7 @@ public class PopulationToFileTest {
         final List<DoubleVectorIndividual> population = null;
         final StringWriter outWriter = new StringWriter();
         
-        PopulationToFile.DoubleVectorPopulationToFile(population, outWriter);
+        PopulationToFile.DoubleVectorIndividualsToFile(population, Option.NONE, outWriter);
     }
     
     private List<double[]> parseCSV(final String csv, final String delimiter) {

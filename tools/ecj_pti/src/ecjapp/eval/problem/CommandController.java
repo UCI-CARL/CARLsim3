@@ -47,7 +47,7 @@ public class CommandController {
      * @throws IOException, InterruptedException
      * @return A unique integer identifying the files used for this CARLsim invocation.
      */
-    public String execute(final List<? extends DoubleVectorIndividual> individuals, final String additionalArguments) throws IOException, InterruptedException {
+    public String execute(final List<DoubleVectorIndividual> individuals, final Option<List<Integer>> subPopulations, final String additionalArguments) throws IOException, InterruptedException {
         assert(individuals != null);
         assert(additionalArguments != null);
         final String allArguments = (arguments.isDefined() ? arguments.get() : "") + (additionalArguments.isEmpty() ? "" : " " + additionalArguments);
@@ -58,7 +58,7 @@ public class CommandController {
         //final Process p = Runtime.getRuntime().exec(carlsimShellCommand);
         final Process p = new ProcessBuilder(carlsimShellCommand.split(" ")).redirectError(ProcessBuilder.Redirect.INHERIT).start();
         final Writer carlSimInput = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
-        PopulationToFile.DoubleVectorPopulationToFile(individuals, carlSimInput);
+        PopulationToFile.DoubleVectorIndividualsToFile(individuals, subPopulations, carlSimInput);
         carlSimInput.close(); // Sends EOF
         p.waitFor();
         

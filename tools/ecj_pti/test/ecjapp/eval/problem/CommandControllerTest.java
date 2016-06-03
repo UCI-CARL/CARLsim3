@@ -70,7 +70,7 @@ public class CommandControllerTest {
         System.out.println("execute (bad command)");
         sut = new CommandController("guhrgwergwerg/wergwer234g", Option.NONE, Option.NONE);
         assertTrue(sut.repOK());
-        final String result = sut.execute(testPopulation, "");
+        final String result = sut.execute(testPopulation, Option.NONE, "");
     }    
 
     /** Test of execute method, of class CARLsimController. */
@@ -78,7 +78,7 @@ public class CommandControllerTest {
     public void testExecute() throws Exception {
         System.out.println("execute");
         
-        final String result = sut.execute(testPopulation, "");
+        final String result = sut.execute(testPopulation, Option.NONE, "");
         
         final String[] lines = result.split("\n");
         testCSVEqualsPopulation(lines, testPopulation);
@@ -92,7 +92,7 @@ public class CommandControllerTest {
         // The -e option tells cat to print '$' at the end of each line.
         sut = new CommandController(path, new Option<String>("-e"), Option.NONE);
         
-        final String result = sut.execute(testPopulation, "");
+        final String result = sut.execute(testPopulation, Option.NONE, "");
         
         final String[] lines = result.split("\n");
         for (int i = 0; i < lines.length; i++) {
