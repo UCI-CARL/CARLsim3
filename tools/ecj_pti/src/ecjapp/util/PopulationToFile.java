@@ -3,6 +3,7 @@ package ecjapp.util;
 import ec.Individual;
 import ec.vector.DoubleVectorIndividual;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
 
@@ -44,5 +45,16 @@ final public class PopulationToFile {
                 outWriter.write(String.format("%s%f", DELIMITER, genome[j]));
             outWriter.write(String.format("%n"));
         }
+    }
+    
+    public static String DoubleVectorIndividualsToString(final List<DoubleVectorIndividual> individuals, final Option<List<Integer>> subPopulations) {
+        final Writer stringWriter = new StringWriter();
+        try {
+            DoubleVectorIndividualsToFile(individuals, subPopulations, stringWriter);
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(e);
+        }
+        return stringWriter.toString();
     }
 }

@@ -10,6 +10,7 @@ import ec.vector.DoubleVectorIndividual;
 import ecjapp.eval.problem.objective.ObjectiveFunction;
 import ecjapp.util.Misc;
 import ecjapp.util.Option;
+import ecjapp.util.PopulationToFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -155,21 +156,21 @@ public class MultiPopCommandProblem extends Problem implements MultiPopGroupedPr
         assert(threadnum >= 0);
        
         final List<DoubleVectorIndividual> indsToEvaluate = new ArrayList<DoubleVectorIndividual>();
-        final List<Integer> indsToEvaluateSubPops = new ArrayList<Integer>();
+        final Option<List<Integer>> indsToEvaluateSubPops = new Option(new ArrayList<Integer>());
         for (int i = 0; i < individuals.size(); i++) {
             if (reevaluate || !individuals.get(i).evaluated) {
                 indsToEvaluate.add(individuals.get(i));
-                indsToEvaluateSubPops.add(subPopulations.get(i));
+                indsToEvaluateSubPops.get().add(subPopulations.get(i));
             }
         }
         
         if (!indsToEvaluate.isEmpty()) {
             final String extraArguments = (dynamicArguments.isDefined()) ? dynamicArguments.get().get(state, threadnum) : "";
             try {
-                final String simulationResult = controller.execute(indsToEvaluate, new Option(indsToEvaluateSubPops), extraArguments);
+                final String simulationResult = controller.execute(indsToEvaluate, indsToEvaluateSubPops, extraArguments);
                 final String[] lines = simulationResult.split("\n");
                 if (simulationResult.isEmpty() || lines.length != indsToEvaluate.size()) {
-                    writeGenomesAndResults(state, indsToEvaluate, lines);
+                    writeGenomesAndResults(state, indsToEvaluate, indsToEvaluateSubPops, lines);
                     if (simulationResult.isEmpty())
                         throw new IllegalStateException(String.format("%s: Sent %d individuals to external command '%s', but the returns simulation results were empty.", this.getClass().getSimpleName(), indsToEvaluate.size(), controller.getCommandPath()));
                     else
@@ -181,7 +182,7 @@ public class MultiPopCommandProblem extends Problem implements MultiPopGroupedPr
                         ind.fitness = objective.evaluate(state, lines[i]);
                     }
                     catch (final Exception e) {
-                        writeGenomesAndResults(state, indsToEvaluate, lines);
+                        writeGenomesAndResults(state, indsToEvaluate, indsToEvaluateSubPops, lines);
                         throw new IllegalStateException(String.format("%s: Exception '%s' occurred when evaluating the following phenotype: %s", this.getClass().getSimpleName(), e, lines[i]));
                     }
                     ind.evaluated = true;
@@ -195,14 +196,15 @@ public class MultiPopCommandProblem extends Problem implements MultiPopGroupedPr
     }
     
     /** If the simulator fails, we write some data so we can determine what caused it. */
-    private void writeGenomesAndResults(final EvolutionState state, final List<DoubleVectorIndividual> chunk, final String[] lines) {
+    private void writeGenomesAndResults(final EvolutionState state, final List<DoubleVectorIndividual> chunk,  final Option<List<Integer>> subPopulations, final String[] lines) {
         assert(chunk != null);
         assert(lines != null);
         
         final StringBuilder genesSb = new StringBuilder();
         for (final DoubleVectorIndividual ind : chunk)
             genesSb.append(ind.genotypeToString()).append("\n");
-        state.output.println(genesSb.toString(), genesErrorLog);
+        
+        state.output.println(PopulationToFile.DoubleVectorIndividualsToString(chunk, subPopulations), genesErrorLog);
 
         final StringBuilder resultsSb = new StringBuilder();
         for (final String s : lines)

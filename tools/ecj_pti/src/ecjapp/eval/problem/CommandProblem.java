@@ -9,6 +9,7 @@ import ec.vector.DoubleVectorIndividual;
 import ecjapp.eval.problem.objective.ObjectiveFunction;
 import ecjapp.util.Misc;
 import ecjapp.util.Option;
+import ecjapp.util.PopulationToFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -167,7 +168,7 @@ public class CommandProblem extends Problem implements SimpleGroupedProblemForm 
                 final String simulationResult = controller.execute(chunk, Option.NONE, extraArguments);
                 final String[] lines = simulationResult.split("\n");
                 if (simulationResult.isEmpty() || lines.length != chunk.size()) {
-                    writeGenomesAndResults(state, chunk, lines);
+                    writeGenomesAndResults(state, chunk, Option.NONE, lines);
                     if (simulationResult.isEmpty())
                         throw new IllegalStateException(String.format("%s: Sent %d individuals to external command '%s', but the returns simulation results were empty.", this.getClass().getSimpleName(), chunk.size(), controller.getCommandPath()));
                     else
@@ -179,7 +180,7 @@ public class CommandProblem extends Problem implements SimpleGroupedProblemForm 
                         ind.fitness = objective.evaluate(state, lines[i]);
                     }
                     catch (final Exception e) {
-                        writeGenomesAndResults(state, chunk, lines);
+                        writeGenomesAndResults(state, chunk, Option.NONE, lines);
                         throw new IllegalStateException(String.format("%s: Exception '%s' occurred when evaluating the following phenotype: %s", this.getClass().getSimpleName(), e, lines[i]));
                     }
                     ind.evaluated = true;
@@ -193,14 +194,15 @@ public class CommandProblem extends Problem implements SimpleGroupedProblemForm 
     }
     
     /** If the simulator fails, we write some data so we can determine what caused it. */
-    private void writeGenomesAndResults(final EvolutionState state, final List<DoubleVectorIndividual> chunk, final String[] lines) {
+    private void writeGenomesAndResults(final EvolutionState state, final List<DoubleVectorIndividual> chunk,  final Option<List<Integer>> subPopulations, final String[] lines) {
         assert(chunk != null);
         assert(lines != null);
         
         final StringBuilder genesSb = new StringBuilder();
         for (final DoubleVectorIndividual ind : chunk)
             genesSb.append(ind.genotypeToString()).append("\n");
-        state.output.println(genesSb.toString(), genesErrorLog);
+        
+        state.output.println(PopulationToFile.DoubleVectorIndividualsToString(chunk, subPopulations), genesErrorLog);
 
         final StringBuilder resultsSb = new StringBuilder();
         for (final String s : lines)
