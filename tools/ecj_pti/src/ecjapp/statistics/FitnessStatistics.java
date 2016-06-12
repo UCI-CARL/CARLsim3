@@ -84,9 +84,9 @@ public class FitnessStatistics extends Statistics {
         
         if (((Integer)state.job[0]).intValue() == 0) // Only print the CSV header on the first job.
             if (individuals)
-                state.output.println("job, generation, time, fitness", statisticslog);
+                state.output.println("job, subpopulation, generation, time, fitness", statisticslog);
             else
-                state.output.println("job, generation, time, mean, std, min, max, bsf", statisticslog);
+                state.output.println("job, subpopulation, generation, time, mean, std, min, max, bsf", statisticslog);
         
         this.startTime = System.currentTimeMillis();
     }
@@ -97,31 +97,30 @@ public class FitnessStatistics extends Statistics {
         assert(state.output.getLog(statisticslog).filename.getAbsolutePath().equals(filename));
         super.postEvaluationStatistics(state);
 
-        if (individuals) {
-            for (int i = 0; i < state.population.subpops.length; i++) {
-                for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                    final Individual ind = state.population.subpops[i].individuals[j];
-                    final double fitness = ((SimpleFitness)ind.fitness).fitness();
-                    final long time = System.currentTimeMillis() - startTime;
-                    state.output.println(String.format("%d, %d, %d, %f", ((Integer)state.job[0]).intValue(), state.generation, time, fitness), statisticslog);
-                }
+        for (int subPop = 0; subPop < state.population.subpops.length; subPop++) {
+            if (individuals) {
+                    for (int j = 0; j < state.population.subpops[subPop].individuals.length; j++) {
+                        final Individual ind = state.population.subpops[subPop].individuals[j];
+                        final double fitness = ((SimpleFitness)ind.fitness).fitness();
+                        final long time = System.currentTimeMillis() - startTime;
+                        state.output.println(String.format("%d, %d, %d, %d, %f", state.job[0], subPop, state.generation, time, fitness), statisticslog);
+                    }
             }
-        }
-        else {
-            final List<Individual> combinedPopulation = new ArrayList<Individual>() {{
-                for (int i = 0; i < state.population.subpops.length; i++)
-                    addAll(Arrays.asList(state.population.subpops[i].individuals));
-            }};
-            final double mean = ecjapp.util.Statistics.mean(combinedPopulation, new FitnessAttribute());
-            final double std = ecjapp.util.Statistics.std(combinedPopulation, mean, new FitnessAttribute());
-            final Fitness min = Collections.min(combinedPopulation, new FitnessComparator()).fitness;
-            final Fitness max = Collections.max(combinedPopulation, new FitnessComparator()).fitness;
-            if (bestSoFar == null)
-                bestSoFar = max;
-            else if (max.betterThan(bestSoFar))
-                bestSoFar = max;
-            final long time = System.currentTimeMillis() - startTime;
-            state.output.println(String.format("%d, %d, %d, %f, %f, %f, %f, %f", ((Integer)state.job[0]).intValue(), state.generation, time, mean, std, min.fitness(), max.fitness(), bestSoFar.fitness()), statisticslog);
+            else {
+                final List<Individual> subPopList = new ArrayList<Individual>();
+                subPopList.addAll(Arrays.asList(state.population.subpops[subPop].individuals));
+                
+                final double mean = ecjapp.util.Statistics.mean(subPopList, new FitnessAttribute());
+                final double std = ecjapp.util.Statistics.std(subPopList, mean, new FitnessAttribute());
+                final Fitness min = Collections.min(subPopList, new FitnessComparator()).fitness;
+                final Fitness max = Collections.max(subPopList, new FitnessComparator()).fitness;
+                if (bestSoFar == null)
+                    bestSoFar = max;
+                else if (max.betterThan(bestSoFar))
+                    bestSoFar = max;
+                final long time = System.currentTimeMillis() - startTime;
+                state.output.println(String.format("%d, %d, %d, %d, %f, %f, %f, %f, %f", state.job[0], subPop, state.generation, time, mean, std, min.fitness(), max.fitness(), bestSoFar.fitness()), statisticslog);
+            }
         }
     }
     

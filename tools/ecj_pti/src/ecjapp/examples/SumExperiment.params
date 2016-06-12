@@ -49,7 +49,9 @@ eval.problem.simulationCommand =        $src/CARLsim-app/Examples/SumExample
 
 # Statistics
 # =========================
-stat.num-children = 1
+stat.num-children = 2
 stat.child.0 =                          ecjapp.statistics.DoubleVectorGenomeStatistics
 stat.child.0.pVectorLength =		pop.subpop.0.species.genome-size
 stat.child.0.file =                     $genomes.csv
+stat.child.1 =                          ecjapp.statistics.FitnessStatistics
+stat.child.1.file =                     $fitness.csv
