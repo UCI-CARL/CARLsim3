@@ -1090,7 +1090,7 @@ classdef GroupMonitor < handle
             elseif strcmpi(obj.plotType,'heatmap')
                 maxD = max(obj.spkData(:));
                 frame = obj.spkData(:,:,frameNr);
-                imagesc(frame, [0 maxD])
+                imagesc(frame, [0 max(0.001,maxD)])
                 axis image equal
                 axis([1 obj.grid3D(1)*obj.grid3D(3) 1 obj.grid3D(2)])
                 title(['Group ' obj.plotTitleName ', rate = [0 , ' ...
