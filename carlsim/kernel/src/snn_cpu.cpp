@@ -167,9 +167,9 @@ short int CpuSNN::connect(int grpId1, int grpId2, const std::string& _type, floa
 		newInfo->numPreSynapses	= 1;
 	} else if ( _type.find("gaussian") != std::string::npos) {
 		newInfo->type   = CONN_GAUSSIAN;
-		// the following will soon go away, just assume the worst case for now
-		newInfo->numPostSynapses	= grp_Info[grpId2].SizeN;
-		newInfo->numPreSynapses   = grp_Info[grpId1].SizeN;
+		// the following is antiquated, just assume the worst case for now
+		newInfo->numPostSynapses	= std::min(MAX_nPostSynapses, grp_Info[grpId2].SizeN);
+		newInfo->numPreSynapses   = std::min(MAX_nPreSynapses, grp_Info[grpId1].SizeN);
 	} else {
 		KERNEL_ERROR("Invalid connection type (should be 'random', 'full', 'one-to-one', 'full-no-direct', or 'gaussian')");
 		exitSimulation(-1);
