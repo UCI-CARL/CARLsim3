@@ -7,60 +7,65 @@
 #include <assert.h>               // assert
 
 // ****************************************************************************************************************** //
-// CONSTRUCTOR / DESTRUCTOR
+// SIMPLEWEIGHTTUNER UTILITY PRIVATE IMPLEMENTATION
 // ****************************************************************************************************************** //
 
-SimpleWeightTuner::SimpleWeightTuner(CARLsim *sim, double errorMargin, int maxIter, double stepSizeFraction) {
-	assert(sim!=NULL);
-	assert(errorMargin>0);
-	assert(maxIter>0);
-	assert(stepSizeFraction>0.0f && stepSizeFraction<=1.0f);
+/*!
+ * \brief Private implementation of the Stopwatch Utility
+ *
+ * This class provides a timer with milliseconds resolution.
+ * \see http://stackoverflow.com/questions/1861294/how-to-calculate-execution-time-of-a-code-snippet-in-c/1861337#1861337
+ * \since v3.1
+ */
+class SimpleWeightTuner::Impl {
+public:
+	// +++++ PUBLIC METHODS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
-	sim_ = sim;
-	assert(sim_->getCARLsimState()!=RUN_STATE);
+	Impl(CARLsim *sim, double errorMargin, int maxIter, double stepSizeFraction) {
+		assert(sim!=NULL);
+		assert(errorMargin>0);
+		assert(maxIter>0);
+		assert(stepSizeFraction>0.0f && stepSizeFraction<=1.0f);
 
-	errorMargin_ = errorMargin;
-	stepSizeFraction_ = stepSizeFraction;
-	maxIter_ = maxIter;
+		sim_ = sim;
+		assert(sim_->getCARLsimState()!=RUN_STATE);
 
-	connId_ = -1;
-	wtRange_ = NULL;
-	wtInit_ = -1.0;
+		errorMargin_ = errorMargin;
+		stepSizeFraction_ = stepSizeFraction;
+		maxIter_ = maxIter;
 
-	grpId_ = -1;
-	targetRate_ = -1.0;
+		connId_ = -1;
+		wtRange_ = NULL;
+		wtInit_ = -1.0;
 
-	wtStepSize_ = -1.0;
-	cntIter_ = 0;
+		grpId_ = -1;
+		targetRate_ = -1.0;
 
-	wtShouldIncrease_ = true;
-	adjustRange_ = true;
+		wtStepSize_ = -1.0;
+		cntIter_ = 0;
 
-	needToInitConnection_ = true;
-	needToInitTargetFiring_ = true;
+		wtShouldIncrease_ = true;
+		adjustRange_ = true;
 
-	needToInitAlgo_ = true;
-}
+		needToInitConnection_ = true;
+		needToInitTargetFiring_ = true;
 
-SimpleWeightTuner::~SimpleWeightTuner() {
-	if (wtRange_!=NULL)
-		delete wtRange_;
-	wtRange_=NULL;
-}
+		needToInitAlgo_ = true;
+	}
 
-
-
-// ****************************************************************************************************************** //
-// PUBLIC METHODS
-// ****************************************************************************************************************** //
+	~Impl() {
+		if (wtRange_!=NULL)
+			delete wtRange_;
+		wtRange_=NULL;
+	}
 
 // user function to reset algo
-void SimpleWeightTuner::reset() {
+void reset() {
 	needToInitAlgo_ = true;
 	initAlgo();
 }
 
-bool SimpleWeightTuner::done(bool printMessage) {
+bool done(bool printMessage) {
 	// algo not initalized: we're not done
 	if (needToInitConnection_ || needToInitTargetFiring_ || needToInitAlgo_)
 		return false;
@@ -85,7 +90,7 @@ bool SimpleWeightTuner::done(bool printMessage) {
 	return false;
 }
 
-void SimpleWeightTuner::setConnectionToTune(short int connId, double initWt, bool adjustRange) {
+void setConnectionToTune(short int connId, double initWt, bool adjustRange) {
 	assert(connId>=0 && connId<sim_->getNumConnections());
 
 	connId_ = connId;
@@ -96,7 +101,7 @@ void SimpleWeightTuner::setConnectionToTune(short int connId, double initWt, boo
 	needToInitAlgo_ = true;
 }
 
-void SimpleWeightTuner::setTargetFiringRate(int grpId, double targetRate) {
+void setTargetFiringRate(int grpId, double targetRate) {
 	grpId_ = grpId;
 	targetRate_ = targetRate;
 	currentError_ = targetRate;
@@ -112,7 +117,7 @@ void SimpleWeightTuner::setTargetFiringRate(int grpId, double targetRate) {
 	needToInitAlgo_ = true;
 }
 
-void SimpleWeightTuner::iterate(int runDurationMs, bool printStatus) {
+void iterate(int runDurationMs, bool printStatus) {
 	assert(runDurationMs>0);
 
 	// if we're done, don't iterate
@@ -162,14 +167,12 @@ void SimpleWeightTuner::iterate(int runDurationMs, bool printStatus) {
 	sim_->biasWeights(connId_, wtStepSize_, adjustRange_);
 }
 
-
-// ****************************************************************************************************************** //
-// PRIVATE METHODS
-// ****************************************************************************************************************** //
+private:
+	// +++++ PRIVATE METHODS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
 // need to call this whenever connection or target firing changes
 // or when user calls reset
-void SimpleWeightTuner::initAlgo() {
+void initAlgo() {
 	if (!needToInitAlgo_)
 		return;
 
@@ -206,3 +209,57 @@ void SimpleWeightTuner::initAlgo() {
 
 	needToInitAlgo_ = false;
 }
+
+
+	// +++++ PRIVATE STATIC PROPERTIES ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+
+	// +++++ PRIVATE PROPERTIES +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+
+	// flags that manage state
+	bool needToInitConnection_;     //!< flag indicating whether to initialize connection params
+	bool needToInitTargetFiring_;   //!< flag indicating whether to initialize target firing params
+	bool needToInitAlgo_;           //!< flag indicating whether to initialize algorithm
+
+	// CARLsim data structures
+	CARLsim *sim_;                  //!< pointer to CARLsim object
+	SpikeMonitor *SM_;              //!< pointer to SpikeMonitor object
+	int grpId_;                     //!< CARLsim group ID
+	short int connId_;              //!< CARLsim connection ID
+	RangeWeight* wtRange_;          //!< pointer to CARLsim RangeWeight struct
+
+	// termination condition params
+	int maxIter_;                   //!< maximum number of iterations (termination condition)
+	double errorMargin_;            //!< error margin for firing rate (termination condition)
+	double targetRate_;             //!< target firing rate specified in setTargetFiringRate
+
+	// params that are updated every iteration step
+	int cntIter_;                   //!< current count of iteration number
+	double wtStepSize_;             //!< current weight step size
+	bool wtShouldIncrease_;         //!< flag indicating the direction of weight change (increase=true, decrease=false)
+	double currentError_;           //!< current firing error
+
+	// options
+	bool adjustRange_;              //!< flag indicating whether to update [minWt,maxWt] when weight goes out of bounds
+	double wtInit_;                 //!< initial weight specified in setConnectionToTune
+	double stepSizeFraction_;       //!< initial weight step size
+};
+
+
+// ****************************************************************************************************************** //
+// SIMPLEWEIGHTTUNER API IMPLEMENTATION
+// ****************************************************************************************************************** //
+
+// create and destroy a pImpl instance
+SimpleWeightTuner::SimpleWeightTuner(CARLsim* sim, double errorMargin, int maxIter, double stepSizeFraction) :
+	_impl( new Impl(sim, errorMargin, maxIter, stepSizeFraction) ) {}
+SimpleWeightTuner::~SimpleWeightTuner() { delete _impl; }
+
+void SimpleWeightTuner::setConnectionToTune(short int connId, double initWt, bool adjustRange) {
+	_impl->setConnectionToTune(connId, initWt, adjustRange);
+}
+void SimpleWeightTuner::setTargetFiringRate(int grpId, double targetRate) { 
+	_impl->setTargetFiringRate(grpId, targetRate);
+}
+void SimpleWeightTuner::iterate(int runDurationMs, bool printStatus) { _impl->iterate(runDurationMs, printStatus); }
+bool SimpleWeightTuner::done(bool printMessage) { return _impl->done(printMessage); }
+void SimpleWeightTuner::reset() { _impl->reset(); }

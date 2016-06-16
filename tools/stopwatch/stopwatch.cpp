@@ -20,7 +20,7 @@
  */
 class Stopwatch::Impl {
 public:
-	// +++++ PUBLIC METHODS: CONSTRUCTOR / DESTRUCTOR +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+	// +++++ PUBLIC METHODS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
 	Impl(bool startTimer) {
 		reset();
