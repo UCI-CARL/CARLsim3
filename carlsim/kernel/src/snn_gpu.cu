@@ -2074,8 +2074,8 @@ void CpuSNN::copyNeuronState(network_ptr_t* dest, network_ptr_t* src, cudaMemcpy
 	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->nextVoltage[ptrPos], &src->nextVoltage[ptrPos], sizeof(float) * length, kind));
 
 	if (allocateMem)
-		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->curSpike, sizeof(float) * length));
-	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->curSpike[ptrPos], &src->curSpike[ptrPos], sizeof(float) * length, kind));
+		CUDA_CHECK_ERRORS(cudaMalloc((void**)&dest->curSpike, sizeof(bool) * length));
+	CUDA_CHECK_ERRORS(cudaMemcpy(&dest->curSpike[ptrPos], &src->curSpike[ptrPos], sizeof(bool) * length, kind));
 
 	if (sim_with_conductances) {
 	    //conductance information

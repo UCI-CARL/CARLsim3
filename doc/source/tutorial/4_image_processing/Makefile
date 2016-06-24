@@ -5,7 +5,7 @@ USER_MK_PATH = ../../../../
 include $(USER_MK_PATH)user.mk
 
 # list all targets in this directory
-local_targets := image_processing
+local_targets := smooth dog
 output := *.dot *.dat *.log *.csv results/*
 
 # we are compiling from carlsim lib
@@ -20,12 +20,15 @@ CARLSIM_FLAGS += -I$(CARLSIM_LIB_DIR)/include/kernel \
 				 -I$(CARLSIM_LIB_DIR)/include/stopwatch
 CARLSIM_LIBS  += -L$(CARLSIM_LIB_DIR)/lib -lCARLsim
 
-.PHONY: all clean distclean
+.PHONY: all clean distclean $(local_targets)
 all: $(local_targets)
 # compile from CARLsim lib
 
 # list all rules, one per target
-image_processing: main_image_processing.cpp
+dog: main_dog.cpp
+	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $< -o $@ $(CARLSIM_LFLAGS) $(CARLSIM_LIBS)
+
+smooth: main_smooth.cpp
 	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $< -o $@ $(CARLSIM_LFLAGS) $(CARLSIM_LIBS)
 
 clean:

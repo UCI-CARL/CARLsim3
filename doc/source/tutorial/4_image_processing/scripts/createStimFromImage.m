@@ -1,12 +1,17 @@
-function createStimFromImage(inFile, outFile)
+function createStimFromImage(inFile, outFile, mode)
 if nargin<2,outFile='../input/image.dat';end
+if nargin<3,mode='gray';end
 
-pic = PictureStim;
-for i=1:numel(inFile)
-	pic.add(inFile{i})
-end
+pic = PictureStim(inFile);
 pic.resize([256 256]);
-pic.rgb2gray();
+
+switch lower(mode)
+	case 'gray'
+		pic.rgb2gray();
+	case 'rgb'
+		pic.gray2rgb();
+end
+
 pic.save(outFile);
 
 end
