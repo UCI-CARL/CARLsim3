@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Regents of the University of California. All rights reserved.
+ * Copyright (c) 2016 Regents of the University of California. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,14 +28,6 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * *********************************************************************************************** *
- * CARLsim
- * created by: 		(MDR) Micah Richert, (JN) Jayram M. Nageswaran
- * maintained by:	(MA) Mike Avery <averym@uci.edu>, (MB) Michael Beyeler <mbeyeler@uci.edu>,
- *					(KDC) Kristofor Carlson <kdcarlso@uci.edu>
- *
- * CARLsim available from http://socsci.uci.edu/~jkrichma/CARL/CARLsim/
- * Ver 11/6/14
  */
 
 // include CARLsim user interface
@@ -54,20 +46,31 @@ int main() {
 
 	// ---------------- CONFIG STATE -------------------
 
-	// create a network on GPU
+	// Create a network on the CPU.
+	// In order to run a network on the GPU, change CPU_MODE to GPU_MODE. However, please note that this
+	// won't work if you compiled CARLsim with flag CPU_ONLY=1.
+	// USER mode will print status and error messages to console. Suppress these by changing mode to SILENT.
 	int ithGPU = 0;
 	int randSeed = 42;
-	CARLsim sim("hello_world", GPU_MODE, USER, ithGPU, randSeed);
+	CARLsim sim("hello_world", CPU_MODE, USER, ithGPU, randSeed);
 
-	// configure the network
-	// set up a COBA two-layer network with gaussian connectivity
+	// Configure the network.
+	// Organize neurons on a 2D grid: A SpikeGenerator group `gin` and a regular-spiking group `gout`
 	Grid3D gridIn(13,9,1); // pre is on a 13x9 grid
 	Grid3D gridOut(3,3,1); // post is on a 3x3 grid
 	int gin=sim.createSpikeGeneratorGroup("input", gridIn, EXCITATORY_NEURON);
 	int gout=sim.createGroup("output", gridOut, EXCITATORY_NEURON);
 	sim.setNeuronParameters(gout, 0.02f, 0.2f, -65.0f, 8.0f);
+
+	// Connect with Gaussian connectivity with a 3x3 Gaussian kernel. The max weight (peak of the Gaussian)
+	// is 0.05, and is connected with probability 1. Both connection strength and probability drop off with
+	// a Gaussian based on spatial arrangement. All synaptic delays are 1 ms.
 	sim.connect(gin, gout, "gaussian", RangeWeight(0.05), 1.0f, RangeDelay(1), RadiusRF(3,3,1));
+
+	// Make synapses conductance based. Set to false for current based synapses.
 	sim.setConductances(true);
+
+	// Use the forward Euler integration method with 2 integration steps per 1 ms time step.
 	sim.setIntegrationMethod(FORWARD_EULER, 2);
 
 
@@ -76,13 +79,13 @@ int main() {
 	watch.lap("setupNetwork");
 	sim.setupNetwork();
 	
-	printf("Network setup successfully!");
-	// set some monitors
+	// Set spike monitors on both groups. Also monitor the weights between `gin` and `gout`.
 	sim.setSpikeMonitor(gin,"DEFAULT");
 	sim.setSpikeMonitor(gout,"DEFAULT");
 	sim.setConnectionMonitor(gin,gout,"DEFAULT");
 
-	//setup some baseline input
+	// Setup some baseline input: Every neuron in `gin` will spike according to a Poisson process with
+	// 30 Hz mean firing rate.
 	PoissonRate in(gridIn.N);
 	in.setRates(30.0f);
 	sim.setSpikeRate(gin,&in);
@@ -91,13 +94,13 @@ int main() {
 	// ---------------- RUN STATE -------------------
 	watch.lap("runNetwork");
 
-	// run for a total of 10 seconds
-	// at the end of each runNetwork call, SpikeMonitor stats will be printed
+	// Run for a total of 10 seconds.
+	// At the end of each `runNetwork` call, SpikeMonitor stats will be printed (thus, every second).
 	for (int i=0; i<10; i++) {
 		sim.runNetwork(1,0);
 	}
 
-	// print stopwatch summary
+	// Print stopwatch summary
 	watch.stop();
 	
 	return 0;

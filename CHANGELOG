@@ -11,6 +11,11 @@ Release 3.1
 Build 3.1.2
 ---------------------
 
+2016-11-02     Michael Beyeler <mbeyeler@uw.edu>
+  * Change default mode to CPU_MODE in Hello World project in order to avoid
+    error messages when compiled with CPU_ONLY=1.
+  * Extend source code documentation of Hello World project.
+
 2016-06-16     Michael Beyeler <mbeyeler@uci.edu>
   + Add proper pImpl for SimpleWeightTuner.
 
