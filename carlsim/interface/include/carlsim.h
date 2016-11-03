@@ -1791,13 +1791,7 @@ private:
 	void printSimulationSpecs();
 
 	// +++++ PRIVATE STATIC PROPERTIES ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-	static bool gpuAllocation[MAX_NUM_CUDA_DEVICES];
-	static std::string gpuOccupiedBy[MAX_NUM_CUDA_DEVICES];
-#if defined(WIN32) || defined(WIN64)
-	static HANDLE gpuAllocationLock;
-#else
-	static pthread_mutex_t gpuAllocationLock;
-#endif
+
 	// +++++ PRIVATE PROPERTIES +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
 	CpuSNN* snn_;					//!< an instance of CARLsim core class
@@ -1805,7 +1799,6 @@ private:
 	int randSeed_;					//!< RNG seed
 	simMode_t simMode_;				//!< CPU_MODE or GPU_MODE
 	loggerMode_t loggerMode_;		//!< logger mode (USER, DEVELOPER, SILENT, CUSTOM)
-	int ithGPU_;					//!< on which device to establish a context
 	bool enablePrint_;
 	bool copyState_;
 

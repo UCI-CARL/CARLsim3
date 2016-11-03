@@ -823,11 +823,9 @@ private:
 
 	void assignPoissonFiringRate_GPU();
 
-	void checkAndSetGPUDevice();
 	void checkDestSrcPtrs(network_ptr_t* dest, network_ptr_t* src, cudaMemcpyKind kind, bool allocateMem, int grpId);
 	void checkInitialization(char* testString=NULL);
 	void checkInitialization2(char* testString=NULL);
-	void configGPUDevice();
 
 	void copyConductanceAMPA(network_ptr_t* dest, network_ptr_t* src, cudaMemcpyKind kind, bool allocateMem, int grpId=-1);
 	void copyConductanceNMDA(network_ptr_t* dest, network_ptr_t* src, cudaMemcpyKind kind, bool allocateMem, int grpId=-1);
@@ -923,7 +921,6 @@ private:
 	const std::string networkName_;	//!< network name
 	const simMode_t simMode_;		//!< current simulation mode (CPU_MODE or GPU_MODE) FIXME: give better name
 	const loggerMode_t loggerMode_;	//!< current logger mode (USER, DEVELOPER, SILENT, CUSTOM)
-	const int ithGPU_;				//!< on which CUDA device to establish a context (only in GPU_MODE)
 	const int randSeed_;			//!< random number seed to use
 
 

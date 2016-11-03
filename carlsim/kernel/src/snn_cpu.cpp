@@ -76,7 +76,7 @@
 
 // TODO: consider moving unsafe computations out of constructor
 CpuSNN::CpuSNN(const std::string& name, simMode_t simMode, loggerMode_t loggerMode, int ithGPU, int randSeed)
-					: networkName_(name), simMode_(simMode), loggerMode_(loggerMode), ithGPU_(ithGPU),
+					: networkName_(name), simMode_(simMode), loggerMode_(loggerMode),
 					  randSeed_(CpuSNN::setRandSeed(randSeed)) // all of these are const
 {
 	// move all unsafe operations out of constructor
@@ -759,8 +759,7 @@ int CpuSNN::runNetwork(int _nsec, int _nmsec, bool printRunSummary, bool copySta
 	if (simTime==0 && printRunSummary) {
 		KERNEL_INFO("");
 		if (simMode_==GPU_MODE) {
-			KERNEL_INFO("******************** Running GPU Simulation on GPU %d ***************************",
-			ithGPU_);
+			KERNEL_INFO("******************** Running GPU Simulation on GPU    ***************************");
 		} else {
 			KERNEL_INFO("********************      Running CPU Simulation      ***************************");
 		}
@@ -1926,8 +1925,6 @@ RangeWeight CpuSNN::getWeightRange(short int connId) {
 
 // all unsafe operations of CpuSNN constructor
 void CpuSNN::CpuSNNinit() {
-	assert(ithGPU_>=0);
-
 	// set logger mode (defines where to print all status, error, and debug messages)
 	switch (loggerMode_) {
 	case USER:
@@ -2209,12 +2206,6 @@ void CpuSNN::CpuSNNinit() {
 	wtANDwtChangeUpdateIntervalCnt_ = 0; // helper var to implement fast modulo
 	stdpScaleFactor_ = 1.0f;
 	wtChangeDecay_ = 0.0f;
-
-#ifndef __CPU_ONLY__
-	if (simMode_ == GPU_MODE) {
-		configGPUDevice();
-	}
-#endif
 }
 
 //! update (initialize) numN, numPostSynapses, numPreSynapses, maxDelay_, postSynCnt, preSynCnt

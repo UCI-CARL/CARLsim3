@@ -64,14 +64,8 @@
 /// **************************************************************************************************************** ///
 /// INIT STATIC PROPERTIES
 /// **************************************************************************************************************** ///
-bool CARLsim::gpuAllocation[MAX_NUM_CUDA_DEVICES] = {false};
-std::string CARLsim::gpuOccupiedBy[MAX_NUM_CUDA_DEVICES];
 
-#if defined(WIN32) || defined(WIN64)
-HANDLE CARLsim::gpuAllocationLock = CreateMutex(NULL, FALSE, NULL);
-#else
-pthread_mutex_t CARLsim::gpuAllocationLock = PTHREAD_MUTEX_INITIALIZER;
-#endif
+
 /// **************************************************************************************************************** ///
 /// CONSTRUCTOR / DESTRUCTOR
 /// **************************************************************************************************************** ///
@@ -83,7 +77,6 @@ CARLsim::CARLsim(const std::string& netName, simMode_t simMode, loggerMode_t log
 	netName_ 					= netName;
 	simMode_ 					= simMode;
 	loggerMode_ 				= loggerMode;
-	ithGPU_ 					= ithGPU;
 	randSeed_					= randSeed;
 	enablePrint_ = false;
 	copyState_ = false;
@@ -122,20 +115,6 @@ CARLsim::~CARLsim() {
 	if (snn_!=NULL)
 		delete snn_;
 	snn_=NULL;
-
-#if defined(WIN32) || defined(WIN64)
-	if (simMode_ == GPU_MODE) {
-		WaitForSingleObject(gpuAllocationLock, INFINITE);
-		gpuAllocation[ithGPU_] = false;
-		ReleaseMutex(gpuAllocationLock);
-	}
-#else // linux
-	if (simMode_ == GPU_MODE) {
-		pthread_mutex_lock(&gpuAllocationLock);
-		gpuAllocation[ithGPU_] = false;
-		pthread_mutex_unlock(&gpuAllocationLock);
-	}
-#endif
 }
 
 // unsafe computations that would otherwise go in constructor
@@ -151,38 +130,8 @@ void CARLsim::CARLsimInit() {
 		"GPU_MODE if compiled in CPU-only mode");
 #endif
 
-	// Allocate GPU
-	if (simMode_ == GPU_MODE) {
-		if (ithGPU_ >= MAX_NUM_CUDA_DEVICES || ithGPU_ < 0) {
-			CARLSIM_ERROR(funcName.c_str(), "Maximum number of GPUs supported by CARLsim is 8");
-			exit(EXIT_FAILURE); // abort
-		}
-#if defined(WIN32) || defined(WIN64)
-		WaitForSingleObject(gpuAllocationLock, INFINITE);
-		if (!gpuAllocation[ithGPU_]) {
-			gpuAllocation[ithGPU_] = true;
-			gpuAllocationResult = true;
-			gpuOccupiedBy[ithGPU_] = netName_;
-		}
-		ReleaseMutex(gpuAllocationLock);
-#else
-		pthread_mutex_lock(&gpuAllocationLock);
-		if (!gpuAllocation[ithGPU_]) {
-			gpuAllocation[ithGPU_] = true;
-			gpuAllocationResult = true;
-			gpuOccupiedBy[ithGPU_] = netName_;
-		}
-		pthread_mutex_unlock(&gpuAllocationLock);
-#endif
-		if (!gpuAllocationResult) {
-			std::string errorMsg = "GPU Allocation Conflict, GPU has been occupied by CARLsim object " + gpuOccupiedBy[ithGPU_];
-			CARLSIM_ERROR(funcName.c_str(), errorMsg.c_str());
-			exit(EXIT_FAILURE); // abort
-		}
-	}
-
 	// init CpuSNN object
-	snn_ = new CpuSNN(netName_, simMode_, loggerMode_, ithGPU_, randSeed_);
+	snn_ = new CpuSNN(netName_, simMode_, loggerMode_, 0, randSeed_);
 
 	// set default time constants for synaptic current decay
 	// TODO: add ref
@@ -1621,7 +1570,7 @@ void CARLsim::printSimulationSpecs() {
 	if (simMode_==CPU_MODE) {
 		fprintf(stdout,"CPU_MODE, enablePrint=%s, copyState=%s\n\n",enablePrint_?"on":"off",copyState_?"on":"off");
 	} else {
-		fprintf(stdout,"GPU_MODE, GPUid=%d, enablePrint=%s, copyState=%s\n\n",ithGPU_,enablePrint_?"on":"off",
+		fprintf(stdout,"GPU_MODE, GPUid=%d, enablePrint=%s, copyState=%s\n\n",0,enablePrint_?"on":"off",
 					copyState_?"on":"off");
 	}
 }
