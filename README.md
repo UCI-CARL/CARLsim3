@@ -4,7 +4,7 @@
 
 # CARLsim 3
 
-![Docs](https://img.shields.io/badge/docs-v3.1.2-green.svg)](http://www.socsci.uci.edu/~jkrichma/CARLsim/doc)
+[![Docs](https://img.shields.io/badge/docs-v3.1.2-green.svg)](http://www.socsci.uci.edu/~jkrichma/CARLsim/doc)
 [![Google group](https://img.shields.io/badge/Google-Discussion%20group-lightgrey.svg)](https://groups.google.com/forum/#!forum/carlsim-snn-simulator)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 
@@ -89,5 +89,10 @@ CARLsim 3.1 comes with the following requirements:
 As of CARLsim 3.1 it is no longer necessary to have the CUDA framework installed. However, CARLsim development 
 will continue to focus on the GPU implementation.
 
-The current release has been tested on the following platforms: Windows 7; Ubuntu 12.04, 12.10, 13.04, 13.10, 14.04;
-Arch Linux; CentOS 6; OpenSUSE 13.1; Mac OS X.
+The current release has been tested on the following platforms:
+- Windows 7
+- Ubuntu 12.04, 12.10, 13.04, 13.10, 14.04, 16.04
+- Arch Linux
+- CentOS 6
+- OpenSUSE 13.1
+- Mac OS X
