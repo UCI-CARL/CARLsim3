@@ -1,3 +1,5 @@
+<img src="http://socsci.uci.edu/~jkrichma/CARL-Logo-small.jpg" style="width: 50%"/>
+
 # CARLsim 3
 
 [![Docs](https://img.shields.io/badge/docs-v3.1.2-green.svg)
