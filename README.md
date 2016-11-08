@@ -1,11 +1,11 @@
 <div align="center">
-	<img src="http://socsci.uci.edu/~jkrichma/CARL-Logo-small.jpg" style="width: 300px"/>
+	<img src="http://socsci.uci.edu/~jkrichma/CARL-Logo-small.jpg" width="300"/>
 </div>
 
 # CARLsim 3
 
 ![Docs](https://img.shields.io/badge/docs-v3.1.2-green.svg)
-[![Google group](https://img.shields.io/badge/Google-Discussion%20group-lightgrey.svg)](https://groups.google.com/d/forum/opencv-python-blueprints)
+[![Google group](https://img.shields.io/badge/Google-Discussion%20group-lightgrey.svg)](https://groups.google.com/forum/#!forum/carlsim-snn-simulator)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 
 CARLsim is an efficient, easy-to-use, GPU-accelerated library for simulating large-scale spiking neural network (SNN) models with a high degree of biological detail. CARLsim allows execution of networks of Izhikevich spiking neurons with realistic synaptic dynamics on both generic x86 CPUs and standard off-the-shelf GPUs. The simulator provides a PyNN-like programming interface in C/C++, which allows for details and parameters to be specified at the synapse, neuron, and network level.
@@ -18,6 +18,13 @@ New features include:
 - an automated parameter tuning interface that utilizes evolutionary algorithms to construct functional SNNs
 - a test suite for functional code verification
 - an exhaustive User Guide and Tutorials
+
+If you use CARLsim 3 in a scholarly publication, please cite as follows:
+> Beyeler, M., Carlson, K.D., Chou, T.-S., Dutt, N., Krichmar, J.L. (2015).
+> CARLsim 3: A user-friendly and highly optimized library for the creation of neurobiologically
+> detailed spiking neural networks.
+> Proceedings of the International Joint Conference on Neural Networks, doi:10.1109/IJCNN.2015.7280424
+
 
 
 ## Installation
@@ -64,3 +71,4 @@ $ ./hello_world
 
 On Windows 7: Simply download the code and open/run the "Hello World" project file
 `projects\hello_world\hello_world.vcxproj`.
+
