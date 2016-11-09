@@ -55,9 +55,9 @@ int main(int argc, const char* argv[]) {
 	int maxDelay = 20;      	// maximal conduction delay
 
 	// create 80-20 network with 80% RS and 20% FS neurons
-	int gExc = sim.createGroup("exc", nNeurExc, EXCITATORY_NEURON);
+	int gExc = sim.createGroup("exc", Grid3D(20, 40) /* nNeurExc */, EXCITATORY_NEURON);
 	sim.setNeuronParameters(gExc, 0.02f, 0.2f, -65.0f, 8.0f); // RS
-	int gInh = sim.createGroup("inh", nNeurInh, INHIBITORY_NEURON);
+	int gInh = sim.createGroup("inh", Grid3D(20, 10) /* nNeurInh */, INHIBITORY_NEURON);
 	sim.setNeuronParameters(gInh, 0.1f, 0.2f, -65.0f, 2.0f); // FS
 
 	// specify connectivity
@@ -89,13 +89,20 @@ int main(int argc, const char* argv[]) {
 
 	SpikeMonitor* SMexc = sim.setSpikeMonitor(gExc, "DEFAULT");
 	SpikeMonitor* SMinh = sim.setSpikeMonitor(gInh, "DEFAULT");
-	sim.setConnectionMonitor(gExc, gExc, "DEFAULT");
-	sim.setConnectionMonitor(gInh, gExc, "DEFAULT");
+	ConnectionMonitor* CMee = sim.setConnectionMonitor(gExc, gExc, "DEFAULT");
+	ConnectionMonitor* CMie = sim.setConnectionMonitor(gInh, gExc, "DEFAULT");
 
 
 	// ---------------- RUN STATE -------------------
 	SMexc->startRecording();
 	SMinh->startRecording();
+
+	//CMee->setUpdateTimeIntervalSec(-1);
+	//CMie->setUpdateTimeIntervalSec(-1);
+
+	//CMee->takeSnapshot();
+	//CMie->takeSnapshot();
+
 	for (int t=0; t<10000; t++) {
 		// random thalamic input to a single neuron from either gExc or gInh
 		std::vector<float> thalamCurrExc(nNeurExc, 0.0f);
@@ -118,10 +125,22 @@ int main(int argc, const char* argv[]) {
 	}
 	SMexc->stopRecording();
 	SMinh->stopRecording();
+	//CMee->takeSnapshot();
+	//CMie->takeSnapshot();
 
 	// print firing stats (but not the exact spike times)
 	SMexc->print(false);
 	SMinh->print(false);
+
+	//SMexc->print(true);
+	//SMinh->print(true);
+
+	CMee->printSparse();
+	CMie->printSparse();
+
+	//CMee->print();
+	//CMie->print();
+	
 
 	return 0;
 }

@@ -67,7 +67,7 @@ int main() {
 	float R_target = 35.0; // target firing rate neuron tries to achieve
 
 	sim.setHomeostasis(gExc,true,alpha,T);
-  sim.setHomeoBaseFiringRate(gExc,R_target);
+	sim.setHomeoBaseFiringRate(gExc,R_target);
 
 	// ---------------- SETUP STATE -------------------
 	sim.setupNetwork();
@@ -97,6 +97,8 @@ int main() {
 
 	// take a snapshot of the weights after the simulation runs to completion
 	CM->takeSnapshot();
+
+	//CM->print();
 
   return 0;
 }
