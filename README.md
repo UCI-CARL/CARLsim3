@@ -90,7 +90,7 @@ As of CARLsim 3.1 it is no longer necessary to have the CUDA framework installed
 will continue to focus on the GPU implementation.
 
 The current release has been tested on the following platforms:
-- Windows 7
+- Windows 7, 10
 - Ubuntu 12.04, 12.10, 13.04, 13.10, 14.04, 16.04
 - Arch Linux
 - CentOS 6
