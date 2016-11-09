@@ -36,7 +36,7 @@ int main() {
 	// ---------------- CONFIG STATE -------------------
 	// create a network with nPois Poisson neurons and nExc excitatory output
 	// neurons
-	CARLsim sim("plasticity simulation", GPU_MODE, USER);
+	CARLsim sim("plasticity simulation", CPU_MODE, USER);
 	int nPois = 100; // 100 input neurons
 	int nExc  = 1;   // 1 output neuron
 
@@ -52,7 +52,7 @@ int main() {
 	sim.setConductances(true);
 
 	// create PoissonRate object of size nPoiss.
-	PoissonRate poissRate(nPois, true); // allocate on GPU for minimal memory copies
+	PoissonRate poissRate(nPois, false); // allocate on GPU for minimal memory copies
 
 	// set E-STDP parameters.
 	float alpha_LTP=0.001f/5; float tau_LTP=20.0f;
