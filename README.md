@@ -25,6 +25,21 @@ If you use CARLsim 3 in a scholarly publication, please cite as follows:
 > detailed spiking neural networks.
 > Proceedings of the International Joint Conference on Neural Networks, [doi:10.1109/IJCNN.2015.7280424](http://dx.doi.org/10.1109/IJCNN.2015.7280424)
 
+Or use the following bibtex:
+```
+@inproceedings{CARLsim3,
+	author = {M. Beyeler and K. D. Carlson and Ting-Shuo Chou and N. Dutt and J. L. Krichmar}, 
+ 	booktitle = {2015 International Joint Conference on Neural Networks (IJCNN)}, 
+	title = {{CARL}sim 3: {A} user-friendly and highly optimized library for the creation of neurobiologically detailed spiking neural networks}, 
+	year = {2015}, 
+	pages = {1-8}, 
+	doi = {10.1109/IJCNN.2015.7280424},
+	url = {http://dx.doi.org/10.1109/IJCNN.2015.7280424},
+	ISSN = {2161-4393}, 
+	month = {July}
+}
+```
+
 
 
 ## Installation
