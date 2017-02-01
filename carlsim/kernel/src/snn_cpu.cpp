@@ -146,20 +146,20 @@ short int CpuSNN::connect(int grpId1, int grpId2, const std::string& _type, floa
 
 	if ( _type.find("random") != std::string::npos) {
 		newInfo->type 	= CONN_RANDOM;
-		newInfo->numPostSynapses	= (std::min)(grp_Info[grpId2].SizeN,((int) (prob*grp_Info[grpId2].SizeN +6.5*sqrt(prob*(1-prob)*grp_Info[grpId2].SizeN)+0.5))); // estimate the maximum number of connections we need.  This uses a binomial distribution at 6.5 stds.
-		newInfo->numPreSynapses   = (std::min)(grp_Info[grpId1].SizeN,((int) (prob*grp_Info[grpId1].SizeN +6.5*sqrt(prob*(1-prob)*grp_Info[grpId1].SizeN)+0.5))); // estimate the maximum number of connections we need.  This uses a binomial distribution at 6.5 stds.
+		newInfo->numPostSynapses = (std::min)(grp_Info[grpId2].SizeN,((int) (prob*grp_Info[grpId2].SizeN +6.5*sqrt(prob*(1-prob)*grp_Info[grpId2].SizeN)+0.5))); // estimate the maximum number of connections we need.  This uses a binomial distribution at 6.5 stds.
+		newInfo->numPreSynapses = (std::min)(grp_Info[grpId1].SizeN,((int) (prob*grp_Info[grpId1].SizeN +6.5*sqrt(prob*(1-prob)*grp_Info[grpId1].SizeN)+0.5))); // estimate the maximum number of connections we need.  This uses a binomial distribution at 6.5 stds.
 	}
 	//so you're setting the size to be prob*Number of synapses in group info + some standard deviation ...
 	else if ( _type.find("full-no-direct") != std::string::npos) {
 		newInfo->type 	= CONN_FULL_NO_DIRECT;
-		newInfo->numPostSynapses	= grp_Info[grpId2].SizeN-1;
+		newInfo->numPostSynapses = grp_Info[grpId2].SizeN-1;
 		newInfo->numPreSynapses	= grp_Info[grpId1].SizeN-1;
 	}
 	else if ( _type.find("full") != std::string::npos) {
 		newInfo->type 	= CONN_FULL;
 
-		newInfo->numPostSynapses	= grp_Info[grpId2].SizeN;
-		newInfo->numPreSynapses   = grp_Info[grpId1].SizeN;
+		newInfo->numPostSynapses = grp_Info[grpId2].SizeN;
+		newInfo->numPreSynapses = grp_Info[grpId1].SizeN;
 	}
 	else if ( _type.find("one-to-one") != std::string::npos) {
 		newInfo->type 	= CONN_ONE_TO_ONE;
@@ -168,25 +168,11 @@ short int CpuSNN::connect(int grpId1, int grpId2, const std::string& _type, floa
 	} else if ( _type.find("gaussian") != std::string::npos) {
 		newInfo->type   = CONN_GAUSSIAN;
 		// the following is antiquated, just assume the worst case for now
-		newInfo->numPostSynapses	= std::min(MAX_nPostSynapses, grp_Info[grpId2].SizeN);
-		newInfo->numPreSynapses   = std::min(MAX_nPreSynapses, grp_Info[grpId1].SizeN);
+		newInfo->numPostSynapses = grp_Info[grpId2].SizeN;
+		newInfo->numPreSynapses = grp_Info[grpId1].SizeN;
 	} else {
 		KERNEL_ERROR("Invalid connection type (should be 'random', 'full', 'one-to-one', 'full-no-direct', or 'gaussian')");
 		exitSimulation(-1);
-	}
-
-	if (newInfo->numPostSynapses > MAX_nPostSynapses) {
-		KERNEL_ERROR("ConnID %d exceeded the maximum number of output synapses (%d), has %d.",
-			newInfo->connId,
-			MAX_nPostSynapses, newInfo->numPostSynapses);
-		assert(newInfo->numPostSynapses <= MAX_nPostSynapses);
-	}
-
-	if (newInfo->numPreSynapses > MAX_nPreSynapses) {
-		KERNEL_ERROR("ConnID %d exceeded the maximum number of input synapses (%d), has %d.",
-			newInfo->connId,
-			MAX_nPreSynapses, newInfo->numPreSynapses);
-		assert(newInfo->numPreSynapses <= MAX_nPreSynapses);
 	}
 
 	// update the pre and post size...
@@ -219,26 +205,6 @@ short int CpuSNN::connect(int grpId1, int grpId2, ConnectionGeneratorCore* conn,
 	assert(grpId1 < numGrp);
 	assert(grpId2 < numGrp);
 
-	if (maxM == 0)
-		maxM = grp_Info[grpId2].SizeN;
-
-	if (maxPreM == 0)
-		maxPreM = grp_Info[grpId1].SizeN;
-
-	if (maxM > MAX_nPostSynapses) {
-		KERNEL_ERROR("Connection from %s (%d) to %s (%d) exceeded the maximum number of output synapses (%d), "
-							"has %d.", grp_Info2[grpId1].Name.c_str(),grpId1,grp_Info2[grpId2].Name.c_str(),
-							grpId2,	MAX_nPostSynapses,maxM);
-		assert(maxM <= MAX_nPostSynapses);
-	}
-
-	if (maxPreM > MAX_nPreSynapses) {
-		KERNEL_ERROR("Connection from %s (%d) to %s (%d) exceeded the maximum number of input synapses (%d), "
-							"has %d.\n", grp_Info2[grpId1].Name.c_str(), grpId1,grp_Info2[grpId2].Name.c_str(),
-							grpId2, MAX_nPreSynapses,maxPreM);
-		assert(maxPreM <= MAX_nPreSynapses);
-	}
-
 	grpConnectInfo_t* newInfo = (grpConnectInfo_t*) calloc(1, sizeof(grpConnectInfo_t));
 
 	newInfo->grpSrc   = grpId1;
@@ -251,8 +217,8 @@ short int CpuSNN::connect(int grpId1, int grpId2, ConnectionGeneratorCore* conn,
 	newInfo->mulSynSlow = _mulSynSlow;
 	newInfo->connProp = SET_CONN_PRESENT(1) | SET_FIXED_PLASTIC(synWtType);
 	newInfo->type	  = CONN_USER_DEFINED;
-	newInfo->numPostSynapses	  	  = maxM;
-	newInfo->numPreSynapses	  = maxPreM;
+	newInfo->numPostSynapses = grp_Info[grpId2].SizeN;
+	newInfo->numPreSynapses = grp_Info[grpId1].SizeN;
 	newInfo->conn	= conn;
 	newInfo->ConnectionMonitorId = -1;
 
@@ -260,7 +226,7 @@ short int CpuSNN::connect(int grpId1, int grpId2, ConnectionGeneratorCore* conn,
 	connectBegin      = newInfo;
 
 	// update the pre and post size...
-	grp_Info[grpId1].numPostSynapses    += newInfo->numPostSynapses;
+	grp_Info[grpId1].numPostSynapses += newInfo->numPostSynapses;
 	grp_Info[grpId2].numPreSynapses += newInfo->numPreSynapses;
 
 	KERNEL_DEBUG("grp_Info[%d, %s].numPostSynapses = %d, grp_Info[%d, %s].numPreSynapses = %d",
@@ -2297,7 +2263,6 @@ void CpuSNN::buildNetworkInit() {
 	memset(lastSpikeTime, 0, sizeof(lastSpikeTime[0]) * numN);
 
 	nSpikeCnt  = new int[numN];
-	KERNEL_INFO("allocated nSpikeCnt");
 
 	//! homeostasis variables
 	if (sim_with_homeostasis) {
@@ -2461,31 +2426,15 @@ void CpuSNN::buildNetwork() {
 
 	// make sure number of neurons and max delay are within bounds
 	assert(maxDelay_ <= MAX_SynapticDelay); 
-	assert(numN <= 1000000);
 	assert((numN > 0) && (numN == numNExcReg + numNInhReg + numNPois));
 
 	// display the evaluated network and delay length....
 	KERNEL_INFO("\n");
 	KERNEL_INFO("***************************** Setting up Network **********************************");
-	KERNEL_INFO("numN = %d, numPostSynapses = %d, numPreSynapses = %d, maxDelay = %d", numN, numPostSynapses_,
-					numPreSynapses_, maxDelay_);
-
-	if (numPostSynapses_ > MAX_nPostSynapses) {
-		for (int g=0;g<numGrp;g++) {
-			if (grp_Info[g].numPostSynapses>MAX_nPostSynapses)
-				KERNEL_ERROR("Grp: %s(%d) has too many output synapses (%d), max %d.",grp_Info2[g].Name.c_str(),g,
-							grp_Info[g].numPostSynapses,MAX_nPostSynapses);
-		}
-		assert(numPostSynapses_ <= MAX_nPostSynapses);
-	}
-	if (numPreSynapses_ > MAX_nPreSynapses) {
-		for (int g=0;g<numGrp;g++) {
-			if (grp_Info[g].numPreSynapses>MAX_nPreSynapses)
-				KERNEL_ERROR("Grp: %s(%d) has too many input synapses (%d), max %d.",grp_Info2[g].Name.c_str(),g,
- 							grp_Info[g].numPreSynapses,MAX_nPreSynapses);
-		}
-		assert(numPreSynapses_ <= MAX_nPreSynapses);
-	}
+	KERNEL_INFO("Number of neurons = %d", numN);
+	KERNEL_INFO("Potentially maximum number of post synapses per neuron = %d", numPostSynapses_);
+	KERNEL_INFO("Potentially maximum number of pre synapses per neuron = %d", numPreSynapses_);
+	KERNEL_INFO("Max axonal delay = %d", maxDelay_);
 
 	// initialize all the parameters....
 	//! update (initialize) numN, numPostSynapses, numPreSynapses, maxDelay_, postSynCnt, preSynCnt
