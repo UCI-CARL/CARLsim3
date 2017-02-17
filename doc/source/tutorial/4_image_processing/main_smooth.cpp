@@ -47,7 +47,7 @@
 
 int main(int argc, const char* argv[]) {
 	// ---------------- CONFIG STATE -------------------
-	CARLsim sim("image_proc", GPU_MODE, USER);
+	CARLsim sim("smooth", GPU_MODE, USER);
 
 	VisualStimulus stim("input/carl.dat");
 	stim.print();

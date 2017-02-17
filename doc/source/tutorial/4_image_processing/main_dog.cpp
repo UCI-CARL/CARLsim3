@@ -86,7 +86,7 @@ private:
 
 int main(int argc, const char* argv[]) {
 	// ---------------- CONFIG STATE -------------------
-	CARLsim sim("image_proc", GPU_MODE, USER);
+	CARLsim sim("dog", GPU_MODE, USER);
 
 
 	VisualStimulus stim("input/carl.dat");
