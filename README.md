@@ -49,7 +49,7 @@ our [User Guide](http://uci-carl.github.io/CARLsim3/ch1_getting_started.html).
 
 In brief (OS X/Linux):
 
-1. Fork CARLsim 3 by clicking on the [``Fork'' ]https://github.com/UCI-CARL/CARLsim3#fork-destination-box) box
+1. Fork CARLsim 3 by clicking on the [`Fork`](https://github.com/UCI-CARL/CARLsim3#fork-destination-box) box
    in the top-right corner.
 
 2. Clone the repo, where `YourUsername` is your actual GitHub user name:
@@ -58,11 +58,11 @@ In brief (OS X/Linux):
    ```
 
 3. Choose between stable release and latest development version:
-   - For the stable release, use the ``stable'' branch:
+   - For the stable release, use the `stable` branch:
      ```
      $ git checkout stable
      ```
-   - For the latest development branch, you are already on the right branch (``master'').
+   - For the latest development branch, you are already on the right branch (`master').
 
 4. Create a configuration file from the sample:
    ```
