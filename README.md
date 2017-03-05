@@ -55,6 +55,7 @@ In brief (OS X/Linux):
 2. Clone the repo, where `YourUsername` is your actual GitHub user name:
    ```
    $ git clone https://github.com/YourUsername/CARLsim3
+   $ cd CARLsim3
    ```
 
 3. Choose between stable release and latest development version:
@@ -66,7 +67,6 @@ In brief (OS X/Linux):
 
 4. Create a configuration file from the sample:
    ```
-   $ cd CARLsim3
    $ cp user.mk.sample user.mk
    ```
 
@@ -76,7 +76,7 @@ In brief (OS X/Linux):
   - Else, look up the [compute capability](https://en.wikipedia.org/wiki/CUDA#GPUs_supported)
     of your NVIDIA GPU (`$ nvidia-smi`), and update `CUDA_MAJOR_NUM` and 
     `CUDA_MINOR_NUM` accordingly.
-    For example, Maxwell devices have `CUDA_MAJOR_NUM`=5 and `CUDA_MINOR_NUM`
+    For example, Maxwell devices (5.x) have `CUDA_MAJOR_NUM`=5 and `CUDA_MINOR_NUM`
     either 0, 1, or 2.
   - Look up the version of your CUDA toolkit (`$ nvcc --version`), and update
     `CARLSIM_CUDAVER` accordingly.
