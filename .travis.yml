@@ -25,6 +25,8 @@ script:
 install:
   - make -j4
   - make install
+  - pwd
+  - ls
   - make test
   - ./carlsim/test/carlsim_tests
 
