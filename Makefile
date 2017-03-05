@@ -27,6 +27,7 @@ default: release
 include carlsim/configure.mk   # import configuration settings
 include carlsim/carlsim.mk     # import CARLsim-related variables and rules
 include carlsim/libcarlsim.mk  # import libCARLsim-related variables and rules
+include carlsim/test.mk        # import test-related variables and rules
 
 # clean all objects
 clean:
@@ -42,13 +43,14 @@ help:
 	@ echo 
 	@ echo "CARLsim3 Makefile options:"
 	@ echo 
-	@ echo "make               Compiles CARLsim4 in default mode (release)"
-	@ echo "make release       Compiles CARLsim4 in release mode (no debug output,"
+	@ echo "make               Compiles CARLsim3 in default mode (release)"
+	@ echo "make release       Compiles CARLsim3 in release mode (no debug output,"
 	@ echo "                   using fast math and GPU optimization level 3)"
-	@ echo "make debug         Compiles CARLsim4 in debug mode (-g -Wall)"
-	@ echo "make -E install    Installs CARLsim4 library (make sure -E is set; may"
+	@ echo "make debug         Compiles CARLsim3 in debug mode (-g -Wall)"
+	@ echo "make test          Compile CARLsim3 tests"
+	@ echo "make -E install    Installs CARLsim3 library (make sure -E is set; may"
 	@ echo "                   require root privileges)"
-	@ echo "make -E uninstall  Uninstalls CARLsim4 library (make sure -E is set; may"
+	@ echo "make -E uninstall  Uninstalls CARLsim3 library (make sure -E is set; may"
 	@ echo "                   require root privileges)"
 	@ echo "make clean         Cleans out all object files"
 	@ echo "make distclean     Cleans out all object and output files"

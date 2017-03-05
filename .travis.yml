@@ -1,0 +1,34 @@
+sudo: false
+
+language:
+  - cpp
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+
+before_install:
+  - pip install --user cpp-coveralls
+  - mkdir $HOME/install
+  - export CARLSIM_INSTALL_DIR=$HOME/install
+
+script:
+  - cd external/googletest
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  - cd ../..
+
+install:
+  - make -j4
+  - make install
+  - make test
+  - ./carlsim/test/carlsim_tests
+
+after_success:
+  - coveralls --root .. -E ".*external.*" -E ".*CMakeFiles.*" -E ".*test/.*.cpp.*"
+
+notifications:
+  email: false
