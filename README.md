@@ -4,7 +4,7 @@
 
 # CARLsim 3
 
-[![Docs](https://img.shields.io/badge/docs-v3.1.2-green.svg)](http://www.socsci.uci.edu/~jkrichma/CARLsim/doc)
+[![Docs](https://img.shields.io/badge/docs-v3.1.2-green.svg)](http://uci-carl.github.io/CARLsim3)
 [![Google group](https://img.shields.io/badge/Google-Discussion%20group-lightgrey.svg)](https://groups.google.com/forum/#!forum/carlsim-snn-simulator)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 
@@ -45,7 +45,7 @@ Or use the following bibtex:
 ## Installation
 
 Detailed installation instructions for Mac OS X / Linux / Windows can be found in
-our [User Guide](http://www.socsci.uci.edu/~jkrichma/CARLsim/doc/ch1_getting_started.html).
+our [User Guide](http://uci-carl.github.io/CARLsim3/ch1_getting_started.html).
 
 In brief (OS X/Linux):
 
