@@ -23,7 +23,7 @@
 CUDA_PATH        ?= /usr/local/cuda
 
 # enable CPU-only mode
-CPU_ONLY ?= 0
+CARLSIM3_CPU_ONLY ?= 0
 
 #------------------------------------------------------------------------------
 # CARLsim/ECJ Parameter Tuning Interface Options
@@ -136,7 +136,7 @@ endif
 CXXSHRFL += -fPIC -shared
 
 
-ifeq ($(CPU_ONLY),1)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 	CXXFL += -D__CPU_ONLY__
 	NVCC := $(CXX)
 	NVCCINCFL := $(CXXINCFL)
@@ -171,7 +171,7 @@ endif
 
 CARLSIM3_FLG := -I$(CARLSIM3_INC_DIR) -L$(CARLSIM3_LIB_DIR)
 CARLSIM3_LIB := -l$(SIM_LIB_NAME)
-ifeq ($(CPU_ONLY),1)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 	CARLSIM3_FLG += -D__CPU_ONLY__
 else
 	CARLSIM3_LIB += -lcurand

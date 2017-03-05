@@ -22,7 +22,10 @@
 
 GTEST_DIR := external/googletest
 GTEST_FLG := -I$(GTEST_DIR)/include -L$(GTEST_DIR)/build
-GTEST_LIB := -lgtest -pthread 
+GTEST_LIB := -lgtest
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+	GTEST_LIB += -pthread
+endif
 
 test_dir := carlsim/test
 test_inc_files := $(wildcard $(test_dir)/*.h)

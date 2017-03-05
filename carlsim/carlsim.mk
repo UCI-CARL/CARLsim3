@@ -23,7 +23,7 @@ intf_dir        := carlsim/interface
 intf_inc_files  := $(wildcard $(intf_dir)/include/*.h)
 intf_cpp_files  := $(wildcard $(intf_dir)/src/*.cpp)
 intf_obj_files  := $(patsubst %.cpp, %-cpp.o, $(intf_cpp_files))
-ifeq ($(CPU_ONLY),1)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 	intf_cu_files :=
 else
 	intf_cu_files   := $(wildcard $(intf_dir)/src/*.cu)
@@ -41,7 +41,7 @@ krnl_dir        := carlsim/kernel
 krnl_inc_files  := $(wildcard $(krnl_dir)/include/*.h)
 krnl_cpp_files  := $(wildcard $(krnl_dir)/src/*.cpp)
 krnl_obj_files  := $(patsubst %.cpp, %-cpp.o, $(krnl_cpp_files))
-ifeq ($(CPU_ONLY),1)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 	krnl_cu_files :=
 else
 	krnl_cu_files := $(wildcard $(krnl_dir)/src/*.cu)
@@ -58,7 +58,7 @@ SIMINCFL        += -I$(krnl_dir)/include
 conn_dir        := carlsim/connection_monitor
 conn_inc_files  := $(wildcard $(conn_dir)/*.h)
 conn_cpp_files  := $(wildcard $(conn_dir)/*.cpp)
-ifeq ($(CPU_ONLY),1)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 	conn_cu_files :=
 else
 	conn_cu_files   := $(wildcard $(conn_dir)/src/*.cu)
@@ -71,7 +71,7 @@ SIMINCFL        += -I$(conn_dir)
 grps_dir        := carlsim/group_monitor
 grps_inc_files  := $(wildcard $(grps_dir)/*.h)
 grps_cpp_files  := $(wildcard $(grps_dir)/*.cpp)
-ifeq ($(CPU_ONLY),1)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 	grps_cu_files :=
 else
 	grps_cu_files   := $(wildcard $(grps_dir)/src/*.cu)
@@ -84,7 +84,7 @@ SIMINCFL        += -I$(grps_dir)
 spks_dir        := carlsim/spike_monitor
 spks_inc_files  := $(wildcard $(spks_dir)/*.h)
 spks_cpp_files  := $(wildcard $(spks_dir)/*.cpp)
-ifeq ($(CPU_ONLY),1)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 	spks_cu_files :=
 else
 	spks_cu_files   := $(wildcard $(spks_dir)/src/*.cu)
@@ -105,7 +105,7 @@ tools_obj_files  :=
 swt_dir          := tools/simple_weight_tuner
 swt_inc_files    := $(wildcard $(swt_dir)/*.h)
 swt_cpp_files    := $(wildcard $(swt_dir)/*.cpp)
-ifeq ($(CPU_ONLY),1)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 	swt_cu_files :=
 else
 	swt_cu_files    := $(wildcard $(swt_dir)/*.cu)
@@ -120,7 +120,7 @@ SIMINCFL         += -I$(swt_dir)
 spkgen_dir       := tools/spike_generators
 spkgen_inc_files := $(wildcard $(spkgen_dir)/*.h)
 spkgen_cpp_files := $(wildcard $(spkgen_dir)/*.cpp)
-ifeq ($(CPU_ONLY),1)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 	spkgen_cu_files :=
 else
 	spkgen_cu_files  := $(wildcard $(spkgen_dir)/*.cu)
@@ -135,7 +135,7 @@ SIMINCFL         += -I$(spkgen_dir)
 stp_dir          := tools/stopwatch
 stp_inc_files    := $(wildcard $(stp_dir)/*h)
 stp_cpp_files    := $(wildcard $(stp_dir)/*.cpp)
-ifeq ($(CPU_ONLY),1)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 	stp_cu_files :=
 else
 	stp_cu_files     := $(wildcard $(stp_dir)/*.cu)
@@ -150,7 +150,7 @@ SIMINCFL         += -I$(stp_dir)
 vs_dir          := tools/visual_stimulus
 vs_inc_files    := $(wildcard $(vs_dir)/*h)
 vs_cpp_files    := $(wildcard $(vs_dir)/*.cpp)
-ifeq ($(CPU_ONLY),1)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 	vs_cu_files :=
 else
 	vs_cu_files     := $(wildcard $(vs_dir)/*.cu)
@@ -184,21 +184,28 @@ add_files       := $(addprefix carlsim/,configure.mk)
 
 .PHONY: release debug $(targets)
 
+ifeq ($(CARLSIM3_CPU_ONLY),1)
 # release build
-ifeq ($(CPU_ONLY),1)
 release: CXXFL  += -O3 -ffast-math
 release: NVCCFL += -O3 -ffast-math 
 release: $(targets)
-else
-release: CXXFL  += -O3 -ffast-math
-release: NVCCFL += --compiler-options "-O3 -ffast-math"
-release: $(targets)
-endif
 
 # debug build
 debug: CXXFL    += -g -Wall -O0
 debug: NVCCFL   += -g -G --compiler-options "-Wall -O0"
 debug: $(targets)
+
+else
+# release build
+release: CXXFL  += -O3 -ffast-math
+release: NVCCFL += --compiler-options "-O3 -ffast-math"
+release: $(targets)
+
+# debug build
+debug: CXXFL    += -g -Wall -O0
+debug: NVCCFL   += -g -G --compiler-options "-Wall -O0"
+debug: $(targets)
+endif
 
 # all CARLsim3 targets
 $(targets): $(objects)

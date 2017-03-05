@@ -42,14 +42,19 @@ uninstall: test_env delete_files farewell
 
 test_env:
 ifndef CARLSIM3_LIB_DIR
-	$(error CARLSIM3_LIB_DIR not set. Run with -E: $$ sudo -E make install)
+	$(error CARLSIM3_LIB_DIR not set. Run with -e: $$ sudo -e make install)
 else
 	$(info CARLsim3 library path: $(CARLSIM3_LIB_DIR))
 endif
 ifndef CARLSIM3_INC_DIR
-	$(error CARLSIM3_INC_DIR not set. Run with -E: $$ sudo -E make install)
+	$(error CARLSIM3_INC_DIR not set. Run with -e: $$ sudo -e make install)
 else
 	$(info CARLsim3 include path: $(CARLSIM3_INC_DIR))
+endif
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+	$(info CARLsim3 mode: CPU_ONLY. Install without GPU support.)
+else
+	$(info CARLSIM3 mode: CPU_ONLY not set. Install with GPU support.)
 endif
 
 create_files:
