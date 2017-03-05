@@ -28,7 +28,7 @@ If you use CARLsim 3 in a scholarly publication, please cite as follows:
 Or use the following bibtex:
 ```
 @inproceedings{CARLsim3,
-	author = {M. Beyeler and K. D. Carlson and Ting-Shuo Chou and N. Dutt and J. L. Krichmar}, 
+	author = {M. Beyeler and K. D. Carlson and T.-S. Chou and N. Dutt and J. L. Krichmar}, 
  	booktitle = {2015 International Joint Conference on Neural Networks (IJCNN)}, 
 	title = {{CARL}sim 3: {A} user-friendly and highly optimized library for the creation of neurobiologically detailed spiking neural networks}, 
 	year = {2015}, 
@@ -49,20 +49,30 @@ our [User Guide](http://uci-carl.github.io/CARLsim3/ch1_getting_started.html).
 
 In brief (OS X/Linux):
 
-1. Download the latest CARLsim release:
-```
-$ git clone https://github.com/UCI-CARL/CARLsim3
-```
+1. Fork CARLsim 3 by clicking on the [``Fork'' ]https://github.com/UCI-CARL/CARLsim3#fork-destination-box) box
+   in the top-right corner.
 
-2. Create a configuration file from the sample:
-```
-$ cd CARLsim3
-$ cp user.mk.sample user.mk
-```
+2. Clone the repo, where `YourUsername` is your actual GitHub user name:
+   ```
+   $ git clone https://github.com/YourUsername/CARLsim3
+   ```
 
-3. Edit the configuration file.
+3. Choose between stable release and latest development version:
+   - For the stable release, use the ``stable'' branch:
+     ```
+     $ git checkout stable
+     ```
+   - For the latest development branch, you are already on the right branch (``master'').
+
+4. Create a configuration file from the sample:
+   ```
+   $ cd CARLsim3
+   $ cp user.mk.sample user.mk
+   ```
+
+5. Edit the configuration file.
   - If you do not have an NVIDIA GPU and want to run CARLsim in `CPU_MODE` only,
-    set `CPU_ONLY=1`. Skip to Step 4.
+    set `CPU_ONLY=1`. Skip to Step 6.
   - Else, look up the [compute capability](https://en.wikipedia.org/wiki/CUDA#GPUs_supported)
     of your NVIDIA GPU (`$ nvidia-smi`), and update `CUDA_MAJOR_NUM` and 
     `CUDA_MINOR_NUM` accordingly.
@@ -71,20 +81,20 @@ $ cp user.mk.sample user.mk
   - Look up the version of your CUDA toolkit (`$ nvcc --version`), and update
     `CARLSIM_CUDAVER` accordingly.
 
-4. Make and install:
-```
-$ make -j4
-$ sudo make install
-```
+6. Make and install:
+   ```
+   $ make -j4
+   $ sudo make install
+   ```
 
-5. Make sure installation was successful by running the "Hello World" example:
-```
-$ cd projects/hello_world
-$ make
-$ ./hello_world
-```
+7. Make sure installation was successful by running the "Hello World" example:
+   ```
+   $ cd projects/hello_world
+   $ make
+   $ ./hello_world
+   ```
 
-On Windows 7: Simply download the code and open/run the "Hello World" project file
+On Windows 7/10: Simply download the code and open/run the "Hello World" project file
 `projects\hello_world\hello_world.vcxproj`.
 
 
