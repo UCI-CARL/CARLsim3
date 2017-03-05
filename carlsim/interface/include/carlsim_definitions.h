@@ -43,8 +43,6 @@
 #define _CARLSIM_DEFINITIONS_H_
 
 
-#include <cuda_version_control.h>
-
 #include <stdio.h>
 #include <math.h> // fabs
 

@@ -1,85 +1,86 @@
-carlsim_major_num := 3
-carlsim_minor_num := 1
-carlsim_build_num := 2
+##----------------------------------------------------------------------------##
+##
+##   CARLsim3 Library
+##   ----------------
+##
+##   Authors:   Michael Beyeler <mbeyeler@uci.edu>
+##              Kristofor Carlson <kdcarlso@uci.edu>
+##
+##   Institute: Cognitive Anteater Robotics Lab (CARL)
+##              Department of Cognitive Sciences
+##              University of California, Irvine
+##              Irvine, CA, 92697-5100, USA
+##
+##   Version:   03/31/2016
+##
+##----------------------------------------------------------------------------##
 
-num_ver := $(carlsim_major_num).$(carlsim_minor_num)
+#------------------------------------------------------------------------------
+# CARLsim3 Library Variables
+#------------------------------------------------------------------------------
 
-lib_ver := $(num_ver).$(carlsim_build_num)
+lib_name := lib$(SIM_LIB_NAME).a
+lib_ver := $(SIM_MAJOR_NUM).$(SIM_MINOR_NUM).$(SIM_BUILD_NUM)
 
-lib_name := libCARLsim.a
+targets += $(lib_name)
+libraries += $(lib_name).$(lib_ver)
 
-carlsim_lib := $(addprefix carlsim/,$(lib_name))
-# keep track of this so we can delete it later on distclean
-libraries += $(carlsim_lib).$(lib_ver)
+sim_install_files += $(CARLSIM3_LIB_DIR)/$(lib_name)*
 
-default_targets += libCARLsim
-.PHONY: libCARLsim install
-libCARLsim: $(carlsim_lib)
 
-$(carlsim_lib): $(carlsim_sources) $(carlsim_inc) $(carlsim_objs)
-	ar rcs $@.$(lib_ver) $(carlsim_objs)
+#------------------------------------------------------------------------------
+# CARLsim3 Library Targets
+#------------------------------------------------------------------------------
 
-install: $(carlsim_lib)
-	@echo "CARLsim installation path:" $(CARLSIM_LIB_DIR)
-	@test -d $(CARLSIM_LIB_DIR) || \
-		mkdir -p $(CARLSIM_LIB_DIR)
-	@test -d $(CARLSIM_LIB_DIR)/lib || mkdir \
-		$(CARLSIM_LIB_DIR)/lib
-	@test -d $(CARLSIM_LIB_DIR)/include || mkdir \
-		$(CARLSIM_LIB_DIR)/include
-	@test -d $(CARLSIM_LIB_DIR)/include/kernel || mkdir \
-		$(CARLSIM_LIB_DIR)/include/kernel
-	@test -d $(CARLSIM_LIB_DIR)/include/interface || mkdir \
-		$(CARLSIM_LIB_DIR)/include/interface
-	@test -d $(CARLSIM_LIB_DIR)/include/connection_monitor || mkdir \
-		$(CARLSIM_LIB_DIR)/include/connection_monitor
-	@test -d $(CARLSIM_LIB_DIR)/include/spike_monitor || mkdir \
-		$(CARLSIM_LIB_DIR)/include/spike_monitor
-	@test -d $(CARLSIM_LIB_DIR)/include/group_monitor || mkdir \
-		$(CARLSIM_LIB_DIR)/include/group_monitor
-	@test -d $(CARLSIM_LIB_DIR)/include/spike_generators || mkdir \
-		$(CARLSIM_LIB_DIR)/include/spike_generators
-	@test -d $(CARLSIM_LIB_DIR)/include/simple_weight_tuner || mkdir \
-		$(CARLSIM_LIB_DIR)/include/simple_weight_tuner
-	@test -d $(CARLSIM_LIB_DIR)/include/stopwatch || mkdir \
-		$(CARLSIM_LIB_DIR)/include/stopwatch
-	@test -d $(CARLSIM_LIB_DIR)/include/visual_stimulus || mkdir \
-		$(CARLSIM_LIB_DIR)/include/visual_stimulus
-	@install -m 0755 $(carlsim_lib).$(lib_ver) $(CARLSIM_LIB_DIR)/lib
-	@ln -fs $(CARLSIM_LIB_DIR)/lib/$(lib_name).$(lib_ver) \
-		$(CARLSIM_LIB_DIR)/lib/$(lib_name).$(num_ver)
-	@ln -fs $(CARLSIM_LIB_DIR)/lib/$(lib_name).$(num_ver) \
-		$(CARLSIM_LIB_DIR)/lib/$(lib_name)
-	@install -m 0644 $(kernel_dir)/include/cuda_version_control.h \
-		$(kernel_dir)/include/snn_definitions.h \
-		$(CARLSIM_LIB_DIR)/include/kernel
-	@install -m 0644 $(interface_dir)/include/callback.h \
-		$(interface_dir)/include/carlsim_datastructures.h \
-		$(interface_dir)/include/carlsim_definitions.h \
-		$(interface_dir)/include/carlsim_log_definitions.h \
-		$(interface_dir)/include/linear_algebra.h \
-		$(interface_dir)/include/poisson_rate.h \
-		$(interface_dir)/include/carlsim.h $(interface_dir)/include/user_errors.h \
-		$(CARLSIM_LIB_DIR)/include/interface
-	@install -m 0644 $(conn_mon_dir)/connection_monitor.h \
-		$(CARLSIM_LIB_DIR)/include/connection_monitor
-	@install -m 0644 $(spike_mon_dir)/spike_monitor.h \
-		$(CARLSIM_LIB_DIR)/include/spike_monitor
-	@install -m 0644 $(group_mon_dir)/group_monitor.h \
-		$(CARLSIM_LIB_DIR)/include/group_monitor
-	@install -m 0644 $(tools_visualstim_dir)/visual_stimulus.h \
-		$(CARLSIM_LIB_DIR)/include/visual_stimulus
-	@install -m 0644 $(tools_spikegen_dir)/periodic_spikegen.h \
-		$(tools_spikegen_dir)/spikegen_from_file.h \
-		$(tools_spikegen_dir)/spikegen_from_vector.h \
-		$(tools_spikegen_dir)/interactive_spikegen.h \
-		$(tools_spikegen_dir)/pre_post_group_spikegen.h \
-		$(CARLSIM_LIB_DIR)/include/spike_generators
-	@install -m 0644 $(tools_swt_dir)/simple_weight_tuner.h \
-		$(CARLSIM_LIB_DIR)/include/simple_weight_tuner
-	@install -m 0644 $(tools_stopwatch_dir)/stopwatch.h \
-		$(CARLSIM_LIB_DIR)/include/stopwatch
+.PHONY: $(lib_name) test_env install uninstall
+.PHONY: create_files welcome uninstall delete_files farewell
 
-# uninstall LIB folder, which by default is under /opt/
-uninstall:
-	@test -d $(CARLSIM_LIB_DIR) && $(RM) $(CARLSIM_LIB_DIR)
+install: test_env create_files welcome
+
+uninstall: test_env delete_files farewell
+
+
+test_env:
+ifeq ($(CARLSIM3_LIB_DIR),)
+	$(error CARLSIM3_LIB_DIR not set. Run with -E: $$ sudo -E make install)
+else
+	$(info CARLsim3 library path: $(CARLSIM3_LIB_DIR))
+endif
+ifeq ($(CARLSIM3_INC_DIR),)
+	$(error CARLSIM3_INC_DIR not set. Run with -E: $$ sudo -E make install)
+else
+	$(info CARLsim3 include path: $(CARLSIM3_INC_DIR))
+endif
+
+create_files:
+ifneq ($(CARLSIM3_INSTALL_DIR),)
+	@test -d $(CARLSIM3_INSTALL_DIR) || mkdir $(CARLSIM3_INSTALL_DIR)
+endif
+	ar rcs $(lib_name).$(lib_ver) $(intf_obj_files) $(krnl_obj_files) $(grps_obj_files) $(spks_obj_files) $(conn_obj_files) $(tools_obj_files)
+	@test -d $(CARLSIM3_INC_DIR) || mkdir $(CARLSIM3_INC_DIR)
+	@test -d $(CARLSIM3_LIB_DIR) || mkdir $(CARLSIM3_LIB_DIR)
+	@install -m 0755 $(lib_name).$(lib_ver) $(CARLSIM3_LIB_DIR)
+	@ln -Tfs $(CARLSIM3_LIB_DIR)/$(lib_name).$(lib_ver) $(CARLSIM3_LIB_DIR)/$(lib_name).$(SIM_MAJOR_NUM).$(SIM_MINOR_NUM)
+	@ln -Tfs $(CARLSIM3_LIB_DIR)/$(lib_name).$(SIM_MAJOR_NUM).$(SIM_MINOR_NUM) $(CARLSIM3_LIB_DIR)/$(lib_name)
+	@install -m 0644 $(intf_inc_files) $(CARLSIM3_INC_DIR)
+	@install -m 0644 $(krnl_inc_files) $(CARLSIM3_INC_DIR)
+	@install -m 0644 $(grps_inc_files) $(CARLSIM3_INC_DIR)
+	@install -m 0644 $(conn_inc_files) $(CARLSIM3_INC_DIR)
+	@install -m 0644 $(spks_inc_files) $(CARLSIM3_INC_DIR)
+	@install -m 0644 $(swt_inc_files) $(CARLSIM3_INC_DIR)
+	@install -m 0644 $(spkgen_inc_files) $(CARLSIM3_INC_DIR)
+	@install -m 0644 $(stp_inc_files) $(CARLSIM3_INC_DIR)
+	@install -m 0644 $(vs_inc_files) $(CARLSIM3_INC_DIR)
+	@install -m 0644 $(add_files) $(CARLSIM3_INC_DIR)
+
+delete_files: test_env
+ifeq (,$(findstring $(lib_name),$(sim_install_files)))
+	$(error Something went wrong. None of the files that are about to be deleted contain the string "$(lib_name)". Delete files manually)
+endif
+	$(RMR) $(sim_install_files)
+
+welcome:
+	$(info CARLsim $(SIM_MAJOR_NUM).$(SIM_MINOR_NUM).$(SIM_BUILD_NUM) successfully installed.)
+
+farewell:
+	$(info CARLsim $(SIM_MAJOR_NUM).$(SIM_MINOR_NUM).$(SIM_BUILD_NUM) successfully uninstalled.)

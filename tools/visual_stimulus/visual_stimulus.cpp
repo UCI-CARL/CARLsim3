@@ -1,4 +1,4 @@
-#include <visual_stimulus.h>
+#include "visual_stimulus.h"
 
 #include <poisson_rate.h>
 #include <string>

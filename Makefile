@@ -40,7 +40,7 @@ distclean:
 # print a help message
 help:
 	@ echo 
-	@ echo "CARLsim4 Makefile options:"
+	@ echo "CARLsim3 Makefile options:"
 	@ echo 
 	@ echo "make               Compiles CARLsim4 in default mode (release)"
 	@ echo "make release       Compiles CARLsim4 in release mode (no debug output,"
