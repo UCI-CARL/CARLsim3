@@ -13,20 +13,19 @@ before_install:
   - mkdir $HOME/install
   - export CARLSIM3_INSTALL_DIR=$HOME/install
   - export CPU_ONLY=1
-
-script:
   - cd external/googletest
   - mkdir build
   - cd build
   - cmake ..
   - make
-  - cd ../..
+  - cd ../../..
 
 install:
+  - pwd
   - make -j4
   - make install
-  - pwd
-  - ls
+
+script:
   - make test
   - ./carlsim/test/carlsim_tests
 
