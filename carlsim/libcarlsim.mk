@@ -41,19 +41,19 @@ uninstall: test_env delete_files farewell
 
 
 test_env:
-ifeq ($(CARLSIM3_LIB_DIR),)
+ifndef CARLSIM3_LIB_DIR
 	$(error CARLSIM3_LIB_DIR not set. Run with -E: $$ sudo -E make install)
 else
 	$(info CARLsim3 library path: $(CARLSIM3_LIB_DIR))
 endif
-ifeq ($(CARLSIM3_INC_DIR),)
+ifndef CARLSIM3_INC_DIR
 	$(error CARLSIM3_INC_DIR not set. Run with -E: $$ sudo -E make install)
 else
 	$(info CARLsim3 include path: $(CARLSIM3_INC_DIR))
 endif
 
 create_files:
-ifneq ($(CARLSIM3_INSTALL_DIR),)
+ifdef CARLSIM3_INSTALL_DIR
 	@test -d $(CARLSIM3_INSTALL_DIR) || mkdir $(CARLSIM3_INSTALL_DIR)
 endif
 	ar rcs $(lib_name).$(lib_ver) $(intf_obj_files) $(krnl_obj_files) $(grps_obj_files) $(spks_obj_files) $(conn_obj_files) $(tools_obj_files)

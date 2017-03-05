@@ -22,10 +22,8 @@
 # path to CUDA installation
 CUDA_PATH        ?= /usr/local/cuda
 
-# path of installation of Google test framework
-# required to run CARLsim test suite
-GTEST_DIR ?= /opt/gtest
-
+# enable CPU-only mode
+CPU_ONLY ?= 0
 
 #------------------------------------------------------------------------------
 # CARLsim/ECJ Parameter Tuning Interface Options
@@ -138,6 +136,15 @@ endif
 CXXSHRFL += -fPIC -shared
 
 
+ifeq ($(CPU_ONLY),1)
+	CXXFL += -D__CPU_ONLY__
+	NVCC := $(CXX)
+	NVCCINCFL := $(CXXINCFL)
+	NVCCLDLF := $(CXXLIBFL)
+	NVCCFL := $(CXXFL)
+endif
+
+
 #------------------------------------------------------------------------------
 # CARLsim Library
 #------------------------------------------------------------------------------
@@ -152,10 +159,9 @@ SIM_BUILD_NUM := 3
 sim_install_files :=
 
 # use the following flags when building from CARLsim lib path
-ifneq ($(CARLSIM3_INSTALL_DIR),)
+ifdef CARLSIM3_INSTALL_DIR
 	CARLSIM3_INC_DIR  := $(CARLSIM3_INSTALL_DIR)/inc
 	CARLSIM3_LIB_DIR  := $(CARLSIM3_INSTALL_DIR)/lib
-	CARLSIM3_LD       := -L$(CARLSIM3_LIB_DIR)
 	sim_install_files += $(CARLSIM3_INSTALL_DIR)
 else
 	CARLSIM3_INC_DIR  := /usr/local/include/carlsim
@@ -163,5 +169,10 @@ else
 	sim_install_files += $(CARLSIM3_INC_DIR)
 endif
 
-CARLSIM3_INC      := -I$(CARLSIM3_INC_DIR)
-CARLSIM3_LD       += -l$(SIM_LIB_NAME) -lcurand
+CARLSIM3_FLG := -I$(CARLSIM3_INC_DIR) -L$(CARLSIM3_LIB_DIR)
+CARLSIM3_LIB := -l$(SIM_LIB_NAME)
+ifeq ($(CPU_ONLY),1)
+	CARLSIM3_FLG += -D__CPU_ONLY__
+else
+	CARLSIM3_LIB += -lcurand
+endif

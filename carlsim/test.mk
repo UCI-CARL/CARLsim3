@@ -21,8 +21,8 @@
 #------------------------------------------------------------------------------
 
 GTEST_DIR := external/googletest
-GTEST_INC := -I$(GTEST_DIR)/include
-GTEST_LD := -L$(GTEST_DIR)/build -lgtest 
+GTEST_FLG := -I$(GTEST_DIR)/include -L$(GTEST_DIR)/build
+GTEST_LIB := -lgtest -pthread 
 
 test_dir := carlsim/test
 test_inc_files := $(wildcard $(test_dir)/*.h)
@@ -40,4 +40,4 @@ targets += $(test_target)
 test: $(test_target)
 
 $(test_target): $(test_cpp_files) $(test_inc_files)
-	$(NVCC) $(CARLSIM3_INC) $(GTEST_INC) $(CARLSIM3_LD) $(GTEST_LD) $(NVCCFL) $(test_cpp_files) -o $@
+	$(NVCC) $(CARLSIM3_FLG) $(GTEST_FLG) $(GTEST_LD) $(NVCCFL) $(test_cpp_files) -o $@ $(GTEST_LIB) $(CARLSIM3_LIB)

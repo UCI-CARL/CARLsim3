@@ -18,6 +18,7 @@
 # the following are filled in the include files and passed up
 targets :=
 objects :=
+clean_objects :=
 libraries :=
 output_folders := doc/html
 
@@ -31,11 +32,11 @@ include carlsim/test.mk        # import test-related variables and rules
 
 # clean all objects
 clean:
-	$(RM) $(objects)
+	$(RM) $(clean_objects)
 
 # clean all objects and output files
 distclean:
-	$(RM) $(objects) $(targets) $(libraries)
+	$(RM) $(clean_objects) $(targets) $(libraries)
 	$(RMR) $(output_folders)
 
 # print a help message

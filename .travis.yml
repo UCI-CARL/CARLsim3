@@ -12,6 +12,7 @@ before_install:
   - pip install --user cpp-coveralls
   - mkdir $HOME/install
   - export CARLSIM_INSTALL_DIR=$HOME/install
+  - export CPU_ONLY=1
 
 script:
   - cd external/googletest
@@ -28,7 +29,4 @@ install:
   - ./carlsim/test/carlsim_tests
 
 after_success:
-  - coveralls --root .. -E ".*external.*" -E ".*CMakeFiles.*" -E ".*test/.*.cpp.*"
-
-notifications:
-  email: false
+  - coveralls --root .. -E ".*external.*" -E ".*projects/.*" -E ".*test/.*.cpp.*"

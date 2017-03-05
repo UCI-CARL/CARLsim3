@@ -84,7 +84,7 @@ default: $(proj_target)
 
 
 $(proj_target): $(main_src_file) $(inc_files) $(cpp_files) $(obj_files)
-	$(NVCC) $(CARLSIM3_INC) $(CARLSIM3_LD) $(obj_files) $< -o $@
+	$(NVCC) $(CARLSIM3_FLG) $(obj_files) $< -o $@ $(CARLSIM3_LIB)
 
 $(proj_src_dir)/%-cpp.o: $(proj_src_dir)/%.cpp $(inc_files)
 	$(CXX) -c $(CXXINCFL) $(CXXFL) $< -o $@
