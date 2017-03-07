@@ -4,55 +4,79 @@
 
 \tableofcontents
 
-We provide test cases to A) test core functionality of CARLsim, to
-B) test the reproducibility of published results, and C) to benchmark simulation speed.
+In order to ensure that the addition of new functionality did not compromise the existing code base,
+CARLsim comes with a regression suite,
+which relies on the <a href="https://github.com/google/googletest">Google Test</a> framework.
 
-We currently have incorporated part A) into the current CARLsim release with plans for inclusion of
-parts B) and C) in the future.
 
-For the most part, end users should not need to test their CARLsim installation. Users should
-only have to run the test suite if they modify the source code or are experiencing strange and
-inconsistent simulation behavior.
+\section ch11s1_installation 11.1 Installing Google Test
 
-CARLsim uses the googletest framework v1.7 for testing. For more information
-on using and installing googltest please visit the
-<a href=https://code.google.com/p/googletest/>website</a>.
-For a quick primer, visit this
-<a href=https://code.google.com/p/googletest/wiki/Primer>website</a>.
+\subsection ch11s1s1_checkingout 11.1.1 Checking out the Code from GitHub
 
-After google tests has been installed:
+The Google Test framework is included in the CARLsim package as an external dependency.
+If you cloned the CARLsim repo using the <tt>--recursive</tt> flag, you already have a local copy of
+the Google Test codebase (see \ref ch1s2_installation).
 
-1) From the carlsim/test directory of the CARLsim installation, type:
+If you forgot to include the <tt>--recursive</tt> flag, you might encounter an empty directory when
+you navigate to <tt>external/googletest</tt>.
+If this is the case, you have to initialize the submodule yourself.
+Simply navigate to the CARLsim root directory and run the following:
 
 \code
-make carlsim_tests
+$ git submodule update --init --recursive
 \endcode
 
-which compiles the carlsim tests
 
-2) To run the tests, run ‘carlsim_tests’:
+\subsection ch11s1s2_compiling 11.1.2 Compiling the Code
+
+Google Test can be installed with the help of CMake, per the following recipe:
+
+1. Navigate to the Google Test folder and create a new directory called <tt>build</tt>:
+   \code
+   $ cd external/googletest
+   $ mkdir build
+
+2. Change into the <tt>build</tt> directory and run <tt>cmake</tt>:
+   \code
+   $ cd build
+   $ cmake ..
+   \endcode
+
+3. This will generate a Makefile. Run it:
+   \code
+   $ make
+   \endcode
+
+And done!
+
+
+\section ch11s2_running 11.2 Running Google Test
+
+Once you have downloaded and compiled the Google Test framework, all CARLsim test cases can be
+compiled and run from the CARLsim root directory:
 
 \code
-./carlsim_tests
+$ make test
+$ ./carlsim/test/carlsim_tests
 \endcode
 
-This runs the CARLsim tests which should all pass. If they do not pass,
-you may have inadvertantly modified the source code and should probably
-redownload CARLsim.
-
-3) To delete all testing output files type:
+This should produce output like the following, possibly all green:
 
 \code
-make distclean
+[==========] Running 100 tests from 17 test cases.
+[----------] Global test environment set-up.
+[----------] 7 tests from SpikeGen
+[ RUN      ] SpikeGen.PeriodicSpikeGenerator
+[       OK ] SpikeGen.PeriodicSpikeGenerator (339 ms)
+[ RUN      ] SpikeGen.PeriodicSpikeGeneratorDeath
+[       OK ] SpikeGen.PeriodicSpikeGeneratorDeath (351 ms)
+[ RUN      ] SpikeGen.SpikeGeneratorFromFile
+[       OK ] SpikeGen.SpikeGeneratorFromFile (1715 ms)
 \endcode
 
-You should only be here if something's broken.
-Why you would use it, what is it good for?
+\note If you installed CARLsim without GPU support (\ref ch1s2s1s3_cpuonly), all GPU-related tests
+will be excluded from the test suite build.
 
-
--B) TESTING PUBLISHED RESULTS
-
--C) BENCHMARK TESTS
 
 \since v3.0
 
