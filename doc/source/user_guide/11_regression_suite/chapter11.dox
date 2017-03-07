@@ -80,4 +80,77 @@ will be excluded from the test suite build.
 
 \since v3.0
 
+
+\section ch11s3_contributing 11.3 Contributing New Tests
+
+If you wish to contribute a new feature to CARLsim, you are expected to provide code that appropriately
+tests the new functionality.
+
+
+\subsection ch11s3s1_choosing_test_cases 11.3.1 Choosing the Right Test Case
+
+Tests are grouped into different test cases, such as <tt>Interface</tt>, <tt>Core</tt>, <tt>CUBA</tt>, etc.
+Identify the right test case depending on the topic your new feature belongs to:
+
+- <tt>core</tt>: All core functionality that involves running the whole CARLsim pipeline.
+
+- <tt>CUBA</tt>/<tt>COBA</tt>: Functionality that is specific to either CUBA or COBA mode.
+
+- <tt>Interface</tt>: Everything related to the CARLsim API.
+
+- <tt>SpikeMon</tt>/<tt>ConnMon</tt>/<tt>GroupMon</tt>: Everything related to Spike, Connection, or Group Monitors.
+
+- <tt>STDP</tt>/<tt>STP</tt>: Everything related to STDP or STP.
+
+- <tt>Compartments</tt>: Everything related to compartmental models.
+
+- etc.
+
+
+
+\subsection ch11s3s2_writing_tests 11.3.2 Writing Tests
+
+Every test is wrapped into some Google Test syntax:
+\code
+TEST(testCase, testName) {
+	
+}
+\endcode
+where the name of your test (<tt>testName</tt>) belongs to a certain test case (or group of tests, <tt>testCase</tt>).
+
+Within this code block, you can write whatever CARLsim network you want.
+
+After a network is run, you want to make its output is correct.
+This is achieved via Google Test-provided assertions such as:
+
+- <tt>EXPECT_EQ</tt>: Expects to variables to be equal. For example:
+  \code
+  EXPECT_EQ(a, 4);
+  \endcode
+  This expects the variable <tt>a</tt> to be equal to 4.
+
+- <tt>EXPECT_LT</tt>: Expects the first variable to be smaller than the second. For example:
+  \code
+  EXPECT_LT(a, 10);
+  \endcode
+  This expects the variable <tt>a</tt> to be smaller than 10.
+
+All Google Test function calls are described <a href="https://github.com/google/googletest/blob/master/googletest/docs/Primer.md">here</a>.
+
+
+\subsection ch11s3s3_writing_death_tests 11.3.3 Writing Death Tests
+
+If you write tests that expect the program to die (i.e., raise an Exception) in combination with
+<tt>EXPECT_DEATH</tt>, make sure the test is run in thread-safe mode by adding the following decorator:
+
+\code
+TEST(testCase, testName) {
+	::testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+	EXPECT_DEATH(...)	
+}
+\endcode
+
+\since v3.0
+
 */
