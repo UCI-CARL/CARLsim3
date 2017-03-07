@@ -6,6 +6,7 @@
 
 \section ch1s1_preinstallation 1.1 Pre-Installation
 \author Kristofor D. Carlson
+\author Michael Beyeler
 
 CARLsim runs on both generic x86 CPUs and off-the-shelf NVIDIA GPUs.
 Full support of all CARLsim features requires that the NVIDIA CUDA parallel computing platform be installed.
@@ -63,6 +64,8 @@ scripts, spike generators, and tools for visual stimuli.
 ├── doc                           # CARLsim documentation generation directory
 │   ├── html                        # Generated documentation in html
 │   └── source                      # Documentation source code
+├── external                      # External dependencies
+│   ├── googletest                  # Google Test framework
 ├── projects                      # User projects directory
 │   └── hello_world                 # Project template for new users
 └── tools                         # CARLsim tools that are not built-in
@@ -82,8 +85,33 @@ scripts, spike generators, and tools for visual stimuli.
 \author Ting-Shuo Chou
 \author Michael Beyeler
 
-To install CARLsim, first download and unzip the zip file from the
-<a href="http://www.socsci.uci.edu/~jkrichma/CARLsim/index.html">CARL website</a>.
+CARLsim is now available on <a href="https://github.com/UCI-CARL/CARLsim3">GitHub</a>.
+
+If you are familiar with Git and GitHub, the preferred way to obtain the software
+is to fork and clone the GitHub repository.
+This will give you a way to access the latest stable and development versions of the code,
+and allow you to easily update your codebase later on.
+
+This can be done in two steps:
+
+-# Navigate to CARLsim's
+   <a href="https://github.com/UCI-CARL/CARLsim3">GitHub page</a> and click on the
+   <a href="https://github.com/UCI-CARL/CARLsim3#fork-destination-box"><tt>Fork</tt></a> box in the
+   top-right corner.
+
+-# Switch to a terminal (or <a href="https://desktop.github.com/">GitHub Desktop</a>)
+   and clone the repository:
+   \code
+   $ git clone --recursive https://github.com/UCI-CARL/YourUsername/CARLsim3
+   $ cd CARLsim 3
+   \endcode
+   where <tt>YourUsername</tt> is your GitHub user name.
+   Note the <tt>--recursive</tt> option: It will make sure all external software
+   dependencies get installed (e.g., Google Test).
+
+Alternatively, you may download the latest stable release from the 
+<a href="https://github.com/UCI-CARL/CARLsim3/releases">GitHub Release</a> page (.zip or .tar.gz).
+
 For installation instructions on Linux and Mac OS X platforms, please refer to \ref ch1s2s1_linux below.
 For installation instructions on Windows platforms, please refer to \ref ch1s2s2_windows below.
 
@@ -97,51 +125,59 @@ After you have unzipped the downloaded CARLsim files, you next have to set insta
 variables such as information about GPU devices, CUDA Toolkit version, and the desired installation
 location.
 
+
 \subsubsection ch1s2s1s1_environment_variables 1.2.1.1 Environment Variables
 
-The easiest way to set all relevant environment variables is to add the following lines to your
-<tt>~/.bashrc</tt> file:
-\code
-# CARLsim mandatory variables
-export CARLSIM_LIB_DIR=/opt/CARL/CARLsim
-export CUDA_INSTALL_PATH=/usr/local/cuda
-export CARLSIM_CUDAVER=6
-export CUDA_MAJOR_NUM=3
-export CUDA_MINOR_NUM=5
+CARLsim 3 allows configuration via environment variables.
+The easiest way to set these is to add them to your
+<tt>~/.bashrc</tt> file.
 
-# CARLsim optional variables
-export CARLSIM_FASTMATH=0
-export CARLSIM_CUOPTLEVEL=3
-export CPU_ONLY=0
-\endcode
+The following options are available:
 
-The desired installation location of the CARLsim library is specified with the
-<tt>CARLSIM_LIB_DIR</tt> variable. The major and minor compute capability numbers of your
-CUDA-capable GPU device must be specified by setting the <tt>CUDA_MAJOR_NUM</tt> and
-<tt>CUDA_MINOR_NUM</tt> variables, respectively. Next <tt>CUDA_INSTALL_PATH</tt> variable must be
-set. This variable points to where CUDA is installed. Finally, the CUDA Toolkit version must be set
-with the <tt>CARLSIM_CUDAVER</tt> variable.
-<tt>CARLSIM_FASTMATH</tt> (GCC fast-math flag) and <tt>CARLSIM_CUOPTLEVEL</tt> (optimization level,
-disable with value 0, enable with values 1-3) are optional settings.
-Setting <tt>CPU_ONLY</tt> to 1 will allow you to compile CARLsim without any GPU support.
+- Installation directory: By default, the CARLsim library lives in <tt>/usr/local/lib</tt>,
+  and CARLsim include files live in <tt>/usr/local/include/carlsim</tt>.
+  You can overwrite these by exporting an evironment variable called
+  <tt>CARLSIM3_INSTALL_DIR</tt>:
+  \code
+  $ export CARLSIM3_INSTALL_DIR=/path/to/your/preferred/location
+  \endcode
 
-To make sure these settings go into effect, you can either type:
+- GPU support: By default, CARLsim comes with CUDA support.
+  Obviously, this requires CUDA to be installed first.
+  If you want to run CARLsim without GPU support, you need to export an
+  environment variable called <tt>CARLSIM3_CPU_ONLY</tt> and set it to 1:
+  \code
+  $ export CARLSIM3_CPU_ONLY=1
+  \endcode
+
+- Custom CUDA paths: By default, CARLsim assumes that your CUDA library lives in
+  <tt>/usr/local/cuda</tt>. If this is not the case on your system, make sure to
+  set adjust an environment variable called <tt>CUDA_PATH</tt>:
+  \code
+  $ CUDA_PATH=/path/to/CUDA
+  \endcode
+
+- ECJ support: By default, CARLsim assumes that the Parameter Tuning Interface
+  lives in <tt>/opt/CARL/carlsim_ecj_pti</tt>, with the JAR file located at
+  <tt>/opt/ecj/jar/ecj.23.jar</tt>. If these paths are not correct and you wish
+  to use the Parameter Tuning Interface (see \ref ch10_ecj), please update
+  your environment variables accordingly:
+  \code
+  $ ECJ_JAR=/path/to/ECJ/JAR/file
+  $ ECJ_PTI_DIR=/path/to/ECJ/PTI
+  \endcode
+
+
+Once you have made changes to your <tt>~/.bashrc</tt>, make sure they go into
+effect by either typing:
 \code
 $ source ~/.bashrc
 \endcode
-or close the shell and open another one.
+or by closing the shell and opening another one.
 
-An alternative way to set the required environment variable is to edit the <tt>user.mk</tt> file
-found in the CARLsim root directory.
-This can be helpful in case multiple users share the same CARLsim installation and want to use
-global configuration settings.
-The '=?' sign in <tt>user.mk</tt> indicates the value the variable will be assigned if it is not
-already defined in the <tt>~/.bashrc</tt>.
-For example, the following line from <tt>user.mk</tt> would assign value 5 to environment variable
-<tt>CARLSIM_CUDAVER</tt> if the variable does not already exist:
-\code
-CARLSIM_CUDAVER ?= 5
-\endcode
+Older versions of CARLsim used a configuration file called <tt>user.mk</tt>.
+This file is obsolete as of CARLsim 3.1.2.
+
 
 
 \subsubsection ch1s2s1s2_cuda_version 1.2.1.2 Finding CUDA Toolkit Version and Compute Capability
@@ -168,36 +204,39 @@ $ ./deviceQuery
 For CUDA Toolkits other than version 6.5, the paths above need to be changed accordingly.
 
 
+
 \subsubsection ch1s2s1s3_cpuonly 1.2.1.3 Installing CARLsim Without GPU Support
 
-To install CARLsim without GPU support, the environment variable <tt>CPU_ONLY</tt> in <tt>user.mk</tt> needs
-to be set to 1:
+As mentioned above (\ref ch1s2s1s1_environment_variables),
+GPU support can be disabled by exporting an environment
+variable called <tt>CARLSIM3_CPU_ONLY</tt> and by setting it to 1:
 \code
-CPU_ONLY ?= 1
+$ export CARLSIM3_CPU_ONLY=1
 \endcode
-Alternatively, the variable can be added to <tt>~/.bashrc</tt>.
 
 In this case, the NVIDIA CUDA toolkit is not required.
 But, obviously you will not be able to run CARLsim in ::GPU_MODE.
 
 
+
 \subsubsection ch1s2s1s4_compiling 1.2.1.4 Compiling the CARLsim Library
 
-After the environment variables have been set, CARLsim can be compiled and installed via:
+CARLsim can be compiled and installed via:
 \code
-$ make
-$ sudo make install
+$ make -j4
+$ sudo -E make install
 \endcode
 
-This is will install the CARLsim library in the location pointed to by <tt>CARLSIM_LIB_DIR</tt>
-(see \ref ch1s2s1s1_environment_variables above).
+Note the <tt>-E</tt> flag, which will cause sudo to remember any environment
+variables you set above (such as <tt>CARLSIM3_INSTALL_DIR</tt> and
+<tt>CARLSIM3_CPU_ONLY</tt>).
 
 CARLsim comes with an optional automated parameter tuning framework. For more information about
 how to install the framework please see \ref ch10_ecj. Additionally, CARLsim now comes with a
 regression suite that uses <a href="https://code.google.com/p/googletest/">Google Test</a>.
 For more information on how to use the regression suite, please see \ref ch11_regression_suite.
 
-\since v3.0
+\since v3.1
 
 
 \subsection ch1s2s2_windows 1.2.2 Windows
