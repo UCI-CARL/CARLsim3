@@ -41,8 +41,10 @@
 #ifndef _SNN_DATASTRUCTURES_H_
 #define _SNN_DATASTRUCTURES_H_
 
+#ifndef __CPU_ONLY__ 
 // include CUDA version-dependent macros and include files
 #include <cuda_version_control.h>
+#endif
 
 
 //! connection types, used internally (externally it's a string)

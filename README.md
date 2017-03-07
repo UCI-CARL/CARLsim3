@@ -44,8 +44,8 @@ Or use the following bibtex:
 
 ## Installation
 
-Detailed installation instructions for Mac OS X / Linux / Windows can be found in
-our [User Guide](http://uci-carl.github.io/CARLsim3/ch1_getting_started.html).
+Detailed instructions for installing the latest stable release of CARLsim on Mac OS X / Linux / Windows
+can be found in our [User Guide](http://uci-carl.github.io/CARLsim3/ch1_getting_started.html).
 
 In brief (OS X/Linux):
 
@@ -54,40 +54,51 @@ In brief (OS X/Linux):
 
 2. Clone the repo, where `YourUsername` is your actual GitHub user name:
    ```
-   $ git clone https://github.com/YourUsername/CARLsim3
+   $ git clone --recursive https://github.com/YourUsername/CARLsim3
    $ cd CARLsim3
    ```
+   Note the `--recursive` option: It will make sure Google Test gets installed.
 
 3. Choose between stable release and latest development version:
    - For the stable release, use the `stable` branch:
      ```
      $ git checkout stable
      ```
-   - For the latest development branch, you are already on the right branch (`master').
+   - For the latest development branch, you are already on the right branch (`master`).
 
-4. Create a configuration file from the sample:
-   ```
-   $ cp user.mk.sample user.mk
-   ```
-
-5. Edit the configuration file.
-  - If you do not have an NVIDIA GPU and want to run CARLsim in `CPU_MODE` only,
-    set `CPU_ONLY=1`. Skip to Step 6.
-  - Else, look up the [compute capability](https://en.wikipedia.org/wiki/CUDA#GPUs_supported)
-    of your NVIDIA GPU (`$ nvidia-smi`), and update `CUDA_MAJOR_NUM` and 
-    `CUDA_MINOR_NUM` accordingly.
-    For example, Maxwell devices (5.x) have `CUDA_MAJOR_NUM`=5 and `CUDA_MINOR_NUM`
-    either 0, 1, or 2.
-  - Look up the version of your CUDA toolkit (`$ nvcc --version`), and update
-    `CARLSIM_CUDAVER` accordingly.
+4. Consider your options: You can choose the installation directory and whether you want GPU support.
+   - Installation directory: By default, the CARLsim library lives in `/usr/local/lib`, and CARLsim
+     include files live in `/usr/local/include/carlsim`.
+     You can overwrite these by exporting an evironment variable called `CARLSIM3_INSTALL_DIR`:
+     ```
+     $ export CARLSIM3_INSTALL_DIR=/path/to/your/preferred/dir
+     ```
+     
+   - GPU support: By default, CARLsim comes with CUDA support. Obviously, this requires CUDA to be installed
+     first. If you want to run CARLsim without GPU support, you need to export an environment variable
+     called `CARLSIM3_CPU_ONLY` and set it to `1`:
+     ```
+     $ export CARLSIM3_CPU_ONLY=1
+     ```
 
 6. Make and install:
    ```
    $ make -j4
-   $ sudo make install
+   $ sudo -E make install
    ```
+   Note the `-E` flag, which will cause `sudo` to remember any environment variables you set above
+   (such as `CARLSIM3_INSTALL_DIR` and `CARLSIM3_CPU_ONLY`).
 
-7. Make sure installation was successful by running the "Hello World" example:
+7. In order to make sure the installation was successful, you can run the regression suite:
+
+   ```
+   $ make test
+   $ ./carlsim/test/carlsim_tests
+   ```
+   
+8. Start your own project! The "Hello World" project is a goot starting point for this.
+   Make sure it runs:
+
    ```
    $ cd projects/hello_world
    $ make

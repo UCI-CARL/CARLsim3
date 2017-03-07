@@ -1,137 +1,244 @@
-# module include file for CARLsim core
+##----------------------------------------------------------------------------##
+##
+##   CARLsim3 Kernel
+##   ---------------
+##
+##   Authors:   Michael Beyeler <mbeyeler@uci.edu>
+##              Kristofor Carlson <kdcarlso@uci.edu>
+##
+##   Institute: Cognitive Anteater Robotics Lab (CARL)
+##              Department of Cognitive Sciences
+##              University of California, Irvine
+##              Irvine, CA, 92697-5100, USA
+##
+##   Version:   03/31/2016
+##
+##----------------------------------------------------------------------------##
 
-#---------------------------------------------------------------------------
-# CARLsim kernel variables
-#---------------------------------------------------------------------------
-# kernel variables
-kernel_inc := $(addprefix $(kernel_dir)/include/, snn.h gpu.h \
-	snn_definitions.h snn_datastructures.h \
-	gpu_random.h propagated_spike_buffer.h \
-	error_code.h cuda_version_control.h)
-kernel_cpp := $(addprefix $(kernel_dir)/src/, snn_cpu.cpp \
-	propagated_spike_buffer.cpp print_snn_info.cpp)
-ifeq ($(strip $(CPU_ONLY)),1)
-	kernel_cu :=
-	kernel_cu_objs :=
+#------------------------------------------------------------------------------
+# CARLsim3 Interface
+#------------------------------------------------------------------------------
+
+intf_dir        := carlsim/interface
+intf_inc_files  := $(wildcard $(intf_dir)/include/*.h)
+intf_cpp_files  := $(wildcard $(intf_dir)/src/*.cpp)
+intf_obj_files  := $(patsubst %.cpp, %-cpp.o, $(intf_cpp_files))
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+	intf_cu_files :=
 else
-	kernel_cu := $(addprefix $(kernel_dir)/src/, gpu_random.cu snn_gpu.cu)
-	kernel_cu_objs := $(patsubst %.cu, %.o, $(kernel_cu))
+	intf_cu_files   := $(wildcard $(intf_dir)/src/*.cu)
+	intf_obj_files  += $(patsubst %.cu, %-cu.o, $(intf_cu_files))
 endif
-kernel_src := $(kernel_cpp) $(kernel_cu)
-kernel_cpp_objs := $(patsubst %.cpp, %.o, $(kernel_cpp))
-kernel_objs := $(kernel_cpp_objs) $(kernel_cu_objs)
+SIMINCFL        += -I$(intf_dir)/include
 
-# interface variables
-interface_inc := $(addprefix $(interface_dir)/include/, carlsim.h \
-	user_errors.h callback.h callback_core.h carlsim_definitions.h \
-	carlsim_datastructures.h poisson_rate.h linear_algebra.h)
-interface_src := $(addprefix $(interface_dir)/src/,carlsim.cpp \
-	user_errors.cpp callback_core.cpp poisson_rate.cpp linear_algebra.cpp)
-interface_objs := $(patsubst %.cpp, %.o, $(interface_src))
 
-# connection monitor variables
-conn_mon_inc := $(addprefix $(conn_mon_dir)/,connection_monitor_core.h \
-	connection_monitor.h)
-conn_mon_src := $(addprefix $(conn_mon_dir)/, connection_monitor_core.cpp \
-	connection_monitor.cpp)
-conn_mon_objs := $(patsubst %.cpp, %.o, $(conn_mon_src))
-conn_mon_flags := -I$(conn_mon_dir)
 
-# spike monitor variables
-spike_mon_inc := $(addprefix $(spike_mon_dir)/,spike_monitor.h \
-	spike_monitor_core.h)
-spike_mon_src := $(addprefix $(spike_mon_dir)/, spike_monitor.cpp \
-	spike_monitor_core.cpp)
-spike_mon_objs := $(patsubst %.cpp, %.o, $(spike_mon_src))
+#------------------------------------------------------------------------------
+# CARLsim3 Kernel
+#------------------------------------------------------------------------------
 
-# group monitor variables
-group_mon_inc := $(addprefix $(group_mon_dir)/, group_monitor.h \
-	group_monitor_core.h)
-group_mon_src := $(addprefix $(group_mon_dir)/, group_monitor.cpp \
-	group_monitor_core.cpp)
-group_mon_objs := $(patsubst %.cpp, %.o, $(group_mon_src))
+krnl_dir        := carlsim/kernel
+krnl_inc_files  := $(wildcard $(krnl_dir)/include/*.h)
+krnl_cpp_files  := $(wildcard $(krnl_dir)/src/*.cpp)
+krnl_obj_files  := $(patsubst %.cpp, %-cpp.o, $(krnl_cpp_files))
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+	krnl_cu_files :=
+else
+	krnl_cu_files := $(wildcard $(krnl_dir)/src/*.cu)
+	krnl_obj_files  += $(patsubst %.cu, %-cu.o, $(krnl_cu_files))
+endif
+SIMINCFL        += -I$(krnl_dir)/include
 
-# tools spikegen variables
-tools_spikegen_inc  := $(addprefix $(tools_spikegen_dir)/,interactive_spikegen.h \
-	periodic_spikegen.h spikegen_from_file.h spikegen_from_vector.h)
-tools_spikegen_src  := $(addprefix $(tools_spikegen_dir)/,interactive_spikegen.cpp \
-	periodic_spikegen.cpp spikegen_from_file.cpp spikegen_from_vector.cpp pre_post_group_spikegen.cpp)
-tools_spikegen_objs := $(patsubst %.cpp, %.o, $(tools_spikegen_src))
 
-# tools visualstim variables
-tools_visualstim_inc  := $(addprefix $(tools_visualstim_dir)/,visual_stimulus.h)
-tools_visualstim_src  := $(addprefix $(tools_visualstim_dir)/,visual_stimulus.cpp)
-tools_visualstim_objs := $(patsubst %.cpp, %.o, $(tools_visualstim_src))
 
-# tools simple weight tuner variables
-tools_swt_inc  := $(addprefix $(tools_swt_dir)/,simple_weight_tuner.h)
-tools_swt_src  := $(addprefix $(tools_swt_dir)/,simple_weight_tuner.cpp)
-tools_swt_objs := $(patsubst %.cpp, %.o, $(tools_swt_src))
+#------------------------------------------------------------------------------
+# CARLsim3 Utilities
+#------------------------------------------------------------------------------
 
-# tools timer
-tools_stopwatch_inc  := $(addprefix $(tools_stopwatch_dir)/,stopwatch.h)
-tools_stopwatch_src  := $(addprefix $(tools_stopwatch_dir)/,stopwatch.cpp)
-tools_stopwatch_objs := $(patsubst %.cpp, %.o, $(tools_stopwatch_src))
+conn_dir        := carlsim/connection_monitor
+conn_inc_files  := $(wildcard $(conn_dir)/*.h)
+conn_cpp_files  := $(wildcard $(conn_dir)/*.cpp)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+	conn_cu_files :=
+else
+	conn_cu_files   := $(wildcard $(conn_dir)/src/*.cu)
+endif
+conn_obj_files  := $(patsubst %.cpp, %-cpp.o, $(conn_cpp_files))
+conn_obj_files  += $(patsubst %.cu, %-cu.o, $(conn_cu_files))
+SIMINCFL        += -I$(conn_dir)
 
-# motion energy objects
-util_2_0_objs := $(addprefix $(kernel_dir)/,v1ColorME.2.0.o)
 
-# carlsim variables all together in one place
-carlsim_inc += $(kernel_inc) $(interface_inc) $(conn_mon_inc) $(spike_mon_inc) $(group_mon_inc) \
-	$(tools_spikegen_inc) $(tools_visualstim_inc) $(tools_swt_inc) $(tools_stopwatch_inc)
-carlsim_objs += $(kernel_objs) $(interface_objs) $(conn_mon_objs) $(spike_mon_objs) $(group_mon_objs) \
-	$(tools_spikegen_objs) $(tools_visualstim_objs) $(tools_swt_objs) $(tools_stopwatch_objs)
-carlsim_sources += $(kernel_src) $(interface_src) $(conn_mon_src) $(spike_mon_src) $(group_mon_src) \
-	$(tools_spikegen_src) $(tools_visualstim_src) $(tools_swt_src) $(tools_stopwatch_src)
-objects += $(carlsim_objs) $(interface_objs) $(conn_mon_objs) $(spike_mon_objs) $(group_mon_objs) \
-	$(tools_spikegen_objs) $(tools_visualstim_objs) $(tools_swt_objs) $(tools_stopwatch_objs)
+grps_dir        := carlsim/group_monitor
+grps_inc_files  := $(wildcard $(grps_dir)/*.h)
+grps_cpp_files  := $(wildcard $(grps_dir)/*.cpp)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+	grps_cu_files :=
+else
+	grps_cu_files   := $(wildcard $(grps_dir)/src/*.cu)
+endif
+grps_obj_files  := $(patsubst %.cpp, %-cpp.o, $(grps_cpp_files))
+grps_obj_files  += $(patsubst %.cu, %-cu.o, $(grps_cu_files))
+SIMINCFL        += -I$(grps_dir)
 
-default_targets += carlsim
 
-#---------------------------------------------------------------------------
-# CARLsim rules
-#---------------------------------------------------------------------------
-# put libcuda stuff here
-.PHONY: carlsim
-carlsim: $(carlsim_sources) $(carlsim_inc) $(carlsim_objs)
+spks_dir        := carlsim/spike_monitor
+spks_inc_files  := $(wildcard $(spks_dir)/*.h)
+spks_cpp_files  := $(wildcard $(spks_dir)/*.cpp)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+	spks_cu_files :=
+else
+	spks_cu_files   := $(wildcard $(spks_dir)/src/*.cu)
+endif
+spks_obj_files  := $(patsubst %.cpp, %-cpp.o, $(spks_cpp_files))
+spks_obj_files  += $(patsubst %.cu, %-cu.o, $(spks_cu_files))
+SIMINCFL        += -I$(spks_dir)
 
-# interface
-$(interface_dir)/src/%.o: $(interface_dir)/src/%.cpp $(interface_inc)
-	$(NVCC) -c $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $< -o $@
 
-# connection monitor
-$(conn_mon_dir)/%.o: $(conn_mon_dir)/%.cpp $(conn_mon_inc)
-	$(NVCC) -c $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(conn_mon_flags) $< -o $@
 
-# spike_monitor
-$(spike_mon_dir)/%.o: $(spike_mon_dir)/%.cpp $(spike_mon_inc)
-	$(NVCC) -c $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS)	$< -o $@
+#------------------------------------------------------------------------------
+# CARLsim3 Tools
+#------------------------------------------------------------------------------
 
-# group_monitor
-$(group_mon_dir)/%.o: $(group_mon_dir)/%.cpp $(group_mon_inc)
-	$(NVCC) -c $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS)	$< -o $@
+tools_obj_files  :=
 
-# tools/spikegen
-$(tools_spikegen_dir)/%.o: $(tools_spikegen_src) $(tools_spikegen_inc)
-	$(NVCC) -c $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS)	$(@D)/$*.cpp -o $@
+# simple weight tuner
+swt_dir          := tools/simple_weight_tuner
+swt_inc_files    := $(wildcard $(swt_dir)/*.h)
+swt_cpp_files    := $(wildcard $(swt_dir)/*.cpp)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+	swt_cu_files :=
+else
+	swt_cu_files    := $(wildcard $(swt_dir)/*.cu)
+endif
+swt_obj_files    := $(patsubst %.cpp, %.o, $(swt_cpp_files))
+swt_obj_files    += $(patsubst %.cu, %.o, $(swt_cu_files))
+tools_obj_files  += $(swt_obj_files)
+SIMINCFL         += -I$(swt_dir)
 
-# tools/visual_stimulus
-$(tools_visualstim_dir)/%.o: $(tools_visualstim_src) $(tools_visualstim_inc)
-	$(NVCC) -c $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(@D)/$*.cpp -o $@
 
-# tools/simple_weight_tuner
-$(tools_swt_dir)/%.o: $(tools_swt_src) $(tools_swt_inc)
-	$(NVCC) -c $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(@D)/$*.cpp  -o $@
+# spike generators
+spkgen_dir       := tools/spike_generators
+spkgen_inc_files := $(wildcard $(spkgen_dir)/*.h)
+spkgen_cpp_files := $(wildcard $(spkgen_dir)/*.cpp)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+	spkgen_cu_files :=
+else
+	spkgen_cu_files  := $(wildcard $(spkgen_dir)/*.cu)
+endif
+spkgen_obj_files := $(patsubst %.cpp, %.o, $(spkgen_cpp_files))
+spkgen_obj_files += $(patsubst %.cu, %.o, $(spkgen_cu_files))
+tools_obj_files  += $(spkgen_obj_files)
+SIMINCFL         += -I$(spkgen_dir)
 
-# tools/stopwatch
-$(tools_stopwatch_dir)/%.o: $(tools_stopwatch_src) $(tools_stopwatch_inc)
-	$(NVCC) -c $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $(@D)/$*.cpp  -o $@
-#	$(CXX) -c -I$(tools_stopwatch_dir) $(@D)/$*.cpp -o $@
 
-# kernel carlsim cpps
-$(kernel_dir)/src/%.o: $(kernel_dir)/src/%.cpp $(kernel_inc)
-	$(NVCC) -c $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $< -o $@
+# stopwatch
+stp_dir          := tools/stopwatch
+stp_inc_files    := $(wildcard $(stp_dir)/*h)
+stp_cpp_files    := $(wildcard $(stp_dir)/*.cpp)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+	stp_cu_files :=
+else
+	stp_cu_files     := $(wildcard $(stp_dir)/*.cu)
+endif
+stp_obj_files    := $(patsubst %.cpp, %.o, $(stp_cpp_files))
+stp_obj_files    += $(patsubst %.cu, %.o, $(stp_cu_files))
+tools_obj_files  += $(stp_obj_files)
+SIMINCFL         += -I$(stp_dir)
 
-# kernel carlsim cuda
-$(kernel_dir)/src/%.o: $(kernel_dir)/src/%.cu $(kernel_inc)
-	$(NVCC) -c $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $< -o $@
+
+# visual stimulus
+vs_dir          := tools/visual_stimulus
+vs_inc_files    := $(wildcard $(vs_dir)/*h)
+vs_cpp_files    := $(wildcard $(vs_dir)/*.cpp)
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+	vs_cu_files :=
+else
+	vs_cu_files     := $(wildcard $(vs_dir)/*.cu)
+endif
+vs_obj_files    := $(patsubst %.cpp, %.o, $(vs_cpp_files))
+vs_obj_files    += $(patsubst %.cu, %.o, $(vs_cu_files))
+tools_obj_files += $(vs_obj_files)
+SIMINCFL        += -I$(vs_dir)
+
+
+
+#------------------------------------------------------------------------------
+# CARLsim3 Common
+#------------------------------------------------------------------------------
+
+targets         += carlsim3
+
+objects         += $(intf_obj_files) $(krnl_obj_files) $(conn_obj_files)
+objects         += $(grps_obj_files) $(spks_obj_files) $(tools_obj_files)
+
+clean_objects   += $(intf_dir)/src/*.o $(krnl_dir)/src/*.o $(conn_dir)/*.o
+clean_objects   += $(grps_dir)/*.o $(spks_dir)/*.o $(swt_dir)/*.o
+clean_objects   += $(spkgen_dir)/*.o $(stp_dir)/*.o $(vs_dir)/*.o 
+
+add_files       := $(addprefix carlsim/,configure.mk)
+
+
+#------------------------------------------------------------------------------
+# CARLsim3 Targets
+#------------------------------------------------------------------------------
+
+.PHONY: release debug $(targets)
+
+ifeq ($(CARLSIM3_CPU_ONLY),1)
+# release build
+release: CXXFL  += -O3 -ffast-math
+release: NVCCFL += -O3 -ffast-math 
+release: $(targets)
+
+# debug build
+debug: CXXFL    += -g -Wall -O0
+debug: NVCCFL   += -g -G --compiler-options "-Wall -O0"
+debug: $(targets)
+
+else
+# release build
+release: CXXFL  += -O3 -ffast-math
+release: NVCCFL += --compiler-options "-O3 -ffast-math"
+release: $(targets)
+
+# debug build
+debug: CXXFL    += -g -Wall -O0
+debug: NVCCFL   += -g -G --compiler-options "-Wall -O0"
+debug: $(targets)
+endif
+
+# all CARLsim3 targets
+$(targets): $(objects)
+
+
+#------------------------------------------------------------------------------
+# CARLsim3 Rules
+#------------------------------------------------------------------------------
+
+# rule to compile local cpps
+$(intf_dir)/src/%-cpp.o: $(intf_dir)/src/%.cpp $(intf_inc_files)
+	$(NVCC) $(NVCCSHRFL) -c $(NVCCINCFL) $(SIMINCFL) $(NVCCFL) $< -o $@
+$(intf_dir)/src/%-cu.o: $(intf_dir)/src/%.cu $(intf_inc_files)
+	$(NVCC) $(NVCCSHRFL) -c $(NVCCINCFL) $(SIMINCFL) $(NVCCFL) $< -o $@
+$(krnl_dir)/src/%-cpp.o: $(krnl_dir)/src/%.cpp $(krnl_inc_files)
+	$(NVCC) $(NVCCSHRFL) -c $(NVCCINCFL) $(SIMINCFL) $(NVCCFL) $< -o $@
+$(krnl_dir)/src/%-cu.o: $(krnl_dir)/src/%.cu $(krnl_inc_files)
+	$(NVCC) $(NVCCSHRFL) -c $(NVCCINCFL) $(SIMINCFL) $(NVCCFL) $< -o $@
+
+# utilities
+$(conn_dir)/%-cpp.o: $(conn_dir)/%.cpp $(conn_inc_files)
+	$(NVCC) $(NVCCSHRFL) -c $(NVCCINCFL) $(SIMINCFL) $(NVCCFL) $< -o $@
+$(grps_dir)/%-cpp.o: $(grps_dir)/%.cpp $(grps_inc_files)
+	$(NVCC) $(NVCCSHRFL) -c $(NVCCINCFL) $(SIMINCFL) $(NVCCFL) $< -o $@
+$(spks_dir)/%-cpp.o: $(spks_dir)/%.cpp $(spks_inc_files)
+	$(NVCC) $(NVCCSHRFL) -c $(NVCCINCFL) $(SIMINCFL) $(NVCCFL) $< -o $@
+
+# tools
+$(swt_dir)/%.o: $(swt_dir)/%.cpp $(swt_inc_files)
+	$(CXX) $(CXXSHRFL) -c $(CXXINCFL) $(SIMINCFL) $(CXXFL) $< -o $@
+$(spkgen_dir)/%.o: $(spkgen_dir)/%.cpp $(spkgen_inc_files)
+	$(CXX) $(CXXSHRFL) -c $(CXXINCFL) $(SIMINCFL) $(CXXFL) $< -o $@
+$(stp_dir)/%.o: $(stp_dir)/%.cpp $(stp_inc_files)
+	$(CXX) $(CXXSHRFL) -c $(CXXINCFL) $(SIMINCFL) $(CXXFL) $< -o $@
+$(vs_dir)/%.o: $(vs_dir)/%.cpp $(vsinc_files)
+	$(CXX) $(CXXSHRFL) -c $(CXXINCFL) $(SIMINCFL) $(CXXFL) $< -o $@
