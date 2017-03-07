@@ -22,7 +22,6 @@ For platform-specific CUDA installation instructions, please navigate to the
 
 The rest of the chapter assumes you have successfully installed CUDA on appropriate hardware.
 
-
 \subsection ch1s1s1_os 1.1.1 Supported Operating Systems
 CARLsim has been tested on the following platforms:
 - Windows 7
@@ -92,7 +91,7 @@ is to fork and clone the GitHub repository.
 This will give you a way to access the latest stable and development versions of the code,
 and allow you to easily update your codebase later on.
 
-This can be done in two steps:
+This can be done in three steps:
 
 -# Navigate to CARLsim's
    <a href="https://github.com/UCI-CARL/CARLsim3">GitHub page</a> and click on the
@@ -109,6 +108,14 @@ This can be done in two steps:
    Note the <tt>--recursive</tt> option: It will make sure all external software
    dependencies get installed (e.g., Google Test).
 
+-# Choose your software version:
+   - If you want the latest stable release, switch to the <tt>stable</tt> branch:
+     \code
+     $ git checkout stable
+     \endcode
+   - If you want the latest development version, simply stay on the <tt>master</tt>
+     branch.
+
 Alternatively, you may download the latest stable release from the 
 <a href="https://github.com/UCI-CARL/CARLsim3/releases">GitHub Release</a> page (.zip or .tar.gz).
 
@@ -121,9 +128,6 @@ For installation instructions on Windows platforms, please refer to \ref ch1s2s2
 Instructions for Linux/Mac OS X installation assume you are using the Bash shell. Additionally, the
 GNU GCC compiler collection and GNU Make build environment should be installed. 
 On most platforms, these are already installed by default.
-After you have unzipped the downloaded CARLsim files, you next have to set installation-specific environment
-variables such as information about GPU devices, CUDA Toolkit version, and the desired installation
-location.
 
 
 \subsubsection ch1s2s1s1_environment_variables 1.2.1.1 Environment Variables
@@ -204,7 +208,6 @@ $ ./deviceQuery
 For CUDA Toolkits other than version 6.5, the paths above need to be changed accordingly.
 
 
-
 \subsubsection ch1s2s1s3_cpuonly 1.2.1.3 Installing CARLsim Without GPU Support
 
 As mentioned above (\ref ch1s2s1s1_environment_variables),
@@ -221,15 +224,35 @@ But, obviously you will not be able to run CARLsim in ::GPU_MODE.
 
 \subsubsection ch1s2s1s4_compiling 1.2.1.4 Compiling the CARLsim Library
 
-CARLsim can be compiled and installed via:
-\code
-$ make -j4
-$ sudo -E make install
-\endcode
+When it comes to compiling and installing CARLsim, you have two options:
 
-Note the <tt>-E</tt> flag, which will cause sudo to remember any environment
+-# Install a <tt>release</tt> version:
+   \code
+   $ make -j4
+   $ sudo -E make install
+   \endcode
+   This will enable hardware accelerations using the <tt>-O3</tt> and
+   <tt>-ffast-math</tt> compile flags.
+
+-# Install a <tt>debug</tt> version:
+   \code
+   $ make debug -j4
+   $ sudo -E make install
+   \endcode
+   This will disable hardware accelerations (via <tt>-O0</tt>) and enable
+   extensive debug prints (via <tt>-g -Wall</tt>).
+
+\note Note the <tt>-E</tt> flag in the commands above,
+which will cause <tt>sudo</tt> to remember any environment
 variables you set above (such as <tt>CARLSIM3_INSTALL_DIR</tt> and
 <tt>CARLSIM3_CPU_ONLY</tt>).
+You don't need this flag if you're not installing with <tt>sudo</tt>.
+
+\note Also, note the <tt>-j4</tt> flag, which will install CARLsim using
+four workers. You can increase the number if you wish, or omit the flag
+if you're working on a single-core machine.
+
+
 
 CARLsim comes with an optional automated parameter tuning framework. For more information about
 how to install the framework please see \ref ch10_ecj. Additionally, CARLsim now comes with a
@@ -237,6 +260,21 @@ regression suite that uses <a href="https://code.google.com/p/googletest/">Googl
 For more information on how to use the regression suite, please see \ref ch11_regression_suite.
 
 \since v3.1
+
+
+\subsubsection ch1s2s1s5_verifying 1.2.1.5 Verifying the Installation
+
+In order to make sure the installation was successful,
+you can run the regression suite:
+
+\code
+$ make test
+$ ./carlsim/test_carlsim_tests
+\endcode
+
+For more information on the regression suite, please refer to
+\ref ch11_regression_suite.
+
 
 
 \subsection ch1s2s2_windows 1.2.2 Windows
