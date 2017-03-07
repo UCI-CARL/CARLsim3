@@ -106,7 +106,7 @@ This can be done in three steps:
    and clone the repository:
    \code
    $ git clone --recursive https://github.com/UCI-CARL/YourUsername/CARLsim3
-   $ cd CARLsim 3
+   $ cd CARLsim3
    \endcode
    where <tt>YourUsername</tt> is your GitHub user name.
    Note the <tt>--recursive</tt> option: It will make sure all external software
@@ -218,7 +218,7 @@ the file <tt>helper_cuda.h</tt>, which usually resides in
 
 \subsubsection ch1s2s1s3_cpuonly 1.2.1.3 Installing CARLsim Without GPU Support
 
-As mentioned above (\ref ch1s2s1s1_environment_variables),
+As mentioned above,
 GPU support can be disabled by exporting an environment
 variable called <tt>CARLSIM3_CPU_ONLY</tt> and by setting it to 1:
 \code
@@ -228,6 +228,7 @@ $ export CARLSIM3_CPU_ONLY=1
 In this case, the NVIDIA CUDA toolkit is not required.
 But, obviously you will not be able to run CARLsim in ::GPU_MODE.
 
+\see \ref ch1s2s1s1_environment_variables
 
 
 \subsubsection ch1s2s1s4_compiling 1.2.1.4 Compiling the CARLsim Library
