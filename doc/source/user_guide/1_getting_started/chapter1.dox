@@ -22,6 +22,10 @@ For platform-specific CUDA installation instructions, please navigate to the
 
 The rest of the chapter assumes you have successfully installed CUDA on appropriate hardware.
 
+\note Please make sure you install the CUDA SDK samples, as CARLsim relies on
+the file <tt>helper_cuda.h</tt>, which usually resides in
+<tt>/usr/local/cuda/samples/common/inc</tt>.
+
 \subsection ch1s1s1_os 1.1.1 Supported Operating Systems
 CARLsim has been tested on the following platforms:
 - Windows 7
@@ -206,6 +210,10 @@ $ make
 $ ./deviceQuery
 \endcode
 For CUDA Toolkits other than version 6.5, the paths above need to be changed accordingly.
+
+\note Please make sure you install the CUDA SDK samples, as CARLsim relies on
+the file <tt>helper_cuda.h</tt>, which usually resides in
+<tt>/usr/local/cuda/samples/common/inc</tt>.
 
 
 \subsubsection ch1s2s1s3_cpuonly 1.2.1.3 Installing CARLsim Without GPU Support
