@@ -257,8 +257,9 @@ variables you set above (such as <tt>CARLSIM3_INSTALL_DIR</tt> and
 You don't need this flag if you're not installing with <tt>sudo</tt>.
 
 \note Also, note the <tt>-j4</tt> flag, which will install CARLsim using
-four workers. You can increase the number if you wish, or omit the flag
-if you're working on a single-core machine.
+four workers.
+You can increase the number on systems with more than four cores if you wish,
+or omit the flag if you're working on a single-core machine.
 
 
 
