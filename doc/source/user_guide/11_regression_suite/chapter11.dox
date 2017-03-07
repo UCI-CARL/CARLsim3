@@ -120,7 +120,7 @@ where the name of your test (<tt>testName</tt>) belongs to a certain test case (
 
 Within this code block, you can write whatever CARLsim network you want.
 
-After a network is run, you want to make its output is correct.
+After a network is run, you want to make sure its output is correct.
 This is achieved via Google Test-provided assertions such as:
 
 - <tt>EXPECT_EQ</tt>: Expects to variables to be equal. For example:
