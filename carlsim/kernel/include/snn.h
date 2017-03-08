@@ -76,7 +76,7 @@
 
 #include <propagated_spike_buffer.h>
 #include <poisson_rate.h>
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	#include <gpu_random.h>
 #endif
 
@@ -812,7 +812,7 @@ private:
 	// +++++ GPU MODE +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	// TODO: consider moving to snn_gpu.h
 	
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	//! initializes params needed in snn_gpu.cu (gets called in CpuSNN constructor)
 	void CpuSNNinit_GPU();
 
@@ -1076,7 +1076,7 @@ private:
 	unsigned int	nPoissonSpikes;
 
 		//cuda keep track of performance...
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	#if __CUDA3__
 		unsigned int    timer;
 	#else
@@ -1176,7 +1176,7 @@ private:
 	float stdpScaleFactor_;
 	float wtChangeDecay_; //!< the wtChange decay
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	RNG_rand48* gpuPoissonRand;
 #endif
 };

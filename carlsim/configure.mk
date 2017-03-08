@@ -23,7 +23,7 @@
 CUDA_PATH        ?= /usr/local/cuda
 
 # enable CPU-only mode
-CARLSIM3_CPU_ONLY ?= 0
+CARLSIM3_NO_CUDA ?= 0
 
 # enable gcov
 CARLSIM3_COVERAGE ?= 0
@@ -145,8 +145,8 @@ ifeq ($(CARLSIM3_COVERAGE),1)
 	targets += *.gcov
 endif
 
-ifeq ($(CARLSIM3_CPU_ONLY),1)
-	CXXFL += -D__CPU_ONLY__
+ifeq ($(CARLSIM3_NO_CUDA),1)
+	CXXFL += -D__NO_CUDA__
 	NVCC := $(CXX)
 	NVCCINCFL := $(CXXINCFL)
 	NVCCLDFL := $(CXXLIBFL)
@@ -180,8 +180,8 @@ endif
 
 CARLSIM3_FLG := -I$(CARLSIM3_INC_DIR) -L$(CARLSIM3_LIB_DIR)
 CARLSIM3_LIB := -l$(SIM_LIB_NAME)
-ifeq ($(CARLSIM3_CPU_ONLY),1)
-	CARLSIM3_FLG += -D__CPU_ONLY__
+ifeq ($(CARLSIM3_NO_CUDA),1)
+	CARLSIM3_FLG += -D__NO_CUDA__
 else
 	CARLSIM3_LIB += -lcurand
 endif

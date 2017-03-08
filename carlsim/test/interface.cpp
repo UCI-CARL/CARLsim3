@@ -523,7 +523,7 @@ TEST(Interface, setNeuronParametersDeath) {
 TEST(Interface, CARLsimConstructorDeathGPU) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	CARLsim *sim1=NULL, *sim2=NULL, *sim3=NULL;
 	EXPECT_DEATH({sim1 = new CARLsim("Interface.CARLsimConstructorDeathGPU", GPU_MODE, SILENT, -1);},"");
 	EXPECT_DEATH({sim2 = new CARLsim("Interface.CARLsimConstructorDeathGPU", GPU_MODE, SILENT, 42);},"");
@@ -538,7 +538,7 @@ TEST(Interface, CARLsimConstructorDeathGPU) {
 TEST(Interface, AllocateGPUConflict) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	CARLsim *sim1=NULL, *sim2=NULL;
 
 	sim1 = new CARLsim("Interface.AllocateGPUConflict_A", GPU_MODE, SILENT, 0);

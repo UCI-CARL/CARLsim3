@@ -67,8 +67,13 @@ cu_files   := $(wildcard $(proj_src_dir)/src/*.cu)
 inc_files  := $(wildcard $(proj_inc_dir)/*.h)
 
 # compile .cpp files to -cpp.o, and .cu files to -cu.o
-obj_files  := $(patsubst %.cpp, %-cpp.o, $(cpp_files))
-obj_files  += $(patsubst %.cu, %-cu.o, $(cu_files))
+obj_cpp    := $(patsubst %.cpp, %-cpp.o, $(cpp_files))
+obj_cu     := $(patsubst %.cu, %-cu.o, $(cu_files))
+ifeq ($(CARLSIM3_NO_CUDA),1)
+obj_files  := $(obj_cpp)
+else
+obj_files  := $(obj_cpp) $(obj_cu)
+endif
 
 # handled by clean and distclean
 clean_files := $(obj_files) $(proj_target)
@@ -83,7 +88,7 @@ distclean_files := $(clean_files) results/* *.dot *.dat *.csv *.log
 default: $(proj_target)
 
 
-$(proj_target): $(main_src_file) $(inc_files) $(cpp_files) $(obj_files)
+$(proj_target): $(main_src_file) $(inc_files) $(obj_files)
 	$(NVCC) $(CARLSIM3_FLG) $(obj_files) $< -o $@ $(CARLSIM3_LIB)
 
 $(proj_src_dir)/%-cpp.o: $(proj_src_dir)/%.cpp $(inc_files)

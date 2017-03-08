@@ -27,7 +27,7 @@ TEST(setSpikeMon, grpId){
 	CARLsim* sim;
 	const int GRP_SIZE = 10;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -62,7 +62,7 @@ TEST(setSpikeMon, fname){
 	CARLsim* sim;
 	const int GRP_SIZE = 10;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -234,7 +234,7 @@ TEST(SpikeMon, clear) {
     const int inputTargetFR = 20.0f;
 	int runTimeMs = 2000;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -310,7 +310,7 @@ TEST(SpikeMon, spikeTimes) {
 
 	const int GRP_SIZE = rand()%5 + 1; // some random group size
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -397,7 +397,7 @@ TEST(SpikeMon, getGroupFiringRate){
 
 	const int GRP_SIZE = 1;//rand()%5 + 1;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -589,7 +589,7 @@ TEST(SpikeMon, setLogFile) {
 
 	const int GRP_SIZE = 15; // some group size
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;

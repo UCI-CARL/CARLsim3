@@ -51,8 +51,8 @@ namespace CARLsim_PTI {
 				float inhError[indiNum];
 				float fitness[indiNum];
 				/** construct a CARLsim network on the heap. */
-#ifdef __CPU_ONLY__
-				// we cannot use GPU_MODE when compiled with CPU_ONLY
+#ifdef __NO_CUDA__
+				// we cannot use GPU_MODE when compiled with NO_CUDA
 				CARLsim* const network = new CARLsim("tuneFiringRatesECJ", CPU_MODE, SILENT);
 #else
 				CARLsim* const network = new CARLsim("tuneFiringRatesECJ", GPU_MODE, SILENT);

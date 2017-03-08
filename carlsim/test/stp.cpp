@@ -54,7 +54,7 @@ TEST(STP, firingRateSTDvsSTF) {
 	SpikeMonitor *spkMonG2 = NULL, *spkMonG3 = NULL;
 	PeriodicSpikeGenerator *spkGenG0 = NULL, *spkGenG1 = NULL;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -163,7 +163,7 @@ TEST(STP, spikeTimesCPUvsGPU) {
 	for (int hasCOBA=0; hasCOBA<=1; hasCOBA++) {
 		// compare spike times cpu vs gpu
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;

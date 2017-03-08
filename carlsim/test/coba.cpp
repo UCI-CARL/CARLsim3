@@ -26,7 +26,7 @@ TEST(COBA, synRiseTime) {
 	float time_abs_error = 2.0; // 2 ms
 	float wt_abs_error = 0.1; // error for wt
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -136,7 +136,7 @@ TEST(COBA, condSingleNeuronCPUvsGPU) {
 	float rate = 30.0f;
 	bool spikeAtZero = true;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -270,7 +270,7 @@ TEST(COBA, firingRateCPUvsGPU) {
 //	fprintf(stderr,"runTime=%d, delay=%d, wt=%f, input=%f\n",runTimeMs,delay,wt,inputRate);
 	for (int hasIzh4=0; hasIzh4<=1; hasIzh4++) {
 		for(int method = 0; method < numMethods; method++) {//integration method
-			#ifdef __CPU_ONLY__
+			#ifdef __NO_CUDA__
 			for (int isGPUmode=0; isGPUmode<=0; isGPUmode++) {
 			#else
 			for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {
@@ -373,7 +373,7 @@ TEST(COBA, firingRateCPUandGPU_EULERvsRUNGE_KUTTA) {
 	int numMethods = 2; //Euler and Runge-Kutta integration methods.
 //	fprintf(stderr,"runTime=%d, delay=%d, wt=%f, input=%f\n",runTimeMs,delay,wt,inputRate);
 	for (int hasIzh4=0; hasIzh4<=1; hasIzh4++) {
-		#ifdef __CPU_ONLY__
+		#ifdef __NO_CUDA__
 		for (int isGPUmode=0; isGPUmode<=0; isGPUmode++) {
 		#else
 		for (int isGPUmode=0; isGPUmode<=1; isGPUmode++) {

@@ -41,7 +41,7 @@
 #ifndef _SNN_DATASTRUCTURES_H_
 #define _SNN_DATASTRUCTURES_H_
 
-#ifndef __CPU_ONLY__ 
+#ifndef __NO_CUDA__ 
 // include CUDA version-dependent macros and include files
 #include <cuda_version_control.h>
 #endif
@@ -214,7 +214,7 @@ typedef struct network_ptr_s {
 
 	float*	poissonFireRate;
 	unsigned int*	poissonRandPtr;		//!< firing random number. max value is 10,000
-	#ifndef __CPU_ONLY__
+	#ifndef __NO_CUDA__
 	int2*	neuronAllocation;		//!< .x: [31:0] index of the first neuron, .y: [31:16] number of neurons, [15:0] group id
 	int3*	groupIdInfo;			//!< .x , .y: the start and end index of neurons in a group, .z: gourd id, used for group Id calculations
 	#endif

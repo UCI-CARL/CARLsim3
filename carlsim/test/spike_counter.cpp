@@ -40,7 +40,7 @@ TEST(SpikeCounter, SpikeCntvsSpikeMon) {
 	int grpIds[nGrp];
 	SpikeMonitor* SM[nGrp];
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -110,7 +110,7 @@ TEST(SpikeCounter, CPUvsGPU) {
 	int *spkCnt;
 	int timeMs = 500;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;

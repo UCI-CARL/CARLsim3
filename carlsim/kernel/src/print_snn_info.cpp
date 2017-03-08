@@ -117,7 +117,7 @@ void CpuSNN::printStatusSpikeMonitor(int grpId) {
 			return;
 		}
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 		// in GPU mode, need to get data from device first
 		if (simMode_==GPU_MODE) {
 			copyFiringStateFromGPU(grpId);
@@ -524,7 +524,7 @@ void CpuSNN::printPreConnection(int grpId, FILE* const fp)
 
 
 void CpuSNN::printNeuronState(int grpId, FILE* const fp) {
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	if (simMode_==GPU_MODE) {
 		copyNeuronState(&cpuNetPtrs, &cpu_gpuNetPtrs, cudaMemcpyDeviceToHost, false, grpId);
 	}
@@ -596,7 +596,7 @@ void CpuSNN::printWeights(int preGrpId, int postGrpId) {
 		fprintf(fpInf_,"Synapses from %s to %s (+/- change in last %d ms)\n",
 			(preGrpId==ALL)?"ALL":grp_Info2[preGrpId].Name.c_str(), grp_Info2[gPost].Name.c_str(), wtANDwtChangeUpdateInterval_);
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 		if (simMode_ == GPU_MODE) {
 			copyWeightState (&cpuNetPtrs, &cpu_gpuNetPtrs, cudaMemcpyDeviceToHost, false, gPost);
 		}

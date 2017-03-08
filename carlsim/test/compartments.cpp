@@ -149,7 +149,7 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 * This test makes sure that CPU mode and GPU mode of the compartment model produce the exact same spike times,
 * even with RK4 at 50 time steps.
 */
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 TEST(COMPARTMENTS, spikeTimesCPUvsGPU) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 

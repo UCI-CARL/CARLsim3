@@ -51,10 +51,10 @@ ifndef CARLSIM3_INC_DIR
 else
 	$(info CARLsim3 include path: $(CARLSIM3_INC_DIR))
 endif
-ifeq ($(CARLSIM3_CPU_ONLY),1)
-	$(info CARLsim3 mode: CPU_ONLY. Install without GPU support.)
+ifeq ($(CARLSIM3_NO_CUDA),1)
+	$(info CARLsim3 mode: NO_CUDA. Install without GPU support.)
 else
-	$(info CARLSIM3 mode: CPU_ONLY not set. Install with GPU support.)
+	$(info CARLSIM3 mode: NO_CUDA not set. Install with GPU support.)
 endif
 
 create_files:

@@ -146,7 +146,7 @@ void CARLsim::CARLsimInit() {
 	UserErrors::assertTrue(simMode_!=UNKNOWN_SIM,UserErrors::CANNOT_BE_UNKNOWN,"CARLsim()","Simulation mode");
 	UserErrors::assertTrue(loggerMode_!=UNKNOWN_LOGGER,UserErrors::CANNOT_BE_UNKNOWN,"CARLsim()","Logger mode");
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	UserErrors::assertTrue(simMode_!=GPU_MODE, UserErrors::CANNOT_BE_SET_TO, "CARLsim()", "Simulation mode", 
 		"GPU_MODE if compiled in CPU-only mode");
 #endif

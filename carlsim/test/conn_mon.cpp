@@ -38,7 +38,7 @@ TEST(setConnMon, interfaceDeath) {
 	CARLsim* sim;
 	const int GRP_SIZE = 10;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -94,7 +94,7 @@ TEST(setConnMon, fname) {
 	// use threadsafe version because we have deathtests
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -134,7 +134,7 @@ TEST(ConnMon, getters) {
 	grpSize[1] = 20;
 	float wtScale = 0.01f;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -215,7 +215,7 @@ TEST(ConnMon, takeSnapshot) {
 	const int GRP_SIZE = 10;
 	float wtScale = 0.01f;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -277,7 +277,7 @@ TEST(ConnMon, weightFile) {
 	const int GRP_SIZE = 10;
 	float wtScale = 0.01f;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -357,7 +357,7 @@ TEST(ConnMon, weightChange) {
 	const int GRP_SIZE = 10;
 	float wtScale = 0.01f;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;

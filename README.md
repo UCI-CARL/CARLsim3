@@ -78,9 +78,9 @@ In brief (OS X/Linux):
      
    - GPU support: By default, CARLsim comes with CUDA support. Obviously, this requires CUDA to be installed
      first. If you want to run CARLsim without GPU support, you need to export an environment variable
-     called `CARLSIM3_CPU_ONLY` and set it to `1`:
+     called `CARLSIM3_NO_CUDA` and set it to `1`:
      ```
-     $ export CARLSIM3_CPU_ONLY=1
+     $ export CARLSIM3_NO_CUDA=1
      ```
 
 6. Make and install:
@@ -89,7 +89,7 @@ In brief (OS X/Linux):
    $ sudo -E make install
    ```
    Note the `-E` flag, which will cause `sudo` to remember any environment variables you set above
-   (such as `CARLSIM3_INSTALL_DIR` and `CARLSIM3_CPU_ONLY`).
+   (such as `CARLSIM3_INSTALL_DIR` and `CARLSIM3_NO_CUDA`).
 
 7. In order to make sure the installation was successful, you can run the regression suite:
 

@@ -23,7 +23,7 @@
 GTEST_DIR := external/googletest
 GTEST_FLG := -I$(GTEST_DIR)/include -L$(GTEST_DIR)/build
 GTEST_LIB := -lgtest
-ifeq ($(CARLSIM3_CPU_ONLY),1)
+ifeq ($(CARLSIM3_NO_CUDA),1)
 	GTEST_LIB += -pthread
 endif
 
