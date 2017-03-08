@@ -162,7 +162,7 @@ The following options are available:
   <tt>/usr/local/cuda</tt>. If this is not the case on your system, make sure to
   set adjust an environment variable called <tt>CUDA_PATH</tt>:
   \code
-  $ CUDA_PATH=/path/to/CUDA
+  $ export CUDA_PATH=/path/to/CUDA
   \endcode
 
 - ECJ support: By default, CARLsim assumes that the Parameter Tuning Interface
@@ -171,9 +171,17 @@ The following options are available:
   to use the Parameter Tuning Interface (see \ref ch10_ecj), please update
   your environment variables accordingly:
   \code
-  $ ECJ_JAR=/path/to/ECJ/JAR/file
-  $ ECJ_PTI_DIR=/path/to/ECJ/PTI
+  $ export ECJ_JAR=/path/to/ECJ/JAR/file
+  $ export ECJ_PTI_DIR=/path/to/ECJ/PTI
   \endcode
+
+- Code coverage: If you are a CARLsim developer, you can run the regression
+  suite and generate a code coverage report using an environment variable
+  called <tt>CARLSIM3_COVERAGE</tt>:
+  \code
+  $ export CARLSIM3_COVERAGE=1
+  \endcode
+  The whole procedure is described in ch11s4_coverage.
 
 
 Once you have made changes to your <tt>~/.bashrc</tt>, make sure they go into

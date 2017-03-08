@@ -153,4 +153,54 @@ TEST(testCase, testName) {
 
 \since v3.0
 
+
+\section ch11s4_coverage 11.4 Checking Code Coverage
+
+If you are on a Linux machine, it is also fairly simple to generate a code
+coverage report using
+<a href="https://gcc.gnu.org/onlinedocs/gcc/Gcov.html"><tt>gcov</tt></a>.
+It's a bit harder on Mac OS X, but it
+<a href="https://github.com/eddyxu/cpp-coveralls">can be done</a>.
+
+Simply follow the following procedure:
+
+-# Uninstall CARLsim, because we will have to re-install it with some
+   additional compile flags:
+   \code
+   $ make uninstall
+   $ make clean
+   \endcode
+
+-# Enable code coverage generation via an environment variable:
+   \code
+   $ export CARLSIM3_COVERAGE=1
+   \endcode
+
+-# Re-install CARLsim:
+   \code
+   $ make -j4
+   $ sudo -E make install
+   \endcode
+
+-# Re-compile and run the test suite:
+   \code
+   $ make test
+   $ ./carlsim/test/carlsim_tests
+   \endcode
+
+-# This should have generated a bunch of <tt>.gcda</tt> files, which can now
+   be investigated. The easiest way to do this is to use <tt>lcov</tt> and
+   generate a HTML report:
+   \code
+   $ lcov --directory ./ --capture --output-file ./code_coverage.info -rc lcov_branch_coverage=1
+   $ genhtml code_coverage.info --branch-coverage --output-directory ./code_coverage_report/
+   \endcode
+
+-# Open the coverage report in a browser:
+   \code
+   $ google-chrome code_coverage_report/index.html &
+   \endcode
+
+\since v3.1
+
 */
