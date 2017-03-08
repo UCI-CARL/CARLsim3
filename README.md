@@ -4,6 +4,8 @@
 
 # CARLsim 3
 
+[![Build Status](https://travis-ci.org/UCI-CARL/CARLsim3.svg?branch=master)](https://travis-ci.org/UCI-CARL/CARLsim3)
+[![Coverage Status](https://coveralls.io/repos/github/UCI-CARL/CARLsim3/badge.svg?branch=master)](https://coveralls.io/github/UCI-CARL/CARLsim3?branch=master)
 [![Docs](https://img.shields.io/badge/docs-v3.1.2-green.svg)](http://uci-carl.github.io/CARLsim3)
 [![Google group](https://img.shields.io/badge/Google-Discussion%20group-lightgrey.svg)](https://groups.google.com/forum/#!forum/carlsim-snn-simulator)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
