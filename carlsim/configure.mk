@@ -25,6 +25,9 @@ CUDA_PATH        ?= /usr/local/cuda
 # enable CPU-only mode
 CARLSIM3_CPU_ONLY ?= 0
 
+# enable gcov
+CARLSIM3_COVERAGE ?= 0
+
 #------------------------------------------------------------------------------
 # CARLsim/ECJ Parameter Tuning Interface Options
 #------------------------------------------------------------------------------
@@ -135,12 +138,16 @@ endif
 # shared library flags
 CXXSHRFL += -fPIC -shared
 
+ifeq ($(CARLSIM3_COVERAGE),1)
+	CXXFL += -fprofile-arcs -ftest-coverage
+	CXXLIBFL += -lgcov --coverage
+endif
 
 ifeq ($(CARLSIM3_CPU_ONLY),1)
 	CXXFL += -D__CPU_ONLY__
 	NVCC := $(CXX)
 	NVCCINCFL := $(CXXINCFL)
-	NVCCLDLF := $(CXXLIBFL)
+	NVCCLDFL := $(CXXLIBFL)
 	NVCCFL := $(CXXFL)
 endif
 
@@ -175,4 +182,9 @@ ifeq ($(CARLSIM3_CPU_ONLY),1)
 	CARLSIM3_FLG += -D__CPU_ONLY__
 else
 	CARLSIM3_LIB += -lcurand
+endif
+
+ifeq ($(CARLSIM3_COVERAGE),1)
+	CARLSIM3_FLG += -fprofile-arcs -ftest-coverage
+	CARLSIM3_LIB += -lgcov --coverage
 endif
