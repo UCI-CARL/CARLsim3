@@ -43,4 +43,4 @@ targets += $(test_target)
 test: $(test_target)
 
 $(test_target): $(test_cpp_files) $(test_inc_files)
-	$(NVCC) $(CARLSIM3_FLG) $(GTEST_FLG) $(GTEST_LD) $(NVCCFL) $(test_cpp_files) -o $@ $(GTEST_LIB) $(CARLSIM3_LIB)
+	$(NVCC) $(CARLSIM3_FLG) $(GTEST_FLG) $(GTEST_LD) $(test_cpp_files) -o $@ $(GTEST_LIB) $(CARLSIM3_LIB)
