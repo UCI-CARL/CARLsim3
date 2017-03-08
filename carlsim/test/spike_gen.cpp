@@ -122,7 +122,7 @@ TEST(SpikeGen, SpikeGeneratorFromFile) {
 	std::vector< std::vector<int> > spkVec0, spkVec1;
 	SpikeMonitor *SM0, *SM1;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -211,7 +211,7 @@ TEST(SpikeGen, SpikeGeneratorFromFileLoadFile) {
 	std::vector< std::vector<int> > spkVec0, spkVec1;
 	SpikeMonitor *SM0, *SM1;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;

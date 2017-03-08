@@ -736,7 +736,7 @@ int CpuSNN::runNetwork(int _nsec, int _nmsec, bool printRunSummary, bool copySta
 	// reset all spike counters
 	if (simMode_==CPU_MODE) {
 		resetSpikeCnt(ALL);
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	} else {
 		resetSpikeCnt_GPU(0,numGrp);
 #endif
@@ -759,7 +759,7 @@ int CpuSNN::runNetwork(int _nsec, int _nmsec, bool printRunSummary, bool copySta
 	// \TODO: should it be PROPAGATED_BUFFER_SIZE-1 or PROPAGATED_BUFFER_SIZE ?
 	setGrpTimeSlice(ALL, (std::max)(1,(std::min)(runDurationMs,PROPAGATED_BUFFER_SIZE-1)));
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	CUDA_RESET_TIMER(timer);
 	CUDA_START_TIMER(timer);
 #endif
@@ -769,7 +769,7 @@ int CpuSNN::runNetwork(int _nsec, int _nmsec, bool printRunSummary, bool copySta
 	for(int i=0; i<runDurationMs; i++) {
 		if(simMode_ == CPU_MODE) {
 			doSnnSim();
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 		} else {
 			doGPUSim();
 #endif
@@ -782,7 +782,7 @@ int CpuSNN::runNetwork(int _nsec, int _nmsec, bool printRunSummary, bool copySta
 				// keep this if statement separate from the above, so that the counter is updated correctly
 				if (simMode_ == CPU_MODE) {
 					updateWeights();
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 				} else{
 					updateWeights_GPU();
 #endif
@@ -805,21 +805,21 @@ int CpuSNN::runNetwork(int _nsec, int _nmsec, bool printRunSummary, bool copySta
 
 			if(simMode_ == CPU_MODE) {
 				updateFiringTable();
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 			} else {
 				updateFiringTable_GPU();
 #endif
 			}
 		}
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 		if(simMode_ == GPU_MODE) {
 			copyFiringStateFromGPU();
 		}
 #endif
 	}
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	// in GPU mode, copy info from device to host
 	if (simMode_==GPU_MODE) {
 		if(copyState) {
@@ -855,7 +855,7 @@ int CpuSNN::runNetwork(int _nsec, int _nmsec, bool printRunSummary, bool copySta
 	updateGroupMonitor();
 
 	// keep track of simulation time...
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	CUDA_STOP_TIMER(timer);
 	lastExecutionTime = CUDA_GET_TIMER_VALUE(timer);
 	cumExecutionTime += lastExecutionTime;
@@ -918,7 +918,7 @@ void CpuSNN::biasWeights(short int connId, float bias, bool updateWeightRange) {
 			}
 		}
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 		// update GPU datastructures in batches, grouped by post-neuron
 		if (simMode_==GPU_MODE) {
 			CUDA_CHECK_ERRORS( cudaMemcpy(&(cpu_gpuNetPtrs.wt[cumIdx]), &(wt[cumIdx]), sizeof(float)*Npre[i],
@@ -967,7 +967,7 @@ void CpuSNN::resetSpikeCounter(int grpId) {
 		if (simMode_==CPU_MODE) {
 			int bufPos = grp_Info[grpId].spkCntBufPos; // retrieve buf pos
 			memset(spkCntBuf[bufPos],0,grp_Info[grpId].SizeN*sizeof(int)); // set all to 0
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 		} else {
 			resetSpikeCounter_GPU(grpId);
 #endif
@@ -1024,7 +1024,7 @@ void CpuSNN::scaleWeights(short int connId, float scale, bool updateWeightRange)
 			}
 		}
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 		// update GPU datastructures in batches, grouped by post-neuron
 		if (simMode_==GPU_MODE) {
 			CUDA_CHECK_ERRORS( cudaMemcpy(&(cpu_gpuNetPtrs.wt[cumIdx]), &(wt[cumIdx]), sizeof(float)*Npre[i],
@@ -1148,7 +1148,7 @@ void CpuSNN::setExternalCurrent(int grpId, const std::vector<float>& current) {
 
 	// copy to GPU if necessary
 	// don't allocate; allocation done in buildNetwork
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	if (simMode_==GPU_MODE) {
 		copyExternalCurrent(&cpu_gpuNetPtrs, &cpuNetPtrs, false, grpId);
 	}
@@ -1289,7 +1289,7 @@ void CpuSNN::setWeight(short int connId, int neurIdPre, int neurIdPost, float we
 			wt[pos_ij] = isExcitatoryGroup(connInfo->grpSrc) ? weight : -1.0*weight;
 			maxSynWt[pos_ij] = isExcitatoryGroup(connInfo->grpSrc) ? maxWt : -1.0*maxWt;
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 			if (simMode_==GPU_MODE) {
 				// need to update datastructures on GPU
 				CUDA_CHECK_ERRORS( cudaMemcpy(&(cpu_gpuNetPtrs.wt[pos_ij]), &(wt[pos_ij]), sizeof(float), cudaMemcpyHostToDevice));
@@ -1339,7 +1339,7 @@ void CpuSNN::saveSimulation(FILE* fid, bool saveSynapseInfo) {
 	if(simMode_ == CPU_MODE) {
 		stopCPUTiming();
 		tmpFloat = cpuExecutionTime/1000.0f;
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	} else {
 		stopGPUTiming();
 		tmpFloat = gpuExecutionTime/1000.0f;
@@ -1369,7 +1369,7 @@ void CpuSNN::saveSimulation(FILE* fid, bool saveSynapseInfo) {
 		if (!fwrite(name,1,100,fid)) KERNEL_ERROR("saveSimulation fwrite error");
 	}
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	// +++++ Fetch WEIGHT DATA (GPU Mode only) ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	if (simMode_ == GPU_MODE)
 		copyWeightState(&cpuNetPtrs, &cpu_gpuNetPtrs, cudaMemcpyDeviceToHost, false);
@@ -1477,7 +1477,7 @@ void CpuSNN::writePopWeights(std::string fname, int grpIdPre, int grpIdPost) {
 		// for every post-neuron, find all pre
 		pos_ij = cumulativePre[i]; // i-th neuron, j=0th synapse
 		//do the GPU copy here.  Copy the current weights from GPU to CPU.
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 		if(simMode_==GPU_MODE){
 			copyWeightsGPU(i,grpIdPre);
 		}
@@ -1580,7 +1580,7 @@ grpConnectInfo_t* CpuSNN::getConnectInfo(short int connectId) {
 std::vector<float> CpuSNN::getConductanceAMPA(int grpId) {
 	assert(isSimulationWithCOBA());
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	// need to copy data from GPU first
 	if (getSimMode()==GPU_MODE) {
 		copyConductanceAMPA(&cpuNetPtrs, &cpu_gpuNetPtrs, cudaMemcpyDeviceToHost, false, grpId);
@@ -1597,7 +1597,7 @@ std::vector<float> CpuSNN::getConductanceAMPA(int grpId) {
 std::vector<float> CpuSNN::getConductanceNMDA(int grpId) {
 	assert(isSimulationWithCOBA());
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	// need to copy data from GPU first
 	if (getSimMode()==GPU_MODE)
 		copyConductanceNMDA(&cpuNetPtrs, &cpu_gpuNetPtrs, cudaMemcpyDeviceToHost, false, grpId);
@@ -1620,7 +1620,7 @@ std::vector<float> CpuSNN::getConductanceNMDA(int grpId) {
 std::vector<float> CpuSNN::getConductanceGABAa(int grpId) {
 	assert(isSimulationWithCOBA());
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	// need to copy data from GPU first
 	if (getSimMode()==GPU_MODE) {
 		copyConductanceGABAa(&cpuNetPtrs, &cpu_gpuNetPtrs, cudaMemcpyDeviceToHost, false, grpId);
@@ -1637,7 +1637,7 @@ std::vector<float> CpuSNN::getConductanceGABAa(int grpId) {
 std::vector<float> CpuSNN::getConductanceGABAb(int grpId) {
 	assert(isSimulationWithCOBA());
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	// need to copy data from GPU first
 	if (getSimMode()==GPU_MODE) {
 		copyConductanceGABAb(&cpuNetPtrs, &cpu_gpuNetPtrs, cudaMemcpyDeviceToHost, false, grpId);
@@ -1847,14 +1847,14 @@ int* CpuSNN::getSpikeCounter(int grpId) {
 	}
 
 	// retrieve spikes from either CPU or GPU
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	if (retrieveSpikesFromGPU) {
 		return getSpikeCounter_GPU(grpId);
 	} else {
 #endif
 		int bufPos = grp_Info[grpId].spkCntBufPos; // retrieve buf pos
 		return spkCntBuf[bufPos]; // return pointer to buffer
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	}
 #endif
 }
@@ -2082,7 +2082,7 @@ void CpuSNN::CpuSNNinit() {
 	// default integration method: Forward-Euler with 0.5ms integration step
 	setIntegrationMethod(FORWARD_EULER, 2);
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	// each CpuSNN object hold its own random number object
 	gpuPoissonRand = NULL;
 #endif
@@ -2165,7 +2165,7 @@ void CpuSNN::CpuSNNinit() {
 
 	}
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	CUDA_CREATE_TIMER(timer);
 	CUDA_RESET_TIMER(timer);
 #endif
@@ -2176,7 +2176,7 @@ void CpuSNN::CpuSNNinit() {
 	stdpScaleFactor_ = 1.0f;
 	wtChangeDecay_ = 0.0f;
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	if (simMode_ == GPU_MODE) {
 		configGPUDevice();
 	}
@@ -2340,7 +2340,7 @@ int CpuSNN::addSpikeToTable(int nid, int g) {
 	if (sim_with_homeostasis)
 		avgFiring[nid] += 1000/(grp_Info[g].avgTimeScale*1000);
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	if (simMode_ == GPU_MODE) {
 		assert(grp_Info[g].isSpikeGenerator == true);
 		setSpikeGenBit_GPU(nid, g);
@@ -2647,7 +2647,7 @@ void CpuSNN::checkSpikeCounterRecordDur() {
 
  		if (simMode_==CPU_MODE) {
 			resetSpikeCounter(g);
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 		} else {
 			resetSpikeCounter_GPU(g);
 #endif
@@ -2975,7 +2975,7 @@ float CpuSNN::getActualExecutionTimeMs() {
 	if (simMode_ == CPU_MODE) {
 		stopCPUTiming();
 		etime = cpuExecutionTime;
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	} else {
 		etime = getActualExecutionTimeMs_GPU();
 #endif
@@ -3006,7 +3006,7 @@ void CpuSNN::deleteObjects() {
 
 	resetPointers(true); // deallocate pointers
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	// do the same as above, but for snn_gpu.cu
 	deleteObjects_GPU();
 #endif
@@ -4480,7 +4480,7 @@ void CpuSNN::resetFiringInformation() {
 	resetTimingTable();
 }
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 void CpuSNN::resetGPUTiming() {
 	prevGpuExecutionTime = cumExecutionTime;
 	gpuExecutionTime     = 0.0;
@@ -4739,7 +4739,7 @@ void CpuSNN::resetPointers(bool deallocate) {
 	if (timeTableD1!=NULL && deallocate) delete[] timeTableD1;
 	firingTableD2=NULL; firingTableD1=NULL; timeTableD2=NULL; timeTableD1=NULL;
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	// clear poisson generator
 	if (gpuPoissonRand != NULL) delete gpuPoissonRand;
 	gpuPoissonRand = NULL;
@@ -4984,13 +4984,13 @@ void CpuSNN::setupNetwork(bool removeTempMem) {
 	if(!doneReorganization)
 		reorganizeNetwork(removeTempMem);
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	if((simMode_ == GPU_MODE) && (cpu_gpuNetPtrs.allocated == false))
 		allocateSNN_GPU();
 #endif
 }
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 void CpuSNN::startGPUTiming() {
 	prevGpuExecutionTime = cumExecutionTime;
 }
@@ -5022,7 +5022,7 @@ void CpuSNN::startTesting(bool shallUpdateWeights) {
 
 			if (simMode_ == CPU_MODE) {
 				updateWeights();
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 			} else{
 				updateWeights_GPU();
 #endif
@@ -5034,7 +5034,7 @@ void CpuSNN::startTesting(bool shallUpdateWeights) {
 	sim_in_testing = true;
 	net_Info.sim_in_testing = true;
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	if (simMode_ == GPU_MODE) {
 		// copy new network info struct to GPU (|TODO copy only a single boolean)
 		copyNetworkInfo();
@@ -5047,7 +5047,7 @@ void CpuSNN::stopTesting() {
 	sim_in_testing = false;
 	net_Info.sim_in_testing = false;
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	if (simMode_ == GPU_MODE) {
 		// copy new network_info struct to GPU (|TODO copy only a single boolean)
 		copyNetworkInfo();
@@ -5130,7 +5130,7 @@ std::vector< std::vector<float> > CpuSNN::getWeightMatrix2D(short int connId) {
 				wtConnId.push_back(wtSlice);
 			}
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 			// copy the weights for a given post-group from device
 			// \TODO: check if the weights for this grpIdPost have already been copied
 			// \TODO: even better, but tricky because of ordering, make copyWeightState connection-based
@@ -5189,7 +5189,7 @@ void CpuSNN::updateGroupMonitor(int grpId) {
 		if (getSimTime() - lastUpdate > 1000)
 			KERNEL_ERROR("updateGroupMonitor(grpId=%d) must be called at least once every second",grpId);
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 		if (simMode_ == GPU_MODE) {
 			// copy the group status (neuromodulators) from the GPU to the CPU..
 			copyGroupState(&cpuNetPtrs, &cpu_gpuNetPtrs, cudaMemcpyDeviceToHost, false);
@@ -5453,7 +5453,7 @@ void CpuSNN::updateSpikeMonitor(int grpId) {
             KERNEL_WARN("updateSpikeMonitor(grpId=%d) is becoming very large. (>%lu MB)",grpId,(int64_t) MAX_SPIKE_MON_BUFFER_SIZE/1024 );// make this better
             KERNEL_WARN("Reduce the cumulative recording time (currently %lu minutes) or the group size (currently %d) to avoid this.",spkMonObj->getAccumTime()/(1000*60),this->getGroupNumNeurons(grpId));
 		}
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 		if (simMode_ == GPU_MODE) {
 			// copy the neuron firing information from the GPU to the CPU..
 			copyFiringInfo_GPU();

@@ -48,7 +48,7 @@ int main() {
 
 	// Create a network on the CPU.
 	// In order to run a network on the GPU, change CPU_MODE to GPU_MODE. However, please note that this
-	// won't work if you compiled CARLsim with flag CPU_ONLY=1.
+	// won't work if you compiled CARLsim with flag NO_CUDA=1.
 	// USER mode will print status and error messages to console. Suppress these by changing mode to SILENT.
 	int ithGPU = 0;
 	int randSeed = 42;

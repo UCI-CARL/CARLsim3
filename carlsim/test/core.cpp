@@ -119,7 +119,7 @@ TEST(CORE, setExternalCurrent) {
 	CARLsim * sim;
 	int nNeur = 10;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -194,7 +194,7 @@ TEST(CORE, biasWeights) {
 	int *nSpkHighWt = new int[nNeur];
 	memset(nSpkHighWt, 0, nNeur*sizeof(int));
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -249,7 +249,7 @@ TEST(CORE, scaleWeights) {
 	int *nSpkHighWt = new int[nNeur];
 	memset(nSpkHighWt, 0, nNeur*sizeof(int));
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -304,7 +304,7 @@ TEST(CORE, setWeight) {
 	int *nSpkHighWt = new int[nNeur];
 	memset(nSpkHighWt, 0, nNeur*sizeof(int));
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -357,7 +357,7 @@ TEST(CORE, getDelayRange) {
 	int minDelay = 1;
 	int maxDelay = 10;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -400,7 +400,7 @@ TEST(CORE, getWeightRange) {
 	float initWt = 1.25f;
 	float maxWt = 10.0f;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -528,7 +528,7 @@ TEST(CORE, startStopTestingPhase) {
 
 	CARLsim* sim;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -615,7 +615,7 @@ TEST(CORE, saveLoadSimulation) {
 	std::vector<std::vector<float> > weightsSave;
 	std::vector<std::vector<float> > weightsLoad;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -757,7 +757,7 @@ TEST(CORE, saveLoadSimulation) {
 TEST(CORE, setNeuronParameters) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;

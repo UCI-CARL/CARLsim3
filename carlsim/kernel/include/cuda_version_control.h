@@ -12,7 +12,7 @@
 #ifndef _CUDA_VERSION_CONTROL_H_
 #define _CUDA_VERSION_CONTROL_H_
 
-#ifndef __CPU_ONLY__
+#ifndef __NO_CUDA__
 	#include <cuda.h>
 	#include <cuda_runtime.h>
 

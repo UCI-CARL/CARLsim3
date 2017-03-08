@@ -28,7 +28,7 @@ TEST(STDP, setSTDPTrue) {
 	float delta = 40.0f;
 	CARLsim* sim;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -118,7 +118,7 @@ TEST(STDP, setSTDPFalse) {
 	float delta = 4.0f;
 	CARLsim* sim;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -174,7 +174,7 @@ TEST(STDP, setNeuromodulatorParameters) {
 	float tauNE = 400.0f;
 	CARLsim* sim;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -228,7 +228,7 @@ TEST(STDP, DASTDPWeightBoost) {
 	SpikeMonitor* spikeMonPre;
 	float weightDAMod, weightNonDAMod;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -344,7 +344,7 @@ TEST(STDP, ESTDPExpCurve) {
 	float initWeight = 5.0f;
 	float minInhWeight = 0.0f;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -434,7 +434,7 @@ TEST(STDP, ESTDPTimingBasedCurve) {
 	float initWeight = 5.0f;
 	float minInhWeight = 0.0f;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -528,7 +528,7 @@ TEST(STDP, ISTDPPulseCurve) {
 	float initWeight = 5.0f;
 	float minInhWeight = 0.0f;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;

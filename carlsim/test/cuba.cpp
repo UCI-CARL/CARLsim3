@@ -48,7 +48,7 @@
 TEST(CUBA, firingRateVsData) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -114,7 +114,7 @@ TEST(CUBA, firingRateCPUvsGPU) {
 	int runTimeMs = 767;
 //	fprintf(stderr,"runTime=%d, delay=%d, wt=%f, input=%f\n",runTimeMs,delay,wt,inputRate);
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -202,7 +202,7 @@ TEST(CUBA, firingRateCPUvsGPU) {
 TEST(CUBA, firingRateVsData9Param) {
         ::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-	#ifdef __CPU_ONLY__
+	#ifdef __NO_CUDA__
         int numModes = 1;
 	#else
         int numModes = 2;
@@ -258,7 +258,7 @@ TEST(CUBA, firingRateVsData9Param) {
 TEST(CUBA, firingRateVsData9Param_RK4) {
         ::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-	#ifdef __CPU_ONLY__
+	#ifdef __NO_CUDA__
         int numModes = 1;
 	#else
         int numModes = 2;

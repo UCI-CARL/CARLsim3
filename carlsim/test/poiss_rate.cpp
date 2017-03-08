@@ -16,7 +16,7 @@ TEST(PoissRate, getRateNeurId) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
 	int nNeur = 100;
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	for (int onGPU=0; onGPU<=0; onGPU++) {
 #else
 	for (int onGPU=0; onGPU<=1; onGPU++) {
@@ -34,7 +34,7 @@ TEST(PoissRate, getRates) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
 	int nNeur = 100;
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	for (int onGPU=0; onGPU<=0; onGPU++) {
 #else
 	for (int onGPU=0; onGPU<=1; onGPU++) {
@@ -58,7 +58,7 @@ TEST(PoissRate, setRatesVector) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
 	int nNeur = 100;
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	for (int onGPU=0; onGPU<=0; onGPU++) {
 #else
 	for (int onGPU=0; onGPU<=1; onGPU++) {
@@ -87,7 +87,7 @@ TEST(PoissRate, setRatesFloat) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
 	int nNeur = 100;
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	for (int onGPU=0; onGPU<=0; onGPU++) {
 #else
 	for (int onGPU=0; onGPU<=1; onGPU++) {
@@ -113,7 +113,7 @@ TEST(PoissRate, setRateNeurId) {
 	int nNeur = 100;
 	int neurId = 42;
 	float neurIdRate = 10.25f;
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	for (int onGPU=0; onGPU<=0; onGPU++) {
 #else
 	for (int onGPU=0; onGPU<=1; onGPU++) {

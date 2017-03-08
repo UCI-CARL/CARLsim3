@@ -22,7 +22,7 @@ TEST(setGroupMon, grpId){
 	CARLsim* sim;
 	const int GRP_SIZE = 10;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -57,7 +57,7 @@ TEST(setGroupMon, fname){
 	CARLsim* sim;
 	const int GRP_SIZE = 10;
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
@@ -174,7 +174,7 @@ TEST(GroupMon, persistentMode) {
 TEST(GroupMon, peakTimeAndValue) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-#ifdef __CPU_ONLY__
+#ifdef __NO_CUDA__
 	int numModes = 1;
 #else
 	int numModes = 2;
