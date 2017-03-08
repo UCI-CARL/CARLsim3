@@ -140,7 +140,9 @@ CXXSHRFL += -fPIC -shared
 
 ifeq ($(CARLSIM3_COVERAGE),1)
 	CXXFL += -fprofile-arcs -ftest-coverage
-	CXXLIBFL += -lgcov --coverage
+	CXXLIBFL += -lgcov
+	clean_objects += *.gcda *.gcno
+	targets += *.gcov
 endif
 
 ifeq ($(CARLSIM3_CPU_ONLY),1)
@@ -186,5 +188,5 @@ endif
 
 ifeq ($(CARLSIM3_COVERAGE),1)
 	CARLSIM3_FLG += -fprofile-arcs -ftest-coverage
-	CARLSIM3_LIB += -lgcov --coverage
+	CARLSIM3_LIB += -lgcov
 endif

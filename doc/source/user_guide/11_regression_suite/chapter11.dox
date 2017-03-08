@@ -154,7 +154,7 @@ TEST(testCase, testName) {
 \since v3.0
 
 
-\section ch11s4_coverage 11.4 Checking Code Coverage
+\section ch11s4_coverage 11.4 Code Coverage
 
 If you are on a Linux machine, it is also fairly simple to generate a code
 coverage report using

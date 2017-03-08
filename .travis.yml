@@ -7,20 +7,24 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+    packages:
+      - lcov
+      - ruby
 
 before_install:
-  - pip install --user cpp-coveralls
+  - gem install coveralls-lcov
+
+install:
   - mkdir $HOME/install
   - export CARLSIM3_INSTALL_DIR=$HOME/install
   - export CARLSIM3_CPU_ONLY=1
+  - export CARLSIM3_COVERAGE=1
   - cd external/googletest
   - mkdir build
   - cd build
   - cmake ..
   - make
   - cd ../../..
-
-install:
   - pwd
   - make -j4
   - make install
@@ -30,4 +34,6 @@ script:
   - ./carlsim/test/carlsim_tests
 
 after_success:
-  - coveralls --root .. -E ".*external.*" -E ".*projects/.*" -E ".*test/.*.cpp.*"
+  - lcov --compat-libtool --directory . --capture --output-file coverage.info
+  - coveralls-lcov coverage.info
+  - coveralls
