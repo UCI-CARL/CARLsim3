@@ -16,7 +16,7 @@ before_install:
 install:
   - mkdir $HOME/install
   - export CARLSIM3_INSTALL_DIR=$HOME/install
-  - export CARLSIM3_CPU_ONLY=1
+  - export CARLSIM3_NO_CUDA=1
   - export CARLSIM3_COVERAGE=1
   - cd external/googletest
   - mkdir build
