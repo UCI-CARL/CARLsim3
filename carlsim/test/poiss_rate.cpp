@@ -13,6 +13,7 @@ TEST(PoissRate, constructDeath) {
 #ifdef __NO_CUDA__
 	// can't allocate on GPU in CPU-only mode
 	EXPECT_DEATH({PoissonRate poiss(10, true);},"");
+#endif
 }
 
 // testing getRate(neurId)

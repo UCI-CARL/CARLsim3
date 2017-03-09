@@ -218,6 +218,9 @@ TEST(SpikeMon, persistentMode) {
 	EXPECT_EQ(spkMon->getRecordingStartTime(), 500);
 	EXPECT_EQ(spkMon->getRecordingStopTime(), 1500);
 
+	spkMon->getPersistentData();
+	spkMon->getMode();
+
 	delete sim;
 }
 
@@ -343,7 +346,21 @@ TEST(SpikeMon, spikeTimes) {
 		int runMs = (5+rand()%20) * isi;
 		sim->runNetwork(runMs/1000,runMs%1000);
 
+		EXPECT_TRUE(spikeMonG0->isRecording());
 		spikeMonG0->stopRecording();
+		EXPECT_TRUE(!spikeMonG0->isRecording());
+
+		// smoke testing
+		spikeMonG0->getPopStdFiringRate();
+		spikeMonG0->getAllFiringRates();
+		spikeMonG0->getNeuronMeanFiringRate(0);
+		spikeMonG0->getNumNeuronsWithFiringRate(0.0f, 100.0f);
+		spikeMonG0->getPercentNeuronsWithFiringRate(0.0f, 100.0f);
+		spikeMonG0->getNumSilentNeurons();
+		spikeMonG0->getPercentSilentNeurons();
+		spikeMonG0->getAllFiringRatesSorted();
+		spikeMonG0->print();
+		spikeMonG0->getRecordingLastStartTime();
 
 		// get spike vector
 		std::vector<std::vector<int> > spkVector = spikeMonG0->getSpikeVector2D();
