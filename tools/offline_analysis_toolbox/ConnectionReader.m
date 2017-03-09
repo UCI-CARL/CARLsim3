@@ -148,6 +148,29 @@ classdef ConnectionReader < handle
         end
         
         function [timeStamps, weights] = readWeights(obj, snapShots)
+            % [timeStamps, weights] = CR.readWeights(snapShots) reads a
+            % number of snapshots whose IDs are specified in SNAPSHOTS.
+            %
+            % For every snapshot, a timestamp (int) is returned on top of
+            % the weight matrix. The weight matrix is 2D, where the first
+            % dimension contains all weights of a given frame, and the
+            % second dimension is time. Weights are returned as a raw
+            % vector,cordered by pre-neurons then post-neurons.
+            %
+            % You can reshape the weight matrix into a 3D matrix
+            % <pre-neurons x post-neurons x time> using:
+            % >> [~,snapshots] = obj.CR.readWeights(frames);
+            % >> snapshots = reshape(snapshots, ...
+            % >>    numel(frames), ...
+            % >>    obj.CR.getNumNeuronsPre(), ...
+            % >>    obj.CR.getNumNeuronsPost());
+            % >> snapshots = permute(snapshots,[2 3 1]); % X Y T
+            % This is basically what ConnectionMonitor.getSnapshots does.
+            %
+            % snapShots    list of snapshot IDs
+            %              For example, the get first and third frame,
+            %              use snapShots=[0, 2]. Set snapShots to -1
+            %              in order to get all available frames.
             if nargin<2 || isempty(snapShots) || snapShots==-1
                 snapShots = 1:obj.nSnapshots;
             end

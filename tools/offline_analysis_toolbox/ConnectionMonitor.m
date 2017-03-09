@@ -58,8 +58,8 @@ classdef ConnectionMonitor < handle
 		
 		plotInteractiveMode;% flag whether to allow click/key events
 		plotStepFrames;     % flag whether to waitforbuttonpress btw frames
-		plotStepFramesFW;    % flag whether to make a step forward
-		plotStepFramesBW;    % flag whether to make a step backward
+		plotStepFramesFW;   % flag whether to make a step forward
+		plotStepFramesBW;   % flag whether to make a step backward
 		
 		recordBgColor;      % bg color of plot (for recording)
 		recordFile;         % filename for recording
