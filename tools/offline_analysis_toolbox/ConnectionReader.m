@@ -167,10 +167,10 @@ classdef ConnectionReader < handle
             % >> snapshots = permute(snapshots,[2 3 1]); % X Y T
             % This is basically what ConnectionMonitor.getSnapshots does.
             %
-            % snapShots    list of snapshot IDs
-            %              For example, the get first and third frame,
-            %              use snapShots=[0, 2]. Set snapShots to -1
-            %              in order to get all available frames.
+            % SNAPSHOTS   - list of snapshot IDs
+            %               For example, the get first and third frame,
+            %               use snapShots=[0, 2]. Set snapShots to -1
+            %               in order to get all available frames.
             if nargin<2 || isempty(snapShots) || snapShots==-1
                 snapShots = 1:obj.nSnapshots;
             end
