@@ -602,3 +602,22 @@ TEST(STDP, ISTDPPulseCurve) {
 		}
 	}
 }
+
+TEST(STDP, setHomeoBaseFiringRate) {
+	::testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+	CARLsim sim("STDP.setHomeoBaseFiringRate",CPU_MODE,SILENT,0,42);
+
+	int gExc = sim.createGroup("output", 1, EXCITATORY_NEURON);
+	sim.setNeuronParameters(gExc, 0.02f, 0.2f, -65.0f, 8.0f); // RS
+	int gIn = sim.createSpikeGeneratorGroup("input", 10, EXCITATORY_NEURON);
+
+	int cInExc  = sim.connect(gIn, gExc, "full", RangeWeight(0.0f, 0.5f, 0.5f), 1.0f, RangeDelay(1), 
+		RadiusRF(-1), SYN_PLASTIC);
+
+	// set E-STDP to be STANDARD (without neuromodulatory influence) with an EXP_CURVE type.
+	sim.setESTDP(gExc, true, STANDARD, ExpCurve(2e-4f,20.0f, -6.6e-5f,60.0f));
+	sim.setHomeostasis(gExc, true, 1.0f, 10.0f);  // homeo scaling factor, avg time scale
+
+	EXPECT_DEATH({sim.setHomeoBaseFiringRate(ALL, 35.0f, 0.0f);},"");
+}

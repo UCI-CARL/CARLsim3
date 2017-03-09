@@ -27,6 +27,7 @@ TEST(Interface, connectDeath) {
 	sim->setNeuronParameters(g2, 0.02f, 0.2f,-65.0f,8.0f);
 
 	// regular connect call
+	EXPECT_DEATH(sim->connect(g1,g2,"invalid",RangeWeight(0.1f),0.1f),""); // invalid type
 	EXPECT_DEATH(sim->connect(g1,g1,"random",RangeWeight(0.1f),0.1f),""); // g-post cannot be PoissonGroup
 	EXPECT_DEATH(sim->connect(g1,g2,"random",RangeWeight(-0.01f),0.1f),""); // weight cannot be negative
 	EXPECT_DEATH(sim->connect(g1,g2,"random",RangeWeight(0.01f,0.1f,0.1f),0.1f),""); // wt.min>0
