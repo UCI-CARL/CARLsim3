@@ -58,8 +58,8 @@ classdef ConnectionMonitor < handle
 		
 		plotInteractiveMode;% flag whether to allow click/key events
 		plotStepFrames;     % flag whether to waitforbuttonpress btw frames
-		plotStepFramesFW;    % flag whether to make a step forward
-		plotStepFramesBW;    % flag whether to make a step backward
+		plotStepFramesFW;   % flag whether to make a step forward
+		plotStepFramesBW;   % flag whether to make a step backward
 		
 		recordBgColor;      % bg color of plot (for recording)
 		recordFile;         % filename for recording
@@ -811,8 +811,15 @@ classdef ConnectionMonitor < handle
 	%% PRIVATE METHODS
 	methods (Hidden, Access = private)
         function [nrP, nrR, nrC] = findPlotLayout(obj, numSubPlots)
-            % given a total number of subplots, what should be optimal
-            % number of rows and cols in the figure?
+        	% [nrP, nrR, nrC] = CM.findPlotLayout(numSubplots) finds
+        	% the best plot layout for a number of subplots, assuming
+        	% you have a monitor with a fairly 1:1 aspect ratio (such
+        	% as 4:3).
+        	%
+        	% The number of subplots per figure is given by the attribute
+        	% PLOTSUBPLOTSPERFIG.
+            %
+            % NUMSUBPLOTS    - The number of subplots you want
 			
 			% plot should have at most 100 subplots
 			nrP = ceil(numSubPlots/obj.plotSubplotsPerFig);
