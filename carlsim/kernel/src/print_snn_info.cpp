@@ -187,20 +187,6 @@ void CpuSNN::printStatusGroupMonitor(int grpId) {
 }
 
 
-// This method allows us to print all information about the neuron.
-// If the enablePrint is false for a specific group, we do not print its state.
-void CpuSNN::printState(FILE* const fp) {
-	for(int g=0; g < numGrp; g++)
-		printNeuronState(g, fp);
-}
-
-void CpuSNN::printTuningLog(FILE * const fp) {
-	if (fp) {
-		fprintf(fp, "Generating Tuning log\n");
-//		printParameters(fp);
-	}
-}
-
 void CpuSNN::printConnectionInfo(FILE * const fp)
 {
   grpConnectInfo_t* newInfo = connectBegin;
@@ -332,14 +318,6 @@ void CpuSNN::printGroupInfo2(FILE* const fpg)
   fflush(fpg);
 }
 
-//! \deprecated
-void CpuSNN::printParameters(FILE* const fp) {
-	KERNEL_WARN("printParameters is deprecated");
-/*	assert(fp!=NULL);
-	printGroupInfo(fp);
-	printConnectionInfo(fp);*/
-}
-
 
 void CpuSNN::printFiringRate(char *fname)
 {
@@ -384,54 +362,6 @@ void CpuSNN::printFiringRate(char *fname)
   fclose(fpg);
 }
 
-void CpuSNN::printNeuronState(int grpId, FILE* const fp) {
-#ifndef __NO_CUDA__
-	if (simMode_==GPU_MODE) {
-		copyNeuronState(&cpuNetPtrs, &cpu_gpuNetPtrs, cudaMemcpyDeviceToHost, false, grpId);
-	}
-#endif
-  
-	fprintf(fp, "[MODE=%s] ", simMode_string[simMode_]);
-	fprintf(fp, "Group %s (%d) Neuron State Information (totSpike=%d, poissSpike=%d)\n",
-		grp_Info2[grpId].Name.c_str(), grpId, spikeCountAllHost, nPoissonSpikes);
-
-	// poisson group does not have default neuron state
-	if(grp_Info[grpId].Type&POISSON_NEURON) {
-		fprintf(fp, "t=%d msec ", simTime);
-		int totSpikes = 0;
-		for (int nid=grp_Info[grpId].StartN; nid <= grp_Info[grpId].EndN; nid++) {
-			totSpikes += cpuNetPtrs.nSpikeCnt[nid];
-			fprintf(fp, "%d ", cpuNetPtrs.nSpikeCnt[nid]);
-		}
-		fprintf(fp, "\n");
-		fprintf(fp, "TotalSpikes [grp=%d, %s]=  %d\n", grpId, grp_Info2[grpId].Name.c_str(), totSpikes);
-		return;
-	}
-
-	int totSpikes = 0;
-	for (int nid=grp_Info[grpId].StartN; nid <= grp_Info[grpId].EndN; nid++) {
-		// copy the neuron firing information from the GPU to the CPU...
-		totSpikes += cpuNetPtrs.nSpikeCnt[nid];
-		if(!sim_with_conductances) {
-			if (cpuNetPtrs.current[nid] != 0.0) {
-				fprintf(fp, "t=%d id=%d v=%+3.3f u=%+3.3f I=%+3.3f nSpikes=%d\n", simTime, nid,
-					cpuNetPtrs.voltage[nid],     cpuNetPtrs.recovery[nid],      cpuNetPtrs.current[nid],
-					cpuNetPtrs.nSpikeCnt[nid]);
-			}
-		}
-		else {
-			if (cpuNetPtrs.gAMPA[nid]+ cpuNetPtrs.gNMDA[nid]+cpuNetPtrs.gGABAa[nid]+cpuNetPtrs.gGABAb[nid] != 0.0) {
-				fprintf(fp, "t=%d id=%d v=%+3.3f u=%+3.3f I=%+3.3f gAMPA=%2.5f gNMDA=%2.5f gGABAa=%2.5f gGABAb=%2.5f "
-					"nSpikes=%d\n", simTime, nid, cpuNetPtrs.voltage[nid], cpuNetPtrs.recovery[nid], 
-					cpuNetPtrs.current[nid], cpuNetPtrs.gAMPA[nid], cpuNetPtrs.gNMDA[nid], cpuNetPtrs.gGABAa[nid],
-					cpuNetPtrs.gGABAb[nid], cpuNetPtrs.nSpikeCnt[nid]);
-			}
-		}
-	}
-	fprintf(fp, "TotalSpikes [grp=%d, %s] = %d\n", grpId, grp_Info2[grpId].Name.c_str(), totSpikes);
-	fprintf(fp, "\n");
-	fflush(fp);
-}
 
 // TODO: make KERNEL_INFO(), don't write to fpInf_
 void CpuSNN::printWeights(int preGrpId, int postGrpId) {

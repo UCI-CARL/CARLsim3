@@ -211,9 +211,10 @@ TEST(GroupMon, peakTimeAndValue) {
 		groupMon->stopRecording();
 
 		// get the timestamps of peaks in group data
-                groupMon->getSortedPeakTimeVector();
-                groupMon->getPeakValueVector();
-                groupMon->getSortedPeakValueVector();
+		groupMon->getTimeVector();
+		groupMon->getSortedPeakTimeVector();
+		groupMon->getPeakValueVector();
+		groupMon->getSortedPeakValueVector();
 		std::vector<int> timeVector = groupMon->getPeakTimeVector();
 		for (int i = 0; i < timeVector.size(); i++) {
 			EXPECT_EQ(timeVector[i], (i+1) * 100); // the peaks shoul be at 100, 200, 300 ... ,900 (ms)

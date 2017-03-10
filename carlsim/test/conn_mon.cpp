@@ -197,6 +197,9 @@ TEST(ConnMon, getters) {
 				EXPECT_FLOAT_EQ(CM->getPercentWeightsInRange(wtScale, 2*wtScale), 2*grpSize[gPost]*100.0/CM->getNumSynapses());
 				EXPECT_FLOAT_EQ(CM->getPercentWeightsWithValue(0.0), grpSize[gPost]*100.0/CM->getNumSynapses());
 				EXPECT_FLOAT_EQ(CM->getPercentWeightsWithValue(wtScale), grpSize[gPost]*100.0/CM->getNumSynapses());
+
+				CM->print();
+				CM->printSparse();
 			}
 		}
 		delete sim;

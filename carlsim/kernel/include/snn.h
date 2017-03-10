@@ -738,14 +738,10 @@ private:
 	void printGroupInfo(int grpId);	//!< CARLSIM_INFO prints group info
 	void printGroupInfo2(FILE* fpg);
 	void printMemoryInfo(FILE* fp); //!< prints memory info to file
-	void printNeuronState(int grpId, FILE* fp);
-	void printParameters(FILE *fp);
 	void printSimSummary(); 	//!< prints a simulation summary at the end of sim
-	void printState(FILE* fp);
 	void printStatusConnectionMonitor(int connId=ALL);
 	void printStatusGroupMonitor(int grpId=ALL);
 	void printStatusSpikeMonitor(int grpId=ALL);
-	void printTuningLog(FILE* fp);
 	void printWeights(int preGrpId, int postGrpId=-1);
 
 	int loadSimulation_internal(bool onlyPlastic);
