@@ -109,8 +109,8 @@ public:
 			uint64_t stopMs = _stopTimeMs[i] - _startTimeMs[0];
 			uint64_t lapMs = _lapTimeMs[i];
 
-			fprintf(fileStream, "| %20.20s  %02lu:%02lu:%02lu.%03lu  %02lu:%02lu:%02lu.%03lu "
-				" %02lu:%02lu:%02lu.%03lu  %02lu:%02lu:%02lu.%03lu |\n",
+			fprintf(fileStream, "| %20.20s  %02llu:%02llu:%02llu.%03llu  %02llu:%02llu:%02llu.%03llu "
+				" %02llu:%02llu:%02llu.%03llu  %02llu:%02llu:%02llu.%03llu |\n",
 				_tags[i].c_str(),
 				startMs/3600000, (startMs/1000/60)%60, (startMs/1000)%60, startMs%1000,
 				stopMs/3600000, (stopMs/1000/60)%60, (stopMs/1000)%60, stopMs%1000,
@@ -136,12 +136,12 @@ public:
 	// returns lap time, look-up by tag
 	uint64_t getLapTime(const std::string& tag) const {
 		unsigned int pos = std::find(_tags.begin(), _tags.end(), tag) - _tags.begin();
-		if (pos >=0 && pos < _tags.size()) {
+		if ((pos >=0 && pos) < _tags.size()) {
 			if (pos >= _lapTimeMs.size()) {
 				CARLSIM_WARN("Stopwatch::getLapTime(tag)", "Cannot look up current lap time until timer stopped.");
 				return 0;
 			}
-			printf("pos = %u, time = %lu\n",pos,_lapTimeMs[pos]);
+			printf("pos = %u, time = %llu\n",pos,_lapTimeMs[pos]);
 			return _lapTimeMs[pos];
 		} else {
 			CARLSIM_WARN("Stopwatch::getLapTime(tag)", "Invalid tag specified.");

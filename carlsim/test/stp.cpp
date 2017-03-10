@@ -142,7 +142,8 @@ TEST(STP, firingRateSTDvsSTF) {
 						}
 					}
 
-					delete spkGenG0, spkGenG1;
+					delete spkGenG0;
+					delete spkGenG1;
 					delete sim;
 				}
 			}
@@ -240,7 +241,8 @@ TEST(STP, spikeTimesCPUvsGPU) {
 					}
 				}
 
-				delete spkGenG0, spkGenG1;
+				delete spkGenG0;
+				delete spkGenG1;
 				delete sim;
 			}
 		}
