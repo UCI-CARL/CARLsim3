@@ -4409,8 +4409,6 @@ void CpuSNN::reorganizeNetwork(bool removeTempMemory) {
 	// reset all spike cnt
 	resetSpikeCnt(ALL);
 
-	printTuningLog(fpDeb_);
-
 	makePtrInfo();
 
 	KERNEL_INFO("");

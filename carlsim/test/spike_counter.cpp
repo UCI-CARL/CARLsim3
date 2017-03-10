@@ -93,6 +93,9 @@ TEST(SpikeCounter, SpikeCntvsSpikeMon) {
 			}
 		}
 
+		sim->resetSpikeCounter(grpIds[0]);
+		sim->resetSpikeCounter(ALL);
+
 		delete sim;
 	}
 }

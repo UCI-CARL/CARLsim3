@@ -37,4 +37,5 @@ after_success:
 - lcov -r coverage.info "/usr*" -o coverage.info
 - lcov -r coverage.info "external/*" -o coverage.info
 - lcov -r coverage.info "*.h" -o coverage.info
+- lcov -r coverage.info "*.cu" -o coverage.info
 - coveralls-lcov coverage.info

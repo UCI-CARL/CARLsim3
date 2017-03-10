@@ -9,6 +9,11 @@ TEST(PoissRate, constructDeath) {
 
 	EXPECT_DEATH({PoissonRate poiss(0);},""); // nNeur==0
 	EXPECT_DEATH({PoissonRate poiss(-1);},""); // nNeur<0
+
+#ifdef __NO_CUDA__
+	// can't allocate on GPU in CPU-only mode
+	EXPECT_DEATH({PoissonRate poiss(10, true);},"");
+#endif
 }
 
 // testing getRate(neurId)
@@ -29,6 +34,16 @@ TEST(PoissRate, getRateNeurId) {
 	}	
 }
 
+TEST(PoissRate, getNumNeurons) {
+	PoissonRate* rate = NULL;
+
+	for (int numNeur=1; numNeur<=30; numNeur+=5) {
+		rate = new PoissonRate(numNeur, false);
+		EXPECT_EQ(rate->getNumNeurons(), numNeur);
+		delete rate;
+	}
+}
+
 // testing getRates vector
 TEST(PoissRate, getRates) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
@@ -41,6 +56,7 @@ TEST(PoissRate, getRates) {
 #endif
 		PoissonRate rate(nNeur,true==onGPU);
 		std::vector<float> ratesVec = rate.getRates();
+		EXPECT_TRUE(rate.isOnGPU() == onGPU);
 
 		bool isSizeCorrect = ratesVec.size() == nNeur;
 		EXPECT_TRUE(isSizeCorrect);
@@ -49,6 +65,18 @@ TEST(PoissRate, getRates) {
 			for (int i=0; i<nNeur; i++) {
 				EXPECT_FLOAT_EQ(ratesVec[i], 0.0f);
 			}
+		}
+
+		if (onGPU) {
+			rate.getRatePtrGPU();
+
+			// in GPU mode, can't access CPU pointers
+			EXPECT_DEATH({rate.getRatePtrCPU();},"");
+		} else {
+			rate.getRatePtrCPU();
+
+			// in CPU mode, can't access GPU pointers
+			EXPECT_DEATH({rate.getRatePtrGPU();},"");
 		}
 	}
 }
@@ -65,9 +93,11 @@ TEST(PoissRate, setRatesVector) {
 #endif
 		PoissonRate rate(nNeur,true==onGPU);
 		std::vector<float> ratesVecIn;
+		EXPECT_EQ(rate.isOnGPU(), onGPU);
 
-		for (int i=0; i<nNeur; i++)
+		for (int i=0; i<nNeur; i++) {
 			ratesVecIn.push_back(i);
+		}
 
 		rate.setRates(ratesVecIn);
 
@@ -78,6 +108,12 @@ TEST(PoissRate, setRatesVector) {
 			for (int i=0; i<nNeur; i++) {
 				EXPECT_FLOAT_EQ(ratesVecOut[i], i);
 			}
+		}
+
+		if (onGPU) {
+			rate.getRatePtrGPU();
+		} else {
+			rate.getRatePtrCPU();
 		}
 	}
 }
@@ -93,6 +129,7 @@ TEST(PoissRate, setRatesFloat) {
 	for (int onGPU=0; onGPU<=1; onGPU++) {
 #endif
 		PoissonRate rate(nNeur,true==onGPU);
+		EXPECT_EQ(rate.isOnGPU(), onGPU);
 		rate.setRates(42.0f);
 
 		std::vector<float> ratesVec = rate.getRates();
@@ -103,6 +140,9 @@ TEST(PoissRate, setRatesFloat) {
 				EXPECT_FLOAT_EQ(ratesVec[i], 42.0f);
 			}
 		}
+
+		// smoke test
+		rate.setRate(ALL, 42.0f);
 	}
 }
 
@@ -119,7 +159,9 @@ TEST(PoissRate, setRateNeurId) {
 	for (int onGPU=0; onGPU<=1; onGPU++) {
 #endif
 		PoissonRate rate(nNeur,true==onGPU);
+		EXPECT_EQ(rate.isOnGPU(), onGPU);
 		rate.setRate(neurId,neurIdRate);
+		rate.getNumNeurons();
 
 		std::vector<float> ratesVec = rate.getRates();
 		bool isSizeCorrect = ratesVec.size() == nNeur;

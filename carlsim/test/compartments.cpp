@@ -12,6 +12,31 @@
 /// ****************************************************************************
 
 
+TEST(COMPARTMENTS, setCompartmentParameters) {
+	CARLsim sim("COMPARTMENTS.setCompartmentParameters", CPU_MODE, SILENT,
+		0, 42);
+	sim.setIntegrationMethod(RUNGE_KUTTA4, 10);
+
+	int N = 5;
+
+	int grpSP = sim.createGroup("SP soma", N, EXCITATORY_NEURON); // s
+	int grpSR = sim.createGroup("SR d1", N, EXCITATORY_NEURON); // d1
+	int grpSLM = sim.createGroup("SLM d2", N, EXCITATORY_NEURON); // d2
+	int grpSO = sim.createGroup("SO d3", N, EXCITATORY_NEURON); // d3
+
+	sim.setNeuronParameters(grpSP, 550.0f, 2.3330991f, -59.101414f, -50.428886f, 0.0021014998f, -0.41361538f, 
+		24.98698f, -53.223213f, 109.0f);//9 parameter setNeuronParametersCall (RS NEURON) (soma)
+	sim.setNeuronParameters(grpSR, 367.0f, 1.1705916f, -59.101414f, -44.298294f, 0.2477681f, 3.3198094f, 
+		20.274296f, -46.076824f, 24.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+	sim.setNeuronParameters(grpSLM, 425.0f, 2.2577047f, -59.101414f, -25.137894f, 0.32122386f, 0.14995363f, 
+		13.203414f, -38.54892f, 69.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+	sim.setNeuronParameters(grpSO, 225.0f, 1.109572f, -59.101414f, -36.55802f, 0.29814243f, -4.385603f, 
+		21.473854f, -40.343994f, 21.0f);//9 parameter setNeuronParametersCall (RS NEURON) (dendr)
+
+	// smoke test
+	sim.setCompartmentParameters(ALL, 28.396f, 5.526f);
+}
+
 
 TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 	::testing::FLAGS_gtest_death_test_style = "threadsafe";
@@ -32,7 +57,8 @@ TEST(COMPARTMENTS, spikeTimesCPUvsData) {
 									{149, 187, 239, 323, 504, 674, 849} };
 
 	for (int numIntSteps = 10; numIntSteps <= 50; numIntSteps += 10) {
-		CARLsim* sim = new CARLsim("CUBA.firingRateVsData", CPU_MODE, SILENT, 0, 42);
+		CARLsim* sim = new CARLsim("COMPARTMENTS.spikeTimesCPUvsData",
+			CPU_MODE, SILENT, 0, 42);
 		sim->setIntegrationMethod(RUNGE_KUTTA4, numIntSteps);
 
 		int N = 5;
@@ -159,7 +185,8 @@ TEST(COMPARTMENTS, spikeTimesCPUvsGPU) {
 
 		for (int numIntSteps=10; numIntSteps<=100; numIntSteps+=10) {
 			for (int isGPUmode = 0; isGPUmode <= 1; isGPUmode++) {
-				CARLsim* sim = new CARLsim("CUBA.firingRateVsData", isGPUmode ? GPU_MODE : CPU_MODE, SILENT, 0, 42);
+				CARLsim* sim = new CARLsim("COMPARTMENTS.spikeTimesCPUvsGPU", 
+					isGPUmode ? GPU_MODE : CPU_MODE, SILENT, 0, 42);
 				sim->setIntegrationMethod(RUNGE_KUTTA4, numIntSteps);
 
 				int N = 5;

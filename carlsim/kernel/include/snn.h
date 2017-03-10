@@ -730,9 +730,6 @@ private:
 
 	// NOTE: all these printer functions should be in printSNNInfo.cpp
 	// FIXME: are any of these actually supposed to be public?? they are not yet in carlsim.h
-	void printConnection(const std::string& fname);
-	void printConnection(FILE* fp);
-	void printConnection(int grpId, FILE* fp); //!< print the connection info of grpId
 	void printConnectionInfo(short int connId);
 	void printConnectionInfo(FILE* fp);
 	void printConnectionInfo2(FILE *fpg);
@@ -741,21 +738,10 @@ private:
 	void printGroupInfo(int grpId);	//!< CARLSIM_INFO prints group info
 	void printGroupInfo2(FILE* fpg);
 	void printMemoryInfo(FILE* fp); //!< prints memory info to file
-	void printNetworkInfo(FILE* fp);
-	void printNeuronState(int grpId, FILE* fp);
-	void printParameters(FILE *fp);
-	void printPostConnection(FILE* fp); //!< print all post connections
-	void printPostConnection(int grpId, FILE* fp);
-	int  printPostConnection2(int grpId, FILE* fpg);
-	void printPreConnection(FILE* fp); //!< print all pre connections
-	void printPreConnection(int grpId, FILE* fp);
-	int  printPreConnection2(int grpId, FILE* fpg);
 	void printSimSummary(); 	//!< prints a simulation summary at the end of sim
-	void printState(FILE* fp);
 	void printStatusConnectionMonitor(int connId=ALL);
 	void printStatusGroupMonitor(int grpId=ALL);
 	void printStatusSpikeMonitor(int grpId=ALL);
-	void printTuningLog(FILE* fp);
 	void printWeights(int preGrpId, int postGrpId=-1);
 
 	int loadSimulation_internal(bool onlyPlastic);
