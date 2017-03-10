@@ -44,22 +44,6 @@
 
 #include <math.h> // sqrt
 
-void CpuSNN::printConnection(const std::string& fname) {
-	FILE *fp = fopen(fname.c_str(), "w");
-	printConnection(fp);
-	fclose(fp);
-}
-
-void CpuSNN::printConnection(FILE* const fp) {
-	printPostConnection(fp);
-	printPreConnection(fp);
-}
-
-//! print the connection info of grpId
-void CpuSNN::printConnection(int grpId, FILE* const fp) {
-	printPostConnection(grpId, fp);
-	printPreConnection(grpId, fp);
-}
 
 void CpuSNN::printMemoryInfo(FILE* const fp) {
   if (!doneReorganization) {
@@ -356,70 +340,6 @@ void CpuSNN::printParameters(FILE* const fp) {
 	printConnectionInfo(fp);*/
 }
 
-// print all post-connections...
-void CpuSNN::printPostConnection(FILE * const fp)
-{
-  if(fp) fprintf(fp, "PRINTING POST-SYNAPTIC CONNECTION TOPOLOGY\n");
-  if(fp) fprintf(fp, "(((((((((((((((((((((())))))))))))))))))))))\n");
-  for(int i=0; i < numGrp; i++)
-	printPostConnection(i,fp);
-}
-
-// print all the pre-connections...
-void CpuSNN::printPreConnection(FILE * const fp)
-{
-  if(fp) fprintf(fp, "PRINTING PRE-SYNAPTIC CONNECTION TOPOLOGY\n");
-  if(fp) fprintf(fp, "(((((((((((((((((((((())))))))))))))))))))))\n");
-  for(int i=0; i < numGrp; i++)
-	printPreConnection(i,fp);
-}
-
-// print the connection info of grpId
-int CpuSNN::printPostConnection2(int grpId, FILE* const fpg)
-{
-  int maxLength = -1;
-  for(int i=grp_Info[grpId].StartN; i<=grp_Info[grpId].EndN; i++) {
-	fprintf(fpg, " id %d : group %d : postlength %d ", i, findGrpId(i), Npost[i]);
-	// fetch the starting position
-	post_info_t* postIds = &postSynapticIds[cumulativePost[i]];
-	for(int j=0; j <= maxDelay_; j++) {
-	  int len   = postDelayInfo[i*(maxDelay_+1)+j].delay_length;
-	  int start = postDelayInfo[i*(maxDelay_+1)+j].delay_index_start;
-	  for(int k=start; k < len; k++) {
-	int post_nid = GET_CONN_NEURON_ID((*postIds));
-	//					int post_gid = GET_CONN_GRP_ID((*postIds));
-	fprintf(fpg, " : %d,%d ", post_nid, j);
-	postIds++;
-	  }
-	  if (Npost[i] > maxLength)
-	maxLength = Npost[i];
-	  if ((start+len) >= Npost[i])
-	break;
-	}
-	fprintf(fpg, "\n");
-  }
-  fflush(fpg);
-  return maxLength;
-}
-
-void CpuSNN::printNetworkInfo(FILE* const fpg) {
-	int maxLengthPost = -1;
-	int maxLengthPre  = -1;
-	printGroupInfo2(fpg);
-	printConnectionInfo2(fpg);
-	fprintf(fpg, "#Flat Network Info Format \n");
-	fprintf(fpg, "#(neuron id : length (number of connections) : neuron_id0,delay0 : neuron_id1,delay1 : ... \n");
-	for(int g=0; g < numGrp; g++) {
-		int postM = printPostConnection2(g, fpg);
-		int numPreSynapses  = printPreConnection2(g, fpg);
-		if (postM > maxLengthPost)
-			maxLengthPost = postM;
-		if (numPreSynapses > maxLengthPre)
-			maxLengthPre = numPreSynapses;
-	}
-	fflush(fpg);
-	fclose(fpg);
-}
 
 void CpuSNN::printFiringRate(char *fname)
 {
@@ -463,65 +383,6 @@ void CpuSNN::printFiringRate(char *fname)
   fflush(fpg);
   fclose(fpg);
 }
-
-// print the connection info of grpId
-void CpuSNN::printPostConnection(int grpId, FILE* const fp)
-{
-  for(int i=grp_Info[grpId].StartN; i<=grp_Info[grpId].EndN; i++) {
-	if(fp) fprintf(fp, " %3d ( %3d ) : \t", i, Npost[i]);
-	// fetch the starting position
-	post_info_t* postIds = &postSynapticIds[cumulativePost[i]];
-	int  offset  = cumulativePost[i];
-	for(int j=0; j < Npost[i]; j++, postIds++) {
-	  int post_nid = GET_CONN_NEURON_ID((*postIds));
-	  int post_gid = GET_CONN_GRP_ID((*postIds));
-	  assert( findGrpId(post_nid) == post_gid);
-	  if(fp) fprintf(fp, " %3d ( maxDelay_=%3d, Grp=%3d) ", post_nid, tmp_SynapticDelay[offset+j], post_gid);
-	}
-	if(fp) fprintf(fp, "\n");
-	if(fp) fprintf(fp, " Delay ( %3d ) : ", i);
-	for(int j=0; j < maxDelay_; j++) {
-	  if(fp) fprintf(fp, " %d,%d ", postDelayInfo[i*(maxDelay_+1)+j].delay_length,
-			 postDelayInfo[i*(maxDelay_+1)+j].delay_index_start);
-	}
-	if(fp) fprintf(fp, "\n");
-  }
-}
-
-int CpuSNN::printPreConnection2(int grpId, FILE* const fpg)
-{
-  int maxLength = -1;
-  for(int i=grp_Info[grpId].StartN; i<=grp_Info[grpId].EndN; i++) {
-	fprintf(fpg, " id %d : group %d : prelength %d ", i, findGrpId(i), Npre[i]);
-	post_info_t* preIds = &preSynapticIds[cumulativePre[i]];
-	for(int j=0; j < Npre[i]; j++, preIds++) {
-	  if (doneReorganization && (!memoryOptimized))
-	fprintf(fpg, ": %d,%s", GET_CONN_NEURON_ID((*preIds)), (j < Npre_plastic[i])?"P":"F");
-	}
-	if ( Npre[i] > maxLength)
-	  maxLength = Npre[i];
-	fprintf(fpg, "\n");
-  }
-  return maxLength;
-}
-
-void CpuSNN::printPreConnection(int grpId, FILE* const fp)
-{
-  for(int i=grp_Info[grpId].StartN; i<=grp_Info[grpId].EndN; i++) {
-	if(fp) fprintf(fp, " %d ( preCnt=%d, prePlastic=%d ) : (id => (wt, maxWt),(preId, P/F)\n\t", i, Npre[i], Npre_plastic[i]);
-	post_info_t* preIds = &preSynapticIds[cumulativePre[i]];
-	int  pos_i  = cumulativePre[i];
-	for(int j=0; j < Npre[i]; j++, pos_i++, preIds++) {
-	  if(fp) fprintf(fp,  "  %d => (%f, %f)", j, wt[pos_i], maxSynWt[pos_i]);
-	  if(doneReorganization && (!memoryOptimized))
-	if(fp) fprintf(fp, ",(%d, %s)",
-			   GET_CONN_NEURON_ID((*preIds)),
-			   (j < Npre_plastic[i])?"P":"F");
-	}
-	if(fp) fprintf(fp, "\n");
-  }
-}
-
 
 void CpuSNN::printNeuronState(int grpId, FILE* const fp) {
 #ifndef __NO_CUDA__
