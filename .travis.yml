@@ -1,7 +1,17 @@
 sudo: false
 
-language:
-  - cpp
+language: cpp
+
+matrix:
+    include:
+        - os: osx
+          compiler: clang
+        - os: linux
+          dist: trusty
+          compiler: gcc
+        - os: linux
+          dist: precise
+          compiler: gcc
 
 addons:
   apt:
@@ -11,6 +21,8 @@ addons:
       - lcov
 
 before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update      ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install lcov; fi
   - gem install coveralls-lcov
 
 install:
