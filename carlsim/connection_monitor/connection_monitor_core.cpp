@@ -309,7 +309,7 @@ void ConnectionMonitorCore::printSparse(int neurPostId, int maxConn, int connPer
 	}
 
 	updateStoredWeights();
-	KERNEL_INFO("(t=%.3fs) ConnectionMonitor ID=%d %d(%s) => %d(%s): [preId,postId] wt (+/-wtChange in %lldms) "
+	KERNEL_INFO("(t=%.3fs) ConnectionMonitor ID=%d %d(%s) => %d(%s): [preId,postId] wt (+/-wtChange in %ldms) "
 		"show first %d", getTimeMsCurrentSnapshot()/1000.0f, connId_,
 		grpIdPre_, snn_->getGroupName(grpIdPre_).c_str(), grpIdPost_, snn_->getGroupName(grpIdPost_).c_str(),
 		getTimeMsSinceLastSnapshot(), maxConn);

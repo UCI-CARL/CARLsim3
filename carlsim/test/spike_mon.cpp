@@ -260,7 +260,8 @@ TEST(SpikeMon, clear) {
 		double initWeight = 0.5f;
 
 		// input
-        PeriodicSpikeGenerator spkGenG0(inputTargetFR);
+        PeriodicSpikeGenerator spkGenG0;
+        spkGenG0.setRates(inputTargetFR);
 		sim->setSpikeGenerator(inputGroup, &spkGenG0);
 
 		// use full because random might give us a network that does not spike (depending on the random seed),
@@ -330,7 +331,8 @@ TEST(SpikeMon, spikeTimes) {
 		int g0 = sim->createSpikeGeneratorGroup("Input",GRP_SIZE,EXCITATORY_NEURON);
 
 		// use periodic spike generator to know the exact spike times
-        PeriodicSpikeGenerator spkGenG0(rate);
+        PeriodicSpikeGenerator spkGenG0;
+        spkGenG0.setRates(rate);
 		sim->setSpikeGenerator(g0, &spkGenG0);
 
 		sim->setConductances(true,COND_tAMPA,COND_tNMDA,COND_tGABAa,COND_tGABAb);
@@ -433,7 +435,8 @@ TEST(SpikeMon, getGroupFiringRate){
 
 		sim->setConductances(true,COND_tAMPA,COND_tNMDA,COND_tGABAa,COND_tGABAb);
 
-        PeriodicSpikeGenerator spkGenG0(rate);
+        PeriodicSpikeGenerator spkGenG0;
+        spkGenG0.setRates(rate);
 		sim->setSpikeGenerator(g0, &spkGenG0);
 
 		sim->connect(g0, g1, "one-to-one", RangeWeight(0.27f), 1.0f);
@@ -524,7 +527,8 @@ TEST(SpikeMon, getMaxMinNeuronFiringRate){
 
 		sim->connect(inputGroup,g1,"random", RangeWeight(0.27f), 0.2f);
 
-        PeriodicSpikeGenerator spkGenG0(inputTargetFR);
+        PeriodicSpikeGenerator spkGenG0;
+        spkGenG0.setRates(inputTargetFR);
 		sim->setSpikeGenerator(inputGroup, &spkGenG0);
 
         sim->setupNetwork();
@@ -622,7 +626,8 @@ TEST(SpikeMon, setLogFile) {
 		int g0 = sim->createSpikeGeneratorGroup("Input",GRP_SIZE,EXCITATORY_NEURON);
 
 		// use periodic spike generator to know the exact spike times
-        PeriodicSpikeGenerator spkGenG0(rate);
+        PeriodicSpikeGenerator spkGenG0;
+        spkGenG0.setRates(rate);
 		sim->setSpikeGenerator(g0, &spkGenG0);
 
 		sim->setConductances(true);

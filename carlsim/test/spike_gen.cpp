@@ -64,9 +64,9 @@ TEST(SpikeGen, PeriodicSpikeGenerator) {
 	int g0 = sim.createSpikeGeneratorGroup("Input0",nNeur,EXCITATORY_NEURON);
 	int g1 = sim.createSpikeGeneratorGroup("Input1",nNeur,EXCITATORY_NEURON);
 	PeriodicSpikeGenerator spkGen0(true);
-	spkGen0.setRates(rate)
+	spkGen0.setRates(rate);
 	PeriodicSpikeGenerator spkGen1(false);
-	spkGen1.setRates(rate)
+	spkGen1.setRates(rate);
 	sim.setSpikeGenerator(g0, &spkGen0);
 	sim.setSpikeGenerator(g1, &spkGen1);
 

@@ -1,38 +1,101 @@
-# Makefile for building Tutorial code from the CARLsim library
+##----------------------------------------------------------------------------##
+##
+##   CARLsim3 Project Makefile
+##   -------------------------
+##
+##   Authors:   Michael Beyeler <mbeyeler@uci.edu>
+##              Kristofor Carlson <kdcarlso@uci.edu>
+##
+##   Institute: Cognitive Anteater Robotics Lab (CARL)
+##              Department of Cognitive Sciences
+##              University of California, Irvine
+##              Irvine, CA, 92697-5100, USA
+##
+##   Version:   03/04/2017
+##
+##----------------------------------------------------------------------------##
 
-# NOTE: need to tell CARLsim where to find the user.mk
-USER_MK_PATH = ../../../../
-include $(USER_MK_PATH)user.mk
+################################################################################
+# Start of user-modifiable section
+################################################################################
 
-# list all targets in this directory
-local_targets := smooth dog
-output := *.dot *.dat *.log *.csv results/*
+# In this section, specify all files that are part of the project.
 
-# we are compiling from carlsim lib
-CARLSIM_FLAGS += -I$(CARLSIM_LIB_DIR)/include/kernel \
-				 -I$(CARLSIM_LIB_DIR)/include/interface \
-				 -I$(CARLSIM_LIB_DIR)/include/spike_monitor \
-				 -I$(CARLSIM_LIB_DIR)/include/group_monitor \
-				 -I$(CARLSIM_LIB_DIR)/include/connection_monitor \
-				 -I$(CARLSIM_LIB_DIR)/include/spike_generators \
-				 -I$(CARLSIM_LIB_DIR)/include/visual_stimulus \
-				 -I$(CARLSIM_LIB_DIR)/include/simple_weight_tuner \
-				 -I$(CARLSIM_LIB_DIR)/include/stopwatch
-CARLSIM_LIBS  += -L$(CARLSIM_LIB_DIR)/lib -lCARLsim
+# Name of the binary file to be created.
+# NOTE: There must be a corresponding .cpp file named main_$(proj_target).cpp!
+proj_target1   := smooth
+proj_target2   := dog
 
-.PHONY: all clean distclean $(local_targets)
-all: $(local_targets)
-# compile from CARLsim lib
+# Directory where all include files reside. The Makefile will automatically
+# detect and include all .h files within that directory.
+proj_inc_dir   := .
 
-# list all rules, one per target
-dog: main_dog.cpp
-	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $< -o $@ $(CARLSIM_LFLAGS) $(CARLSIM_LIBS)
+# Directory where all source files reside. The Makefile will automatically
+# detect and include all .cpp and .cu files within that directory.
+proj_src_dir   := .
 
-smooth: main_smooth.cpp
-	$(NVCC) $(CARLSIM_INCLUDES) $(CARLSIM_FLAGS) $< -o $@ $(CARLSIM_LFLAGS) $(CARLSIM_LIBS)
+################################################################################
+# End of user-modifiable section
+################################################################################
+
+
+#------------------------------------------------------------------------------
+# Include configuration file
+#------------------------------------------------------------------------------
+
+# NOTE: If your CARLsim4 installation does not reside in the default path, make
+# sure the environment variable CARLSIM3_INSTALL_DIR is set.
+ifneq ($(CARLSIM3_INSTALL_DIR),)
+	CARLSIM3_INC_DIR  := $(CARLSIM3_INSTALL_DIR)/inc
+else
+	CARLSIM3_INC_DIR  := /usr/local/include/carlsim
+endif
+
+# include compile flags etc.
+include $(CARLSIM3_INC_DIR)/configure.mk
+
+
+#------------------------------------------------------------------------------
+# Build local variables
+#------------------------------------------------------------------------------
+
+main_src_file1 := $(proj_src_dir)/main_$(proj_target1).cpp
+main_src_file2 := $(proj_src_dir)/main_$(proj_target2).cpp
+
+# build list of all .h files
+inc_files  := $(wildcard $(proj_inc_dir)/*.h)
+
+# compile .cpp files to -cpp.o, and .cu files to -cu.o
+
+# handled by clean and distclean
+clean_files := $(proj_target1) $(proj_target2)
+distclean_files := $(clean_files) results/* *.dot *.dat *.csv *.log
+
+
+#------------------------------------------------------------------------------
+# Project targets and rules
+#------------------------------------------------------------------------------
+
+.PHONY: $(proj_target1) $(proj_target2) clean distclean help
+default: $(proj_target1)
+
+
+$(proj_target1): $(main_src_file1) $(inc_files)
+	$(NVCC) $(CARLSIM3_FLG) $(obj_files) $< -o $@ $(CARLSIM3_LIB)
+
+$(proj_target2): $(main_src_file2) $(inc_files)
+	$(NVCC) $(CARLSIM3_FLG) $(obj_files) $< -o $@ $(CARLSIM3_LIB)
 
 clean:
-	$(RM) $(local_targets)
+	$(RM) $(clean_files)
 
 distclean:
-	$(RM) $(local_targets) $(output)
+	$(RM) $(distclean_files)
+
+help:
+	$(info CARLsim4 Test Suite options:)
+	$(info )
+	$(info make               Compiles test suite
+	$(info make clean         Cleans out all object files)
+	$(info make distclean     Cleans out all object and output files)
+	$(info make help          Brings up this message)
