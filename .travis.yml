@@ -1,23 +1,41 @@
 sudo: false
 
-language:
-  - cpp
+language: cpp
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - lcov
+matrix:
+    include:
+      - os: osx
+        compiler: clang
+      - os: linux
+        dist: trusty
+        compiler: gcc
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - lcov
+      - os: linux
+        dist: precise
+        compiler: gcc
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - lcov
+    fast_finish:
+     - true
+
 
 before_install:
-  - gem install coveralls-lcov
+  # Set alias for readability
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then LINUX=true; fi
+  - if [[ $LINUX ]]; then gem install coveralls-lcov; fi
 
 install:
   - mkdir $HOME/install
   - export CARLSIM3_INSTALL_DIR=$HOME/install
   - export CARLSIM3_NO_CUDA=1
-  - export CARLSIM3_COVERAGE=1
+  - if [[ $LINUX ]]; then export CARLSIM3_COVERAGE=1; fi
   - cd external/googletest
   - mkdir build
   - cd build
@@ -33,9 +51,9 @@ script:
   - ./carlsim/test/carlsim_tests
 
 after_success:
-- lcov -b . -d . -c -o ./coverage.info
-- lcov -r coverage.info "/usr*" -o coverage.info
-- lcov -r coverage.info "external/*" -o coverage.info
-- lcov -r coverage.info "*.h" -o coverage.info
-- lcov -r coverage.info "*.cu" -o coverage.info
-- coveralls-lcov coverage.info
+- if [[ $LINUX ]]; then lcov -b . -d . -c -o ./coverage.info; fi
+- if [[ $LINUX ]]; then lcov -r coverage.info "/usr*" -o coverage.info; fi
+- if [[ $LINUX ]]; then lcov -r coverage.info "external/*" -o coverage.info; fi
+- if [[ $LINUX ]]; then lcov -r coverage.info "*.h" -o coverage.info; fi
+- if [[ $LINUX ]]; then lcov -r coverage.info "*.cu" -o coverage.info; fi
+- if [[ $LINUX ]]; then coveralls-lcov coverage.info; fi

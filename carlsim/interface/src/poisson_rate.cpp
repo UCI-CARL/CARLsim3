@@ -109,6 +109,8 @@ public:
 			float h_d_rate = 0.0f;
 			CUDA_CHECK_ERRORS( cudaMemcpy(&h_d_rate, &(d_rates_[neurId]), sizeof(float), cudaMemcpyDeviceToHost) );
 			return h_d_rate;
+#else
+			assert(false);
 #endif
 		} else {
 			// data is on host
@@ -163,6 +165,8 @@ public:
 #ifndef __NO_CUDA__
 				// copy float to device (might have kernel launch overhead because float is small)
 				CUDA_CHECK_ERRORS( cudaMemcpy(&(d_rates_[neurId]), &rate, sizeof(float), cudaMemcpyHostToDevice) );
+#else
+				assert(false);
 #endif
 			} else {
 				// set float in host array

@@ -239,7 +239,8 @@ TEST(COBA, condSingleNeuronCPUvsGPU) {
 					}
 				}
 
-				delete spkGen1, spkGen2;
+				delete spkGen1;
+				delete spkGen2;
 				delete sim;
 			}
 		}

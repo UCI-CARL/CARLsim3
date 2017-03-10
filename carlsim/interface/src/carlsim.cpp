@@ -241,12 +241,12 @@ short int CARLsim::connect(int grpId1, int grpId2, const std::string& connType, 
 		"Connection Probability connProb", "[0,1]");
 	UserErrors::assertTrue(delay.min>0, UserErrors::MUST_BE_POSITIVE, funcName, "delay.min");
 	UserErrors::assertTrue(connType.compare("one-to-one")!=0
-		|| connType.compare("one-to-one")==0 && getGroupNumNeurons(grpId1) == getGroupNumNeurons(grpId2),
+		|| (connType.compare("one-to-one")==0 && getGroupNumNeurons(grpId1) == getGroupNumNeurons(grpId2)),
 		UserErrors::MUST_BE_IDENTICAL, funcName, "For type \"one-to-one\", number of neurons in pre and post");
 	UserErrors::assertTrue(connType.compare("gaussian")!=0
-		|| connType.compare("gaussian")==0 && (radRF.radX>-1 || radRF.radY>-1 || radRF.radZ>-1),
+		|| (connType.compare("gaussian")==0 && (radRF.radX>-1 || radRF.radY>-1 || radRF.radZ>-1)),
 		UserErrors::CANNOT_BE_NEGATIVE, funcName, "Receptive field radius for type \"gaussian\"");
-	UserErrors::assertTrue(synWtType==SYN_PLASTIC || synWtType==SYN_FIXED && wt.init==wt.max,
+	UserErrors::assertTrue(synWtType==SYN_PLASTIC || (synWtType==SYN_FIXED && wt.init==wt.max),
 		UserErrors::MUST_BE_IDENTICAL, funcName, "For fixed synapses, initWt and maxWt");
 	UserErrors::assertTrue(mulSynFast>=0.0f, UserErrors::CANNOT_BE_NEGATIVE, funcName, "mulSynFast");
 	UserErrors::assertTrue(mulSynSlow>=0.0f, UserErrors::CANNOT_BE_NEGATIVE, funcName, "mulSynSlow");
@@ -536,7 +536,7 @@ void CARLsim::setConductances(bool isSet, int tdAMPA, int trNMDA, int tdNMDA, in
 // set default homeostasis params
 void CARLsim::setHomeostasis(int grpId, bool isSet) {
 	std::string funcName = "setHomeostasis(\""+getGroupName(grpId)+"\")";
-	UserErrors::assertTrue(!isSet || isSet && !isPoissonGroup(grpId), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
+	UserErrors::assertTrue(!isSet || (isSet && !isPoissonGroup(grpId)), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
 	UserErrors::assertTrue(carlsimState_==CONFIG_STATE, UserErrors::CAN_ONLY_BE_CALLED_IN_STATE, funcName, funcName, "CONFIG.");
 
 	hasSetHomeoALL_ = grpId==ALL; // adding groups after this will not have homeostasis set
@@ -554,7 +554,7 @@ void CARLsim::setHomeostasis(int grpId, bool isSet) {
 // set custom homeostasis params for group
 void CARLsim::setHomeostasis(int grpId, bool isSet, float homeoScale, float avgTimeScale) {
 	std::string funcName = "setHomeostasis(\""+getGroupName(grpId)+"\")";
-	UserErrors::assertTrue(!isSet || isSet && !isPoissonGroup(grpId), UserErrors::WRONG_NEURON_TYPE, funcName,
+	UserErrors::assertTrue(!isSet || (isSet && !isPoissonGroup(grpId)), UserErrors::WRONG_NEURON_TYPE, funcName,
 		funcName);
 	UserErrors::assertTrue(carlsimState_==CONFIG_STATE, UserErrors::CAN_ONLY_BE_CALLED_IN_STATE, funcName, funcName,
 		"CONFIG.");
@@ -708,7 +708,7 @@ void CARLsim::setSTDP(int grpId, bool isSet, stdpType_t type, float alphaPlus, f
 // set ESTDP, default
 void CARLsim::setESTDP(int grpId, bool isSet) {
 	std::string funcName = "setESTDP(\""+getGroupName(grpId)+"\")";
-	UserErrors::assertTrue(!isSet || isSet && !isPoissonGroup(grpId), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
+	UserErrors::assertTrue(!isSet || (isSet && !isPoissonGroup(grpId)), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
 	UserErrors::assertTrue(carlsimState_==CONFIG_STATE, UserErrors::CAN_ONLY_BE_CALLED_IN_STATE, funcName, funcName, "CONFIG.");
 
 	hasSetSTDPALL_ = grpId==ALL; // adding groups after this will not have conductances set
@@ -723,7 +723,7 @@ void CARLsim::setESTDP(int grpId, bool isSet) {
 // set ESTDP by stdp curve
 void CARLsim::setESTDP(int grpId, bool isSet, stdpType_t type, ExpCurve curve) {
 	std::string funcName = "setESTDP(\""+getGroupName(grpId)+","+stdpType_string[type]+"\")";
-	UserErrors::assertTrue(!isSet || isSet && !isPoissonGroup(grpId), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
+	UserErrors::assertTrue(!isSet || (isSet && !isPoissonGroup(grpId)), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
 	UserErrors::assertTrue(type!=UNKNOWN_STDP, UserErrors::CANNOT_BE_UNKNOWN, funcName, "Mode");
 	UserErrors::assertTrue(carlsimState_==CONFIG_STATE, UserErrors::CAN_ONLY_BE_CALLED_IN_STATE, funcName, funcName, "CONFIG.");
 
@@ -739,7 +739,7 @@ void CARLsim::setESTDP(int grpId, bool isSet, stdpType_t type, ExpCurve curve) {
 // set ESTDP by stdp curve
 void CARLsim::setESTDP(int grpId, bool isSet, stdpType_t type, TimingBasedCurve curve) {
 	std::string funcName = "setESTDP(\""+getGroupName(grpId)+","+stdpType_string[type]+"\")";
-	UserErrors::assertTrue(!isSet || isSet && !isPoissonGroup(grpId), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
+	UserErrors::assertTrue(!isSet || (isSet && !isPoissonGroup(grpId)), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
 	UserErrors::assertTrue(type!=UNKNOWN_STDP, UserErrors::CANNOT_BE_UNKNOWN, funcName, "Mode");
 	UserErrors::assertTrue(carlsimState_==CONFIG_STATE, UserErrors::CAN_ONLY_BE_CALLED_IN_STATE, funcName, funcName, "CONFIG.");
 
@@ -755,7 +755,7 @@ void CARLsim::setESTDP(int grpId, bool isSet, stdpType_t type, TimingBasedCurve 
 // set ISTDP, default
 void CARLsim::setISTDP(int grpId, bool isSet) {
 	std::string funcName = "setISTDP(\""+getGroupName(grpId)+"\")";
-	UserErrors::assertTrue(!isSet || isSet && !isPoissonGroup(grpId), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
+	UserErrors::assertTrue(!isSet || (isSet && !isPoissonGroup(grpId)), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
 	UserErrors::assertTrue(carlsimState_==CONFIG_STATE, UserErrors::CAN_ONLY_BE_CALLED_IN_STATE, funcName, funcName, "CONFIG.");
 
 	hasSetSTDPALL_ = grpId==ALL; // adding groups after this will not have conductances set
@@ -770,7 +770,7 @@ void CARLsim::setISTDP(int grpId, bool isSet) {
 // set ISTDP by stdp curve
 void CARLsim::setISTDP(int grpId, bool isSet, stdpType_t type, ExpCurve curve) {
 	std::string funcName = "setISTDP(\""+getGroupName(grpId)+","+stdpType_string[type]+"\")";
-	UserErrors::assertTrue(!isSet || isSet && !isPoissonGroup(grpId), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
+	UserErrors::assertTrue(!isSet || (isSet && !isPoissonGroup(grpId)), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
 	UserErrors::assertTrue(type!=UNKNOWN_STDP, UserErrors::CANNOT_BE_UNKNOWN, funcName, "Mode");
 	UserErrors::assertTrue(carlsimState_==CONFIG_STATE, UserErrors::CAN_ONLY_BE_CALLED_IN_STATE, funcName, funcName, "CONFIG.");
 
@@ -786,7 +786,7 @@ void CARLsim::setISTDP(int grpId, bool isSet, stdpType_t type, ExpCurve curve) {
 // set ISTDP by stdp curve
 void CARLsim::setISTDP(int grpId, bool isSet, stdpType_t type, PulseCurve curve) {
 	std::string funcName = "setISTDP(\""+getGroupName(grpId)+","+stdpType_string[type]+"\")";
-	UserErrors::assertTrue(!isSet || isSet && !isPoissonGroup(grpId), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
+	UserErrors::assertTrue(!isSet || (isSet && !isPoissonGroup(grpId)), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
 	UserErrors::assertTrue(type!=UNKNOWN_STDP, UserErrors::CANNOT_BE_UNKNOWN, funcName, "Mode");
 	UserErrors::assertTrue(carlsimState_==CONFIG_STATE, UserErrors::CAN_ONLY_BE_CALLED_IN_STATE, funcName, funcName, "CONFIG.");
 
@@ -1162,7 +1162,7 @@ void CARLsim::setSpikeRate(int grpId, PoissonRate* spikeRate, int refPeriod) {
 	UserErrors::assertTrue(isPoissonGroup(grpId), UserErrors::WRONG_NEURON_TYPE, funcName, funcName);
 	UserErrors::assertTrue(spikeRate->getNumNeurons()==getGroupNumNeurons(grpId), UserErrors::MUST_BE_IDENTICAL,
 		funcName, "PoissonRate length and the number of neurons in the group");
-	UserErrors::assertTrue(!spikeRate->isOnGPU() || spikeRate->isOnGPU()&&getSimMode()==GPU_MODE,
+	UserErrors::assertTrue(!spikeRate->isOnGPU() || (spikeRate->isOnGPU()&&getSimMode()==GPU_MODE),
 		UserErrors::CAN_ONLY_BE_CALLED_IN_MODE, funcName, "PoissonRate on GPU", "GPU_MODE.");
 
 	snn_->setSpikeRate(grpId, spikeRate, refPeriod);
@@ -1278,7 +1278,7 @@ int CARLsim::getGroupId(std::string grpName) {
 
 std::string CARLsim::getGroupName(int grpId) {
 	std::stringstream funcName; funcName << "getGroupName(" << grpId << ")";
-	UserErrors::assertTrue(grpId==ALL || grpId>=0 && grpId<getNumGroups(), UserErrors::MUST_BE_IN_RANGE, funcName.str(),
+	UserErrors::assertTrue(grpId==ALL || (grpId>=0 && grpId<getNumGroups()), UserErrors::MUST_BE_IN_RANGE, funcName.str(),
 		"grpId", "[0,getNumGroups()] or must be ALL.");
 
 	return snn_->getGroupName(grpId);
@@ -1609,7 +1609,7 @@ void CARLsim::handleUserWarnings() {
 
 		fprintf(stdout,"Ignore warnings and continue? Y/n ");
 		char ignoreWarn = std::cin.get();
-		if (std::cin.fail() || ignoreWarn!='y' && ignoreWarn!='Y') {
+		if (std::cin.fail() || (ignoreWarn!='y' && ignoreWarn!='Y')) {
 			fprintf(stdout,"Exiting...\n");
 			exit(1);
 		}

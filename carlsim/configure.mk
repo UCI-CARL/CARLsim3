@@ -72,7 +72,7 @@ ifeq ("$(OSUPPER)","LINUX")
 else
   ifneq ($(DARWIN),)
     # for some newer versions of XCode, CLANG is the default compiler, so we need to include this
-    ifneq ($(MAVERICKS),
+    ifneq ($(MAVERICKS),)
       NVCC   ?= $(CUDA_PATH)/bin/nvcc -ccbin $(CLANG)
       STDLIB ?= -stdlib=libstdc++
     else

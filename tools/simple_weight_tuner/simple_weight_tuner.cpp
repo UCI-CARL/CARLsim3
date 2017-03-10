@@ -155,7 +155,7 @@ void iterate(int runDurationMs, bool printStatus) {
 	}
 
 	// else update parameters
-	if (wtStepSize_>0 && thisRate>targetRate_ || wtStepSize_<0 && thisRate<targetRate_) {
+	if ((wtStepSize_>0 && thisRate>targetRate_) || (wtStepSize_<0 && thisRate<targetRate_)) {
 		// we stepped too far to the right or too far to the left
 		// turn around and cut step size in half
 		// note that this should work for inhibitory connections, too: they have negative weights, so adding

@@ -2925,7 +2925,7 @@ void CpuSNN::connectUserDefined (grpConnectInfo_t* info) {
 
 				assert(delay >= 1);
 				assert(delay <= MAX_SynapticDelay);
-				assert(abs(weight) <= abs(maxWt));
+				assert(fabs(weight) <= fabs(maxWt));
 
 				// adjust the sign of the weight based on inh/exc connection
 				weight = isExcitatoryGroup(grpSrc) ? fabs(weight) : -1.0*fabs(weight);
@@ -5448,7 +5448,7 @@ void CpuSNN::updateSpikeMonitor(int grpId) {
                 && this->getGroupNumNeurons(grpId) > LARGE_SPIKE_MON_GRP_SIZE \
                 && spkMonObj->isBufferBig()){
             // change this warning message to correct message
-            KERNEL_WARN("updateSpikeMonitor(grpId=%d) is becoming very large. (>%lu MB)",grpId,(int64_t) MAX_SPIKE_MON_BUFFER_SIZE/1024 );// make this better
+            KERNEL_WARN("updateSpikeMonitor(grpId=%d) is becoming very large. (>%lld MB)",grpId,(int64_t) MAX_SPIKE_MON_BUFFER_SIZE/1024 );// make this better
             KERNEL_WARN("Reduce the cumulative recording time (currently %lu minutes) or the group size (currently %d) to avoid this.",spkMonObj->getAccumTime()/(1000*60),this->getGroupNumNeurons(grpId));
 		}
 #ifndef __NO_CUDA__
@@ -5552,7 +5552,7 @@ void CpuSNN::updateWeights() {
 			}
 
 			if (i==grp_Info[g].StartN)
-				KERNEL_DEBUG("Weights, Change at %lu (diff_firing: %f)", simTimeSec, diff_firing);
+				KERNEL_DEBUG("Weights, Change at %llu (diff_firing: %f)", simTimeSec, diff_firing);
 
 			for(int j = 0; j < Npre_plastic[i]; j++) {
 				//	if (i==grp_Info[g].StartN)
