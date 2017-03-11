@@ -59,8 +59,10 @@ TEST(COBA, synRiseTime) {
 		sim->setConductances(true, tdAMPA, trNMDA, tdNMDA, tdGABAa, trGABAb, tdGABAb);
 
 		// run network for a second first, so that we know spike will happen at simTimeMs==1000
-		PeriodicSpikeGenerator* spk1 = new PeriodicSpikeGenerator(1.0f,true); // periodic spiking
-		PeriodicSpikeGenerator* spk2 = new PeriodicSpikeGenerator(1.0f,true); // periodic spiking
+		PeriodicSpikeGenerator* spk1 = new PeriodicSpikeGenerator(true); // periodic spiking
+		spk1->setRates(1.0f);
+		PeriodicSpikeGenerator* spk2 = new PeriodicSpikeGenerator(true); // periodic spiking
+		spk2->setRates(1.0f);
 		sim->setSpikeGenerator(g0, spk1);
 		sim->setSpikeGenerator(g2, spk2);
 		sim->setupNetwork(true);
@@ -191,8 +193,10 @@ TEST(COBA, condSingleNeuronCPUvsGPU) {
 				sim->connect(g1,grps[4],"full",RangeWeight(0.0005f),1.0,RangeDelay(1),RadiusRF(-1),SYN_FIXED,0.0,1.0);//GABAb
 				sim->connect(g1,grps[5],"full",RangeWeight(0.0005f),1.0,RangeDelay(1),RadiusRF(-1),SYN_FIXED,0.5,0.5);//GABAa+b
 
-				spkGen1 = new PeriodicSpikeGenerator(rate, spikeAtZero);
-				spkGen2 = new PeriodicSpikeGenerator(rate, spikeAtZero);
+				spkGen1 = new PeriodicSpikeGenerator(spikeAtZero);
+				spkGen1->setRates(rate);
+				spkGen2 = new PeriodicSpikeGenerator(spikeAtZero);
+				spkGen2->setRates(rate);
 				sim->setSpikeGenerator(g0, spkGen1);
 				sim->setSpikeGenerator(g1, spkGen2);
 
@@ -296,7 +300,8 @@ TEST(COBA, firingRateCPUvsGPU) {
 				sim.connect(g0, g1, "full", RangeWeight(wt), 1.0f, RangeDelay(1));
 
 				bool spikeAtZero = true;
-				PeriodicSpikeGenerator spkGenG0(inputRate,spikeAtZero);
+				PeriodicSpikeGenerator spkGenG0(spikeAtZero);
+				spkGenG0.setRates(inputRate);
 				sim.setSpikeGenerator(g0, &spkGenG0);
 
 				sim.setupNetwork();
@@ -400,7 +405,8 @@ TEST(COBA, firingRateCPUandGPU_EULERvsRUNGE_KUTTA) {
 				sim.connect(g0, g1, "full", RangeWeight(wt), 1.0f, RangeDelay(1));
 
 				bool spikeAtZero = true;
-				PeriodicSpikeGenerator spkGenG0(inputRate,spikeAtZero);
+				PeriodicSpikeGenerator spkGenG0(spikeAtZero);
+				spkGenG0.setRates(inputRate);
 				sim.setSpikeGenerator(g0, &spkGenG0);
 
 				sim.setupNetwork();

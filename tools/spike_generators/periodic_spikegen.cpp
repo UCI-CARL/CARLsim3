@@ -1,77 +1,132 @@
-/* 
- * Copyright (c) 2014 Regents of the University of California. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * 3. The names of its contributors may not be used to endorse or promote
- *    products derived from this software without specific prior written
- *    permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * *********************************************************************************************** *
- * CARLsim
- * created by: 		(MDR) Micah Richert, (JN) Jayram M. Nageswaran
- * maintained by:	(MA) Mike Avery <averym@uci.edu>, (MB) Michael Beyeler <mbeyeler@uci.edu>,
- *					(KDC) Kristofor Carlson <kdcarlso@uci.edu>
- *					(TSC) Ting-Shuo Chou <tingshuc@uci.edu>
- *
- * CARLsim available from http://socsci.uci.edu/~jkrichma/CARLsim/
- * Ver 11/26/2014
- */
-
 #include <periodic_spikegen.h>
+
+#include <carlsim.h>
 
 #include <user_errors.h>	// fancy error messages
 #include <algorithm>		// std::find
 #include <vector>			// std::vector
 #include <cassert>			// assert
 
-PeriodicSpikeGenerator::PeriodicSpikeGenerator(float rate, bool spikeAtZero) {
-	assert(rate>0);
-	rate_ = rate;	  // spike rate
-	isi_ = 1000/rate; // inter-spike interval in ms
-	spikeAtZero_ = spikeAtZero;
 
-	checkFiringRate();
-}
 
-unsigned int PeriodicSpikeGenerator::nextSpikeTime(CARLsim* sim, int grpId, int nid, unsigned int currentTime, 
-	unsigned int lastScheduledSpikeTime, unsigned int endOfTimeSlice) {
-//		fprintf(stderr,"currentTime: %u lastScheduled: %u\n",currentTime,lastScheduledSpikeTime);
+class PeriodicSpikeGenerator::Impl {
+public:
+	Impl(bool spikeAtZero) {
+		_spikeAtZero = spikeAtZero;
 
-	if (spikeAtZero_) {
-		// insert spike at t=0 for each neuron (keep track of neuron IDs to avoid getting stuck in infinite loop)
-		if (std::find(nIdFiredAtZero_.begin(), nIdFiredAtZero_.end(), nid)==nIdFiredAtZero_.end()) {
-			// spike at t=0 has not been scheduled yet for this neuron
-			nIdFiredAtZero_.push_back(nid);
-			return 0;
+		_needToUpdateFromVector = false;
+		_needToUpdateFromFloat = false;
+		_tmpRate = 0.0f;
+		_tmpRates.clear();
+	}
+
+	~Impl() {}
+
+	void setRates(float rateHz) {
+		UserErrors::assertTrue(rateHz>=0, UserErrors::CANNOT_BE_NEGATIVE,
+			"PeriodicSpikeGenerator", "Firing rate");
+		_tmpRate = rateHz;
+		_needToUpdateFromFloat = true;
+		_needToUpdateFromVector = false;
+	}
+
+	void setRates(std::vector<float> ratesHz) {
+		for (int i=0; i<ratesHz.size(); i++) {
+			UserErrors::assertTrue(ratesHz[i] >= 0, UserErrors::MUST_BE_POSITIVE,
+				"PeriodicSpikeGenerator", "Firing rate");
+		}
+		_tmpRates = ratesHz;
+		_needToUpdateFromVector = true;
+		_needToUpdateFromFloat = false;
+	}
+
+	unsigned int nextSpikeTime(CARLsim* sim, int grpId, int nid,
+		unsigned int currentTime, 
+		unsigned int lastScheduledSpikeTime,
+		unsigned int endOfTimeSlice)
+	{
+		if (needToUpdateISI()) {
+			updateISI(sim->getGroupNumNeurons(grpId), endOfTimeSlice);
+		}
+
+		if (_spikeAtZero) {
+			// insert spike at t=0 for each neuron (keep track of neuron IDs to avoid getting stuck in infinite loop)
+			if (std::find(_nIdFiredAtZero.begin(), _nIdFiredAtZero.end(), nid)==_nIdFiredAtZero.end()) {
+				// spike at t=0 has not been scheduled yet for this neuron
+				_nIdFiredAtZero.push_back(nid);
+				return 0;
+			}
+		}
+
+		// periodic spiking according to ISI
+		return lastScheduledSpikeTime + _isis[nid];
+	}
+
+private:
+	bool needToUpdateISI() {
+		return _needToUpdateFromVector | _needToUpdateFromFloat;
+	}
+
+	void updateISI(int numNeur, unsigned int endOfTimeSlice) {
+		if (_needToUpdateFromVector) {
+			UserErrors::assertTrue(_tmpRates.size() == numNeur, UserErrors::MUST_BE_IDENTICAL,
+				"PeriodicSpikeGenerator", "Vector size", "the number of neurons");
+
+			// Set all ISIs as 1/f, but avoid division by zero.
+			// If no spikes should be scheduled, set ISI to `endOfTimeSlice`, so it for sure falls outside
+			// the current scheduling time slice.
+			_isis.resize(numNeur, (int)endOfTimeSlice);
+			for (int i=0; i<numNeur; i++) {
+				if (_tmpRates[i] > 0.0f) {
+					_isis[i] = (int) (1000.0f / _tmpRates[i]);
+				}
+			}
+
+			_needToUpdateFromVector = false;
+		} else if (_needToUpdateFromFloat) {
+			UserErrors::assertTrue(_tmpRate>=0, UserErrors::CANNOT_BE_NEGATIVE,
+				"PeriodicSpikeGenerator", "Firing rate");
+
+			// Set all ISIs to 1/rate, but avoid division by zero.
+			// If no spikes should be scheduled, set ISI to `endOfTimeSlice`, so it for sure falls outside
+			// the current scheduling time slice.
+			int isi = (int)endOfTimeSlice;
+			if (_tmpRate > 0.0f) {
+				isi = (int) (1000.0f / _tmpRate);
+			}
+			_isis.resize(numNeur, isi);
+
+			_needToUpdateFromFloat = false;
 		}
 	}
 
-	// periodic spiking according to ISI
-	return lastScheduledSpikeTime+isi_;
-}
 
-void PeriodicSpikeGenerator::checkFiringRate() {
-	UserErrors::assertTrue(rate_>0, UserErrors::MUST_BE_POSITIVE, "PeriodicSpikeGenerator", "Firing rate");
+	bool _needToUpdateFromVector;
+	bool _needToUpdateFromFloat;
+
+	float _tmpRate;					//!< spike rate (Hz)
+	std::vector<float> _tmpRates;	//!< vector of spike rates (Hz)
+
+	std::vector<int> _isis;			//!< vector of inter-spike intervals
+
+	std::vector<int> _nIdFiredAtZero; //!< keep track of all neuron IDs for which a spike at t=0 has been scheduled
+	bool _spikeAtZero; //!< whether to emit a spike at t=0
+};
+
+
+// ****************************************************************************************************************** //
+// API IMPLEMENTATION
+// ****************************************************************************************************************** //
+
+// create and destroy a pImpl instance
+
+PeriodicSpikeGenerator::PeriodicSpikeGenerator(bool spikeAtZero) : _impl( new Impl(spikeAtZero) ) {}
+PeriodicSpikeGenerator::~PeriodicSpikeGenerator() { delete _impl; }
+
+void PeriodicSpikeGenerator::setRates(float rateHz) { _impl->setRates(rateHz); }
+void PeriodicSpikeGenerator::setRates(std::vector<float> ratesHz) { _impl->setRates(ratesHz); }
+
+unsigned int PeriodicSpikeGenerator::nextSpikeTime(CARLsim* sim, int grpId, int nid, unsigned int currentTime, 
+		unsigned int lastScheduledSpikeTime, unsigned int endOfTimeSlice) {
+	return _impl->nextSpikeTime(sim, grpId, nid, currentTime, lastScheduledSpikeTime, endOfTimeSlice);
 }

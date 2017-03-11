@@ -63,7 +63,8 @@ TEST(SpikeCounter, SpikeCntvsSpikeMon) {
 			SM[g] = sim->setSpikeMonitor(grpIds[g],"NULL");
 		}
 
-		PeriodicSpikeGenerator spk50(50.0f,true); // periodic spiking @ 50 Hz
+		PeriodicSpikeGenerator spk50(true); // periodic spiking @ 50 Hz
+		spk50.setRates(50.0f);
 		sim->setSpikeGenerator(grpIds[1], &spk50);
 
 		// after some time expect some number of spikes
@@ -138,7 +139,8 @@ TEST(SpikeCounter, CPUvsGPU) {
 		sim->setSpikeCounter(g1,recordDur);
 		sim->setSpikeMonitor(g1,"NULL");
 
-		PeriodicSpikeGenerator* spk50 = new PeriodicSpikeGenerator(50.0f); // periodic spiking @ 50 Hz
+		PeriodicSpikeGenerator* spk50 = new PeriodicSpikeGenerator(); // periodic spiking @ 50 Hz
+		spk50->setRates(50.0f);
 		sim->setSpikeGenerator(g0, spk50);
 
 		// after some time expect some number of spikes

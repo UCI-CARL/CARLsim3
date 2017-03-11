@@ -41,6 +41,7 @@ classdef NetworkMonitor < handle
 
         errorMode;          % program mode for error handling
         supportedErrorModes;% supported error modes
+        supportedPlotTypes; % supported plot types
     end
     
     % private
@@ -578,6 +579,8 @@ classdef NetworkMonitor < handle
             %                  by spkFile=[saveFolder prefix name suffix].
             %                  If it cannot be found, adjust prefix and
             %                  suffix using NM.setSpikeFileAttributes.
+            %                  If it is set to -1, the plot type will be
+            %                  applied to all groups in the network.
             % PLOTTYPE       - The plotting type to use. If not set, the
             %                  default plotting type will be used, which
             %                  is determined by the Grid3D topography of
@@ -605,8 +608,17 @@ classdef NetworkMonitor < handle
             %                             via NM.setPlottingAttributes.
             %                 - raster    A raster plot with binning window
             %                             binWindowMs
-            gId = obj.getGroupId(groupName);
-            obj.groupMonObj{gId}.setDefaultPlotType(plotType);
+            if isscalar(groupName)
+                if groupName == -1
+                    for g=1:numel(obj.groupNames)
+                        gId = obj.getGroupId(obj.groupNames{g});
+                        obj.groupMonObj{gId}.setDefaultPlotType(plotType);
+                    end
+                end
+            else
+                gId = obj.getGroupId(groupName);
+                obj.groupMonObj{gId}.setDefaultPlotType(plotType);
+            end
         end
         
         function setGroupSubPlot(obj, groupName, subPlots)

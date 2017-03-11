@@ -91,9 +91,11 @@ TEST(STP, firingRateSTDvsSTF) {
 					}
 
 					bool spikeAtZero = true;
-					spkGenG0 = new PeriodicSpikeGenerator(10.0f,spikeAtZero); // periodic spiking @ 15 Hz
+					spkGenG0 = new PeriodicSpikeGenerator(spikeAtZero); // periodic spiking @ 15 Hz
+					spkGenG0->setRates(10.0f);
 					sim->setSpikeGenerator(g0, spkGenG0);
-					spkGenG1 = new PeriodicSpikeGenerator(10.0f,spikeAtZero); // periodic spiking @ 15 Hz
+					spkGenG1 = new PeriodicSpikeGenerator(spikeAtZero); // periodic spiking @ 15 Hz
+					spkGenG1->setRates(10.0f);
 					sim->setSpikeGenerator(g1, spkGenG1);
 
 					sim->setupNetwork();
@@ -199,9 +201,11 @@ TEST(STP, spikeTimesCPUvsGPU) {
 				sim->setSTP(g1, true, 0.15f, 750.0f, 50.0f); // facilitative
 
 				bool spikeAtZero = true;
-				spkGenG0 = new PeriodicSpikeGenerator(10.0f,spikeAtZero); // periodic spiking @ 15 Hz
+				spkGenG0 = new PeriodicSpikeGenerator(spikeAtZero); // periodic spiking @ 15 Hz
+				spkGenG0->setRates(10.0f);
 				sim->setSpikeGenerator(g0, spkGenG0);
-				spkGenG1 = new PeriodicSpikeGenerator(10.0f,spikeAtZero); // periodic spiking @ 15 Hz
+				spkGenG1 = new PeriodicSpikeGenerator(spikeAtZero); // periodic spiking @ 15 Hz
+				spkGenG1->setRates(10.0f);
 				sim->setSpikeGenerator(g1, spkGenG1);
 
 				sim->setupNetwork();

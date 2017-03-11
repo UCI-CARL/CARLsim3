@@ -72,7 +72,8 @@ TEST(CUBA, firingRateVsData) {
 			sim->connect(g0, g1, "full", RangeWeight(wt), 1.0f);
 			
 			bool spikeAtZero = true;
-			PeriodicSpikeGenerator *spkGenG0 = new PeriodicSpikeGenerator(inputRate,spikeAtZero);
+			PeriodicSpikeGenerator *spkGenG0 = new PeriodicSpikeGenerator(spikeAtZero);
+			spkGenG0->setRates(inputRate);
 			sim->setSpikeGenerator(g0, spkGenG0);
 
 			sim->setupNetwork();
@@ -143,7 +144,8 @@ TEST(CUBA, firingRateCPUvsGPU) {
 				sim.connect(g0, g1, "full", RangeWeight(wt), 1.0f, RangeDelay(1));
 
 				bool spikeAtZero = true;
-				PeriodicSpikeGenerator spkGenG0(inputRate,spikeAtZero);
+				PeriodicSpikeGenerator spkGenG0(spikeAtZero);
+				spkGenG0.setRates(inputRate);
 				sim.setSpikeGenerator(g0, &spkGenG0);
 
 				if(method)

@@ -63,8 +63,10 @@ TEST(SpikeGen, PeriodicSpikeGenerator) {
 
 	int g0 = sim.createSpikeGeneratorGroup("Input0",nNeur,EXCITATORY_NEURON);
 	int g1 = sim.createSpikeGeneratorGroup("Input1",nNeur,EXCITATORY_NEURON);
-	PeriodicSpikeGenerator spkGen0(rate,true);
-	PeriodicSpikeGenerator spkGen1(rate,false);
+	PeriodicSpikeGenerator spkGen0(true);
+	spkGen0.setRates(rate);
+	PeriodicSpikeGenerator spkGen1(false);
+	spkGen1.setRates(rate);
 	sim.setSpikeGenerator(g0, &spkGen0);
 	sim.setSpikeGenerator(g1, &spkGen1);
 
@@ -104,13 +106,6 @@ TEST(SpikeGen, PeriodicSpikeGenerator) {
 
 	if (inputArray0!=NULL) delete[] inputArray0;
 	if (inputArray1!=NULL) delete[] inputArray1;
-}
-
-TEST(SpikeGen, PeriodicSpikeGeneratorDeath) {
-	::testing::FLAGS_gtest_death_test_style = "threadsafe";
-
-	EXPECT_DEATH({PeriodicSpikeGenerator spkGen(0.0);},"");
-	EXPECT_DEATH({PeriodicSpikeGenerator spkGen(-10.0);},"");
 }
 
 TEST(SpikeGen, SpikeGeneratorFromFile) {

@@ -198,7 +198,8 @@ TEST(GroupMon, peakTimeAndValue) {
 		sim->setESTDP(g1, true, DA_MOD, ExpCurve(0.1f/100, 20, -0.12f/100, 20));
 
 		// use periodic spike generator to know the exact dopamine delivery
-		PeriodicSpikeGenerator* spkGen = new PeriodicSpikeGenerator(10, false);
+		PeriodicSpikeGenerator* spkGen = new PeriodicSpikeGenerator(false);
+		spkGen->setRates(10.0f);
 		sim->setSpikeGenerator(g0, spkGen);
 
 		sim->setupNetwork();

@@ -2958,7 +2958,7 @@ void CpuSNN::printSimSummary() {
 	KERNEL_INFO("\t\t\tmaxDelay = %d", maxDelay_);
 	KERNEL_INFO("Simulation Mode:\t%s",sim_with_conductances?"COBA":"CUBA");
 	KERNEL_INFO("Random Seed:\t\t%d", randSeed_);
-	KERNEL_INFO("Timing:\t\t\tModel Simulation Time = %lld sec", (unsigned long long)simTimeSec);
+	KERNEL_INFO("Timing:\t\t\tModel Simulation Time = %llu sec", (unsigned long long)simTimeSec);
 	KERNEL_INFO("\t\t\tActual Execution Time = %4.2f sec", executionTimeMs/1000.0);
 	KERNEL_INFO("Average Firing Rate:\t2+ms delay = %3.3f Hz", spikeCountD2Host/(1.0*simTimeSec*numNExcReg));
 	KERNEL_INFO("\t\t\t1ms delay = %3.3f Hz", spikeCountD1Host/(1.0*simTimeSec*numNInhReg));
@@ -5448,7 +5448,7 @@ void CpuSNN::updateSpikeMonitor(int grpId) {
                 && this->getGroupNumNeurons(grpId) > LARGE_SPIKE_MON_GRP_SIZE \
                 && spkMonObj->isBufferBig()){
             // change this warning message to correct message
-            KERNEL_WARN("updateSpikeMonitor(grpId=%d) is becoming very large. (>%lld MB)",grpId,(int64_t) MAX_SPIKE_MON_BUFFER_SIZE/1024 );// make this better
+            KERNEL_WARN("updateSpikeMonitor(grpId=%d) is becoming very large. (>%ld MB)",grpId,(int64_t) MAX_SPIKE_MON_BUFFER_SIZE/1024 );// make this better
             KERNEL_WARN("Reduce the cumulative recording time (currently %lu minutes) or the group size (currently %d) to avoid this.",spkMonObj->getAccumTime()/(1000*60),this->getGroupNumNeurons(grpId));
 		}
 #ifndef __NO_CUDA__
@@ -5552,7 +5552,7 @@ void CpuSNN::updateWeights() {
 			}
 
 			if (i==grp_Info[g].StartN)
-				KERNEL_DEBUG("Weights, Change at %llu (diff_firing: %f)", simTimeSec, diff_firing);
+				KERNEL_DEBUG("Weights, Change at %lu (diff_firing: %f)", simTimeSec, diff_firing);
 
 			for(int j = 0; j < Npre_plastic[i]; j++) {
 				//	if (i==grp_Info[g].StartN)
