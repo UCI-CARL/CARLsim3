@@ -246,6 +246,9 @@ Go back to the <tt>scripts</tt> folder in MATLAB, and run:
 
 
 
+
+
+
 \section tut4s3_dog 4.3 Difference of Gaussians: Edge Detection
 
 We can extend the above example by implementing an edge detector using
@@ -320,6 +323,130 @@ sim.connect(gSmoothInh, gEdges, "one-to-one", RangeWeight(100.0f), 1.0f,
 \endcode
 
 
+\subsection tut4s3s3_converting 4.3.3 Converting Pixels to Spikes
 
+This time around, we want the input to be a little more exact than
+a Poisson rate.
+The problem with the Poisson distribution is that the actual firing rate
+you get from a specified mean firing rate lambda has variance
+equal to lambda!
+
+A more exact translation would be to convert the grayscale value of a
+pixel to a constant inter-spike interval (ISI), so that the firing rate
+of the corresponding neuron is 1/ISI.
+
+We do this by subclassing SpikeGenerator and creating our own spike
+generator class:
+
+\code
+class ConstantISI : public SpikeGenerator {
+public:
+	ConstantISI(int numNeur) {
+		_numNeur = numNeur;
+	}
+	~ConstantISI() {}
+
+	...
+
+private:
+	int _numNeur;
+	std::vector<int> _isi;
+};
+\endcode
+
+The class has a private integer <tt>_numNeur</tt> that holds the number of
+neurons in the group, and a vector <tt>_isi</tt> that holds the ISI for
+every neuron in the group.
+
+We then need to specify a <tt>nextSpikeTime</tt> method.
+This method is supposed to return the next spike time of a specific neuron
+<tt>nid</tt> in the group <tt>grpId</tt>.
+In our case, the next spike time is simply: the last spike of the neuron
+plus its ISI:
+\code
+unsigned int nextSpikeTime(CARLsim* sim, int grpId, int nid, unsigned int currentTime,
+	unsigned int lastScheduledSpikeTime, unsigned int endOfTimeSlice)
+{
+	// printf("_numNeur=%d, getGroupNumNeurons=%d\n",_numNeur, sim->getGroupNumNeurons(grpId));
+	assert(_numNeur == sim->getGroupNumNeurons(grpId));
+
+	// periodic spiking according to ISI
+	return (std::max(currentTime, lastScheduledSpikeTime) + _isi[nid]);
+}
+\endcode
+
+What's left is a method to update the ISI on the fly.
+Here we accept as input an array of grayscale values <tt>stimGray</tt>,
+which should have the same elements as the number of neurons in the group,
+and the upper and lower bounds of our firing rates.
+For every neuron in the group,
+we read the grayscale value of the corresponding pixel,
+convert it to a mean firing rate,
+and then invert the firing rate to get an ISI:
+\code
+void updateISI(unsigned char* stimGray, float maxRateHz=50.0f, float minRateHz=0.0f) {
+	_isi.clear();
+
+	// calculate inter-spike interval (ISI) from firing rate
+	for (int i=0; i<_numNeur; i++) {
+		// convert grayscale value to firing rate
+		float rateHz = (float)stimGray[i] / 255.0f * (maxRateHz - minRateHz) + minRateHz;
+
+		// invert firing rate to get inter-spike interval (ISI)
+		int isi = (rateHz > 0.0f) ? std::max(1, (int)(1000 / rateHz)) : 1000000;
+
+		// add value to vector
+		_isi.push_back(isi);
+	}
+}
+\endcode
+
+\note Yes, we could have implemented a constant-firing-rate class instead.
+After all, firing rate is 1/ISI.
+However, going with the ISI has the advantage that we need not think about the
+division by zero, and we only have to deal with integers.
+
+
+
+\subsection tut4s3s4 4.3.4 Running the Network
+
+With our <tt>ConstantISI</tt> class in hand,
+we can assign to the input group:
+\code
+ConstantISI constISI(imgDim.N);
+sim.setSpikeGenerator(gIn, &constISI);
+\endcode
+
+Then we can use the <tt>readFrameChar</tt> method of the VisualStimulus
+bindings to get access to the raw grayscale values, and pass these to
+the <tt>updateISI</tt> method we wrote above:
+\code
+// ---------------- RUN STATE -------------------
+for (int i=0; i<stim.getLength(); i++) {
+	constISI.updateISI(stim.readFrameChar(), 50.0f, 0.0f);
+	sim.runNetwork(1,0); // run the network
+}
+\endcode
+
+
+
+\subsection tut4s3s5_plotting 4.3.5 Visualizing the Output
+
+You can compile and run the above network as follows:
+
+\code
+$ make dog
+$ ./dog
+\endcode
+
+The result can then be analyzed using the OAT.
+Visualizing network activity is easiest with the NetworkMonitor.
+Go back to the <tt>scripts</tt> folder in MATLAB, and run:
+
+\code
+>> demoDOG
+\endcode
+
+\image html 4_carl_dog.jpg "Edge detection with CARLsim"
 
 */
