@@ -103,9 +103,11 @@ int main(int argc, const char* argv[]) {
 	// The output group should be smaller than the input, depending on the
 	// Gaussian kernel. The number of channels here should be 1, since we
 	// will be summing over all color channels.
-	Grid3D imgSmallDim(imgDim.width/2, imgDim.height/2, 1);
+	Grid3D imgSmallDim(imgDim.width, imgDim.height, 1);
 
 
+	// Input group has firing rates at constant inter-spike intervals (ISI),
+	// converted directly from pixel grayscale values
 	int gIn = sim.createSpikeGeneratorGroup("input", imgDim, EXCITATORY_NEURON);
 	ConstantISI constISI(imgDim.N);
 	sim.setSpikeGenerator(gIn, &constISI);
@@ -117,21 +119,24 @@ int main(int argc, const char* argv[]) {
 	int gSmoothInh = sim.createGroup("smoothInh", imgSmallDim, INHIBITORY_NEURON);
 	sim.setNeuronParameters(gSmoothInh, 0.02f, 0.2f, -65.0f, 8.0f);
 
+	// To get edges: subtract gSmoothIn activity from gSmoothExc activity
 	int gEdges = sim.createGroup("edges", imgSmallDim, EXCITATORY_NEURON);
 	sim.setNeuronParameters(gEdges, 0.02f, 0.2f, -65.0f, 8.0f);
 
 
+	// Exc: one-to-one in x and y, but summing over color channels
 	sim.connect(gIn, gSmoothExc, "gaussian", RangeWeight(10.0f), 1.0f,
 		RangeDelay(1), RadiusRF(0.5,0.5,-1));
 
+	// Inh: Blurring the image in x and y, summing over color channels
 	sim.connect(gIn, gSmoothInh, "gaussian", RangeWeight(5.0f), 1.0f,
 		RangeDelay(1), RadiusRF(3,3,-1));
 
-	sim.connect(gSmoothExc, gEdges, "one-to-one", RangeWeight(16.0f), 1.0f,
+	// Edges: Exc - Inh
+	sim.connect(gSmoothExc, gEdges, "one-to-one", RangeWeight(16.5f), 1.0f,
 		RangeDelay(1));
 	sim.connect(gSmoothInh, gEdges, "one-to-one", RangeWeight(100.0f), 1.0f,
 		RangeDelay(1));
-
 
 	sim.setConductances(false);
 
