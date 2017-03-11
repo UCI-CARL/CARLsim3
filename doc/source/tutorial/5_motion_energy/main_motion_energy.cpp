@@ -38,6 +38,8 @@
  */
 #include <carlsim.h>
 
+#include <motion_energy.h>
+
 #include <vector>
 #include <assert.h>
 
@@ -47,53 +49,55 @@
 
 int main(int argc, const char* argv[]) {
 	// ---------------- CONFIG STATE -------------------
-	CARLsim sim("smooth", GPU_MODE, USER);
+	bool onGPU = true;
+	int frameDurMs = 50;
+	int numDir = 8;
+	double speed = 1.5;
+
+	CARLsim sim("me", onGPU?GPU_MODE:CPU_MODE, USER);
 
 	// Input stimulus created from an image using the MATLAB script
 	// "createStimFromImage.m":
-	VisualStimulus stim("input/carl.dat");
+	VisualStimulus stim("input/grating.dat");
 	stim.print();
 
-	// Arrange neurons on a 3D grid, such that every neuron corresponds to
-	// pixel: <width x height x channels>. For a grayscale image, the number
-	// of channels is 1 -- for an RGB image the number is 3.
-	Grid3D imgDim(stim.getWidth(), stim.getHeight(), stim.getChannels());
+	MotionEnergy me(stim.getWidth(), stim.getHeight(), stim.getChannels());
+	unsigned char* frame;
 
-	// The output group should be smaller than the input, depending on the
-	// Gaussian kernel. The number of channels here should be 1, since we
-	// will be summing over all color channels.
-	Grid3D imgSmallDim(imgDim.width/2, imgDim.height/2, 1);
+	Grid3D gridV1(stim.getWidth(), stim.getHeight(), numDir);
+	Grid3D gridMT(stim.getWidth()/2, stim.getHeight()/2, numDir);
+	int gV1=sim.createSpikeGeneratorGroup("V1", gridV1, EXCITATORY_NEURON);
 
-	int gIn = sim.createSpikeGeneratorGroup("input", imgDim, EXCITATORY_NEURON);
-	int gSmooth = sim.createGroup("smooth", imgSmallDim, EXCITATORY_NEURON);
-	sim.setNeuronParameters(gSmooth, 0.02f, 0.2f, -65.0f, 8.0f);
+	int gMT=sim.createGroup("MT", gridMT, EXCITATORY_NEURON);
+	sim.setNeuronParameters(gMT, 0.02f, 0.2f, -65.0f, 8.0f);
+	sim.connect(gV1, gMT, "gaussian", RangeWeight(0.02), 1.0f, RangeDelay(1), RadiusRF(7,7,1));
 
-	// The connect call takes care of the Gaussian smoothing: We define a
-	// 5x5 Gaussian kernel in x and y. The -1 says that we shall sum over all
-	// color channels (3rd dimension of the grid). If we wanted to smooth only
-	// within channels, we would use RadiusRF(5,5,0) and make sure we adjust
-	// imgSmallDim to have 3 color channels above.
-	sim.connect(gIn, gSmooth, "gaussian", RangeWeight(2.0f), 1.0f,
-		RangeDelay(1), RadiusRF(5,5,-1));
+	PoissonRate rateV1(gridV1.N, onGPU);
 
 	// Use CUBA mode
-	sim.setConductances(false);
+	sim.setConductances(true);
 
 
 	// ---------------- SETUP STATE -------------------
 	sim.setupNetwork();
 
-	sim.setSpikeMonitor(gIn, "DEFAULT");
-	sim.setSpikeMonitor(gSmooth, "DEFAULT");
+	sim.setSpikeMonitor(gV1, "DEFAULT");
+	sim.setSpikeMonitor(gMT, "DEFAULT");
 
 
 	// ---------------- RUN STATE -------------------
 	for (int i=0; i<stim.getLength(); i++) {
-		PoissonRate* rates = stim.readFramePoisson(50.0f, 0.0f);
-		sim.setSpikeRate(gIn, rates);
- 		sim.runNetwork(1,0); // run the network
- 	}
+		// get stim frame
+		frame = stim.readFrameChar();
 
+		// calculate V1 complex cell response
+		me.calcV1complex(frame, onGPU?rateV1.getRatePtrGPU():rateV1.getRatePtrCPU(),
+			speed, onGPU);
+
+		sim.setSpikeRate(gV1, &rateV1);
+
+		sim.runNetwork(frameDurMs/1000, frameDurMs%1000);
+	}
 
 	return 0;
 }

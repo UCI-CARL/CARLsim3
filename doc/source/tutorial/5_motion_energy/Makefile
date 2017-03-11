@@ -23,8 +23,7 @@
 
 # Name of the binary file to be created.
 # NOTE: There must be a corresponding .cpp file named main_$(proj_target).cpp!
-proj_target1   := smooth
-proj_target2   := dog
+proj_target    := motion_energy
 
 # Directory where all include files reside. The Makefile will automatically
 # detect and include all .h files within that directory.
@@ -33,6 +32,7 @@ proj_inc_dir   := .
 # Directory where all source files reside. The Makefile will automatically
 # detect and include all .cpp and .cu files within that directory.
 proj_src_dir   := .
+
 
 ################################################################################
 # End of user-modifiable section
@@ -59,16 +59,30 @@ include $(CARLSIM3_INC_DIR)/configure.mk
 # Build local variables
 #------------------------------------------------------------------------------
 
-main_src_file1 := $(proj_src_dir)/main_$(proj_target1).cpp
-main_src_file2 := $(proj_src_dir)/main_$(proj_target2).cpp
 
-# build list of all .h files
+PROJ_FL := -I/opt/CARL/ME/inc -L/opt/CARL/ME/lib
+PROJ_LIB := -lME
+
+
+main_src_file := $(proj_src_dir)/main_$(proj_target).cpp
+
+# build list of all .cpp, .cu, and .h files (but don't include main_src_file)
+cpp_files  := $(wildcard $(proj_src_dir)/*.cpp)
+cpp_files  := $(filter-out $(main_src_file),$(cpp_files))
+cu_files   := $(wildcard $(proj_src_dir)/src/*.cu)
 inc_files  := $(wildcard $(proj_inc_dir)/*.h)
 
 # compile .cpp files to -cpp.o, and .cu files to -cu.o
+obj_cpp    := $(patsubst %.cpp, %-cpp.o, $(cpp_files))
+obj_cu     := $(patsubst %.cu, %-cu.o, $(cu_files))
+ifeq ($(CARLSIM3_NO_CUDA),1)
+obj_files  := $(obj_cpp)
+else
+obj_files  := $(obj_cpp) $(obj_cu)
+endif
 
 # handled by clean and distclean
-clean_files := $(proj_target1) $(proj_target2)
+clean_files := $(obj_files) $(proj_target)
 distclean_files := $(clean_files) results/* *.dot *.dat *.csv *.log
 
 
@@ -76,15 +90,18 @@ distclean_files := $(clean_files) results/* *.dot *.dat *.csv *.log
 # Project targets and rules
 #------------------------------------------------------------------------------
 
-.PHONY: $(proj_target1) $(proj_target2) clean distclean help
-default: $(proj_target1)
+.PHONY: $(proj_target) clean distclean help
+default: $(proj_target)
 
 
-$(proj_target1): $(main_src_file1) $(inc_files)
-	$(NVCC) $(CARLSIM3_FLG) $(obj_files) $< -o $@ $(CARLSIM3_LIB)
+$(proj_target): $(main_src_file) $(inc_files) $(obj_files)
+	$(NVCC) $(CARLSIM3_FLG) $(PROJ_FL) $(obj_files) $< -o $@ $(CARLSIM3_LIB) $(PROJ_LIB)
 
-$(proj_target2): $(main_src_file2) $(inc_files)
-	$(NVCC) $(CARLSIM3_FLG) $(obj_files) $< -o $@ $(CARLSIM3_LIB)
+$(proj_src_dir)/%-cpp.o: $(proj_src_dir)/%.cpp $(inc_files)
+	$(CXX) -c $(CXXINCFL) $(CXXFL) $< -o $@
+
+$(proj_src_dir)/%-cu.o: $(proj_src_dir)/%.cu $(inc_files)
+	$(NVCC) -c $(NVCCINCFL) $(PROJ_FL) $(SIMINCFL) $(NVCCFL) $< -o $@ $(PROJ_LIB)
 
 clean:
 	$(RM) $(clean_files)
