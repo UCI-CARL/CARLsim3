@@ -1,0 +1,41 @@
+/*!
+
+\page tut5_motion_energy Tutorial 5: Motion Energy
+\tableofcontents
+
+\author Michael Beyeler
+\see \ref ch1_getting_started
+\see \ref ch2_basic_concepts
+\see \ref ch3_neurons_synapses_groups
+\see \ref ch4_connections
+\see \ref ch9_matlab_oat
+
+In this tutorial, we will take a closer look at CARLsim's spatial connectivity
+profiles by implementing a simple image filter.
+Specifically, we will use the Gaussian connectivity profile to implement a
+smoothening operation and an edge detector (using a difference of Gaussians).
+To make this work, we will make use of both the Offline Analysis Toolbox
+and the Visual Stimulus Toolbox.
+
+At the end of the tutorial, you will know how to:
+- implement Gaussian connectivity profiles
+- use the ::Grid3D and ::RadiusRF structs for 2-D and 3-D transforms
+- import stimuli from the VisualStimulusToolbox into CARLsim
+- set up a custom SpikeGenerator object
+- create Gaussian connections for neurons arranged on a 2D/3D grid
+
+
+The source code of this tutorial can be found in
+<tt>%%%CARLSIM_ROOT_DIR%%/doc/source/tutorial/5_motion_energy</tt>.
+
+
+
+\section tut5s1_me 5.1 The MotionEnergy Package
+
+
+\section tut5s2_stimuli 5.2 Stimuli
+
+\section tut5s3_network 5.3 Network
+
+
+*/
