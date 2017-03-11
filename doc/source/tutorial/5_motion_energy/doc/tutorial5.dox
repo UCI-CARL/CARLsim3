@@ -16,7 +16,7 @@ combine different concepts and libraries to create a
 network of direction-selective neurons that are arranged on a spatial grid.
 
 We will first use the <tt>VisualStimulus</tt> toolbox to generate a drifting
-sinusoidal gratign.
+sinusoidal grating.
 Then we will use the <tt>MotionEnergy</tt> library to parse the stimulus
 and generate direction-selective responses akin to those of neurons in the 
 primary visual cortex (V1).
