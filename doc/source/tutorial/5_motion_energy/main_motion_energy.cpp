@@ -34,7 +34,6 @@
  * maintained by:	(MA) Mike Avery <averym@uci.edu>, (MB) Michael Beyeler <mbeyeler@uci.edu>,
  *					(KDC) Kristofor Carlson <kdcarlso@uci.edu>
  *
- * CARLsim available from http://socsci.uci.edu/~jkrichma/CARL/CARLsim
  */
 #include <carlsim.h>
 
@@ -56,25 +55,35 @@ int main(int argc, const char* argv[]) {
 
 	CARLsim sim("me", onGPU?GPU_MODE:CPU_MODE, USER);
 
-	// Input stimulus created from an image using the MATLAB script
-	// "createStimFromImage.m":
+	// Input stimulus created using the MATLAB script "createGratingVideo.m"
 	VisualStimulus stim("input/grating.dat");
 	stim.print();
 
+	// The MotionEnergy object has to be initialized with the stimulus size.
 	MotionEnergy me(stim.getWidth(), stim.getHeight(), stim.getChannels());
 	unsigned char* frame;
 
+	// We want to create neuronal populations responding to `numDir` different
+	// directions of motion at every pixel of the stimulus.
 	Grid3D gridV1(stim.getWidth(), stim.getHeight(), numDir);
 	Grid3D gridMT(stim.getWidth()/2, stim.getHeight()/2, numDir);
-	int gV1=sim.createSpikeGeneratorGroup("V1", gridV1, EXCITATORY_NEURON);
 
+	// Primary visual cortex (V1) neurons will receive input from the `MotionEnergy`
+	// object. Filter responses of the `MotionEnergy` object will be converted to
+	// mean firing rates of a Poisson process (using the `PoissonRate` object).
+	int gV1=sim.createSpikeGeneratorGroup("V1", gridV1, EXCITATORY_NEURON);
+	PoissonRate rateV1(gridV1.N, onGPU);
+	sim.setSpikeRate(gV1, &rateV1);
+
+	// Middle temporal area (MT) neurons will sum over V1 neurons using a Gaussian
+	// kernel in x and y (7x7 pixels), but will not sum across directions (the third
+	// dimension of the grid). Thus the `RadiusRF` struct should be initialized as
+	// `RadiusRF(7,7,0)`.
 	int gMT=sim.createGroup("MT", gridMT, EXCITATORY_NEURON);
 	sim.setNeuronParameters(gMT, 0.02f, 0.2f, -65.0f, 8.0f);
-	sim.connect(gV1, gMT, "gaussian", RangeWeight(0.02), 1.0f, RangeDelay(1), RadiusRF(7,7,1));
+	sim.connect(gV1, gMT, "gaussian", RangeWeight(0.02), 1.0f, RangeDelay(1), RadiusRF(7,7,0));
 
-	PoissonRate rateV1(gridV1.N, onGPU);
-
-	// Use CUBA mode
+	// Use COBA mode
 	sim.setConductances(true);
 
 
@@ -87,14 +96,20 @@ int main(int argc, const char* argv[]) {
 
 	// ---------------- RUN STATE -------------------
 	for (int i=0; i<stim.getLength(); i++) {
-		// get stim frame
+		// Repeated calls to this function will ready one frame at a time from the
+		// stimulus file, automatically advancing to the next frame.
 		frame = stim.readFrameChar();
 
-		// calculate V1 complex cell response
+		// The `MotionEnergy` object has a bunch of intermediate steps that could be
+		// accessed, such as the V1 linear filter response (excluding normalization, etc.).
+		// Here we want to convert a `frame` of the stimulus to V1 complex cell responses,
+		// and use them to fill up the `rateV1` container. Thus we have to pass the right
+		// PoissonRate pointer (could live either on the host or the device).
+		// Since the `MotionEnergy` object does all calculations on the GPU, passing the
+		// `onGPU` flag will avoid copying all data from GPU to CPU, only to copy it back
+		// to a PoissonRate container on the GPU.
 		me.calcV1complex(frame, onGPU?rateV1.getRatePtrGPU():rateV1.getRatePtrCPU(),
 			speed, onGPU);
-
-		sim.setSpikeRate(gV1, &rateV1);
 
 		sim.runNetwork(frameDurMs/1000, frameDurMs%1000);
 	}
