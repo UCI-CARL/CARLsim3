@@ -27,9 +27,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_2_random_spnet", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_3_plasticity", "doc\source\tutorial\3_plasticity\tutorial_3_plasticity.vcxproj", "{B33263C5-0468-4132-AE6B-098F642BA570}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_4_simple_weight_tuner", "doc\source\tutorial\4_simple_weight_tuner\tutorial_4_simple_weight_tuner.vcxproj", "{332BE526-A286-45A1-925E-0D6FAFCAF1B7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_4_image_processing", "doc\source\tutorial\4_simple_weight_tuner\tutorial_4_image_processing.vcxproj", "{332BE526-A286-45A1-925E-0D6FAFCAF1B7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_5_motion_energy", doc\source\tutorial\4_simple_weight_tuner\tutorial_5_motion_energy.vcxproj", "{332BE526-A286-45A1-925E-0D6FAFCAF1B7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tutorial_6_simple_weight_tuner", "doc\source\tutorial\4_simple_weight_tuner\tutorial_6_simple_weight_tuner.vcxproj", "{332BE526-A286-45A1-925E-0D6FAFCAF1B7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stopwatch", "tools\stopwatch\stopwatch.vcxproj", "{9032D439-A99B-4479-947D-431E000FC9FB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "visual_stimulus", "tools\visual_stimulus\visual_stimulus.vcxproj", "{9032D439-A99B-4479-947D-431E000FC9FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

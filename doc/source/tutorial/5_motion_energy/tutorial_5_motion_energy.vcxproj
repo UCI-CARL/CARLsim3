@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main_image_processing.cpp" />
+    <ClCompile Include="main_motion_energy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\carlsim\connection_monitor\connection_monitor.vcxproj">
