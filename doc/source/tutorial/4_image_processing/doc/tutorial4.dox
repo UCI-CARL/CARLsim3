@@ -246,6 +246,79 @@ Go back to the <tt>scripts</tt> folder in MATLAB, and run:
 
 
 
+\section tut4s3_dog 4.3 Difference of Gaussians: Edge Detection
+
+We can extend the above example by implementing an edge detector using
+a difference of Gaussians (DOG) operation.
+For this, we will first convolve the image with a small Gaussian kernel
+::RadiusRF(0.5, 0.5, -1), which is basically a "one-to-one" connection.
+From the output of this operation, we will then
+subtract a blurred version of the image.
+The result will be an edge map.
+
+
+
+\subsection tut4s3s1_setup 4.3.1 Setting up the Network
+
+Importing the image and setting up the ::Grid3D structs is the same as above:
+
+\code
+CARLsim sim("dog", GPU_MODE, USER);
+
+VisualStimulus stim("input/carl.dat");
+stim.print();
+
+Grid3D imgDim(stim.getWidth(), stim.getHeight(), stim.getChannels());
+Grid3D imgSmallDim(imgDim.width/2, imgDim.height/2, 1);
+\endcode
+
+
+From these specs, we will create the input and smoothing groups as above:
+\code
+int gIn = sim.createSpikeGeneratorGroup("input", imgDim, EXCITATORY_NEURON);
+int gSmoothExc = sim.createGroup("smoothExc", imgSmallDim, EXCITATORY_NEURON);
+sim.setNeuronParameters(gSmoothExc, 0.02f, 0.2f, -65.0f, 8.0f);
+\endcode
+
+However, this time around we also need an inhibitory group, so that we can
+subtract the blurred version of the image,
+and an output group that will contain the edge map:
+\code
+int gSmoothInh = sim.createGroup("smoothInh", imgSmallDim, INHIBITORY_NEURON);
+sim.setNeuronParameters(gSmoothInh, 0.02f, 0.2f, -65.0f, 8.0f);
+
+int gEdges = sim.createGroup("edges", imgSmallDim, EXCITATORY_NEURON);
+sim.setNeuronParameters(gEdges, 0.02f, 0.2f, -65.0f, 8.0f);
+\endcode
+
+
+\subsection tut4s3s2_dog 4.3.2 Performing the Difference of Gaussians (DOG) Operation
+
+Setting up the connectivity is straightforward, too.
+The only annoying thing is that you will have to tune the synaptic weights
+in order to get this right.
+
+Luckily I have already done this for you.
+We need two feedforward connections from the input group:
+One with a small kernel to an excitatory group,
+and another with a larger kernel to an inhibitory group.
+\code
+sim.connect(gIn, gSmoothExc, "gaussian", RangeWeight(10.0f), 1.0f,
+	RangeDelay(1), RadiusRF(0.5,0.5,-1));
+
+sim.connect(gIn, gSmoothInh, "gaussian", RangeWeight(5.0f), 1.0f,
+	RangeDelay(1), RadiusRF(3,3,-1));
+\endcode
+
+We then want to subtract the output of <tt>gSmoothInh</tt> from
+<tt>gSmoothExc</tt>:
+\code
+sim.connect(gSmoothExc, gEdges, "one-to-one", RangeWeight(16.0f), 1.0f,
+	RangeDelay(1));
+sim.connect(gSmoothInh, gEdges, "one-to-one", RangeWeight(100.0f), 1.0f,
+	RangeDelay(1));
+\endcode
+
 
 
 
