@@ -47,24 +47,36 @@
 
 int main(int argc, const char* argv[]) {
 	// ---------------- CONFIG STATE -------------------
-	CARLsim sim("smooth", CPU_MODE, USER);
+	CARLsim sim("smooth", GPU_MODE, USER);
 
+	// Input stimulus created from an image using the MATLAB script
+	// "createStimFromImage.m":
 	VisualStimulus stim("input/carl.dat");
 	stim.print();
 
+	// Arrange neurons on a 3D grid, such that every neuron corresponds to
+	// pixel: <width x height x channels>. For a grayscale image, the number
+	// of channels is 1 -- for an RGB image the number is 3.
 	Grid3D imgDim(stim.getWidth(), stim.getHeight(), stim.getChannels());
-	Grid3D imgSmallDim(imgDim.width/2, imgDim.height/2, imgDim.channels);
+
+	// The output group should be smaller than the input, depending on the
+	// Gaussian kernel. The number of channels here should be 1, since we
+	// will be summing over all color channels.
+	Grid3D imgSmallDim(imgDim.width/2, imgDim.height/2, 1);
 
 	int gIn = sim.createSpikeGeneratorGroup("input", imgDim, EXCITATORY_NEURON);
 	int gSmooth = sim.createGroup("smooth", imgSmallDim, EXCITATORY_NEURON);
 	sim.setNeuronParameters(gSmooth, 0.02f, 0.2f, -65.0f, 8.0f);
 
-	int gSum = sim.createGroup("sum", imgSmallDim, EXCITATORY_NEURON);
-	sim.setNeuronParameters(gSum, 0.02f, 0.2f, -65.0f, 8.0f);
+	// The connect call takes care of the Gaussian smoothing: We define a
+	// 5x5 Gaussian kernel in x and y. The -1 says that we shall sum over all
+	// color channels (3rd dimension of the grid). If we wanted to smooth only
+	// within channels, we would use RadiusRF(5,5,0) and make sure we adjust
+	// imgSmallDim to have 3 color channels above.
+	sim.connect(gIn, gSmooth, "gaussian", RangeWeight(2.0f), 1.0f,
+		RangeDelay(1), RadiusRF(5,5,-1));
 
-	sim.connect(gIn, gSmooth, "gaussian", RangeWeight(2.0f), 1.0f, RangeDelay(1), RadiusRF(5,5,0));
-	sim.connect(gSmooth, gSum, "gaussian", RangeWeight(20.0f), 1.0f, RangeDelay(1), RadiusRF(0.5,0.5,-1));
-
+	// Use CUBA mode
 	sim.setConductances(false);
 
 
@@ -73,12 +85,11 @@ int main(int argc, const char* argv[]) {
 
 	sim.setSpikeMonitor(gIn, "DEFAULT");
 	sim.setSpikeMonitor(gSmooth, "DEFAULT");
-	sim.setSpikeMonitor(gSum, "DEFAULT");
 
 
 	// ---------------- RUN STATE -------------------
 	for (int i=0; i<stim.getLength(); i++) {
-		PoissonRate* rates = stim.readFrame(50.0f, 0.0f);
+		PoissonRate* rates = stim.readFramePoisson(50.0f, 0.0f);
 		sim.setSpikeRate(gIn, rates);
  		sim.runNetwork(1,0); // run the network
  	}

@@ -48,13 +48,13 @@ public:
 	}
 
 	// reads the next frame and returns the char array
-	unsigned char* readFrame() {
+	unsigned char* readFrameChar() {
 		readFramePrivate();
 		return _frame;
 	}
 
 	// reads the next frame and returns the PoissonRate object
-	PoissonRate* readFrame(float maxPoisson, float minPoisson) {
+	PoissonRate* readFramePoisson(float maxPoisson, float minPoisson) {
 		assert(maxPoisson>0);
 		assert(maxPoisson>minPoisson);
 
@@ -229,9 +229,9 @@ private:
 VisualStimulus::VisualStimulus(std::string fileName, bool wrapAroundEOF) : _impl( new Impl(fileName, wrapAroundEOF) ) {}
 VisualStimulus::~VisualStimulus() { delete _impl; }
 
-unsigned char* VisualStimulus::readFrame() { return _impl->readFrame(); }
-PoissonRate* VisualStimulus::readFrame(float maxPoisson, float minPoisson) {
-	return _impl->readFrame(maxPoisson, minPoisson);
+unsigned char* VisualStimulus::readFrameChar() { return _impl->readFrameChar(); }
+PoissonRate* VisualStimulus::readFramePoisson(float maxPoisson, float minPoisson) {
+	return _impl->readFramePoisson(maxPoisson, minPoisson);
 }
 void VisualStimulus::rewind() { _impl->rewind(); }
 void VisualStimulus::print() { _impl->print(); }

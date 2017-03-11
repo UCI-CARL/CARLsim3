@@ -954,7 +954,8 @@ classdef GroupMonitor < handle
                 clear spkBuffer;
                 spkBuffer(:,:,1,:) = flowX;
                 spkBuffer(:,:,2,:) = flowY;
-            elseif strcmpi(obj.plotType,'heatmap')
+            elseif strcmpi(obj.plotType,'heatmap') ...
+                    || strcmpi(obj.plotType,'bw')
                 % heat map uses user-set frameDur for both binning and
                 % plotting
                 spkBuffer = obj.spkObj.readSpikes(plotBinWinMs);
@@ -1016,7 +1017,7 @@ classdef GroupMonitor < handle
             
             obj.grid3D = -1;
             
-            obj.supportedPlotTypes  = {'flowfield', 'heatmap', ...
+            obj.supportedPlotTypes  = {'flowfield', 'heatmap', 'bw', ...
                 'histogram', 'raster'};
             obj.supportedErrorModes = {'standard', 'warning', 'silent'};
 			
@@ -1091,6 +1092,23 @@ classdef GroupMonitor < handle
                 maxD = max(obj.spkData(:));
                 frame = obj.spkData(:,:,frameNr);
                 imagesc(frame, [0 max(0.001,maxD)])
+                axis image equal
+                axis([1 obj.grid3D(1)*obj.grid3D(3) 1 obj.grid3D(2)])
+                title(['Group ' obj.plotTitleName ', rate = [0 , ' ...
+                    num2str(maxD*1000/frameDur) ' Hz]'])
+                xlabel('nrX')
+                ylabel('nrY')
+%                 set(gca, 'XTick', 0:obj.grid3D(2):obj.grid3D(2)*obj.grid3D(3))
+                
+                % if enabled, display the frame number in lower left corner
+                if dispFrameNr
+                    text(2,size(obj.spkData,1)-1,num2str(frameNr), ...
+                        'FontSize',10,'BackgroundColor','white')
+                end
+            elseif strcmpi(obj.plotType,'bw')
+                maxD = max(obj.spkData(:));
+                frame = obj.spkData(:,:,frameNr);
+                imagesc(int32(frame > 0), [0 1])
                 axis image equal
                 axis([1 obj.grid3D(1)*obj.grid3D(3) 1 obj.grid3D(2)])
                 title(['Group ' obj.plotTitleName ', rate = [0 , ' ...

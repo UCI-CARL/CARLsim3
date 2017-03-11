@@ -86,7 +86,7 @@ public:
 	 *
 	 * \returns  pointer to the char array of raw grayscale values
 	 */
-	unsigned char* readFrame();
+	unsigned char* readFrameChar();
 
 	/*!
 	 * \brief Reads the next image frame and returns a pointer to a PoissonRate object
@@ -111,7 +111,7 @@ public:
 	 * PoissonRate object of a frame that has already been read, use getCurrentFrameChar() or getCurrentFramePoisson()
 	 * instead.
 	 */
-	PoissonRate* readFrame(float maxPoisson, float minPoisson=0.0f);
+	PoissonRate* readFramePoisson(float maxPoisson, float minPoisson=0.0f);
 
 	/*!
 	 * \brief Rewinds the file pointer to the top

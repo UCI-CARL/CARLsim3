@@ -38,6 +38,7 @@
  */
 #include <carlsim.h>
 
+#include <algorithm>
 #include <vector>
 #include <assert.h>
 
@@ -60,7 +61,7 @@ public:
 			float rateHz = (float)stimGray[i] / 255.0f * (maxRateHz - minRateHz) + minRateHz;
 
 			// invert firing rate to get inter-spike interval (ISI)
-			int isi = (rateHz > 0.0f) ? MAX(1, 1000 / rateHz) : 1000000;
+			int isi = (rateHz > 0.0f) ? std::max(1, (int)(1000 / rateHz)) : 1000000;
 
 			// add value to vector
 			_isi.push_back(isi);
@@ -74,7 +75,7 @@ public:
 		assert(_numNeur == sim->getGroupNumNeurons(grpId));
 
 		// periodic spiking according to ISI
-		return (MAX(currentTime, lastScheduledSpikeTime) + _isi[nid]);
+		return (std::max(currentTime, lastScheduledSpikeTime) + _isi[nid]);
 	}
 
 private:
@@ -88,59 +89,65 @@ int main(int argc, const char* argv[]) {
 	// ---------------- CONFIG STATE -------------------
 	CARLsim sim("dog", GPU_MODE, USER);
 
-
+	// Input stimulus created from an image using the MATLAB script
+	// "createStimFromImage.m":
 	VisualStimulus stim("input/carl.dat");
 	stim.print();
 
+
+	// Arrange neurons on a 3D grid, such that every neuron corresponds to
+	// pixel: <width x height x channels>. For a grayscale image, the number
+	// of channels is 1 -- for an RGB image the number is 3.
 	Grid3D imgDim(stim.getWidth(), stim.getHeight(), stim.getChannels());
-	// Grid3D imgSmallDim(imgDim.width/2, imgDim.height/2, imgDim.channels);
+
+	// The output group should be smaller than the input, depending on the
+	// Gaussian kernel. The number of channels here should be 1, since we
+	// will be summing over all color channels.
+	Grid3D imgSmallDim(imgDim.width/2, imgDim.height/2, 1);
 
 
-	// int gSmooth = sim.createGroup("smooth", imgSmallDim, EXCITATORY_NEURON);
-	// sim.setNeuronParameters(gSmooth, 0.02f, 0.2f, -65.0f, 8.0f);
-	// sim.connect(gInDOG, gSmooth, "gaussian", RangeWeight(2.0f), 1.0f, RangeDelay(1), RadiusRF(5,5,1));
-
-
-	// int gInDOG = sim.createSpikeGeneratorGroup("inDOG", imgDim, EXCITATORY_NEURON);
-	int gDOG = sim.createGroup("DOG", imgDim, EXCITATORY_NEURON);
-	sim.setNeuronParameters(gDOG, 0.02f, 0.2f, -65.0f, 8.0f);
-	int gDOGi = sim.createGroup("DOGi", imgDim, INHIBITORY_NEURON);
-	sim.setNeuronParameters(gDOGi, 0.02f, 0.2f, -65.0f, 8.0f);
-
-	int gAvg = sim.createGroup("avg", imgDim, INHIBITORY_NEURON);
-	sim.setNeuronParameters(gAvg, 0.02f, 0.2f, -65.0f, 8.0f);
-
-	int gInDOG = sim.createSpikeGeneratorGroup("inputDOG", imgDim, EXCITATORY_NEURON);
+	int gIn = sim.createSpikeGeneratorGroup("input", imgDim, EXCITATORY_NEURON);
 	ConstantISI constISI(imgDim.N);
-	sim.setSpikeGenerator(gInDOG, &constISI);
+	sim.setSpikeGenerator(gIn, &constISI);
 
-	sim.connect(gInDOG, gDOG, "one-to-one", RangeWeight(30.0f), 1.0f);
-	sim.connect(gInDOG, gDOGi, "gaussian", RangeWeight(20.0f), 1.0f, RangeDelay(1), RadiusRF(5,5,0));
-	sim.connect(gDOGi, gDOG, "one-to-one", RangeWeight(30.0f), 1.0f);
-	// sim.connect(gDOGi, gDOG, "gaussian", RangeWeight(120.0f), 1.0f, RangeDelay(1), RadiusRF(0.5,0.5,0));
 
-	// sim.connect(gInDOG, gAvg, "random", RangeWeight(1.0f), 0.005f);
-	// sim.connect(gAvg, gDOG, "random", RangeWeight(1.0f), 0.005f);
+	int gSmoothExc = sim.createGroup("smoothExc", imgSmallDim, EXCITATORY_NEURON);
+	sim.setNeuronParameters(gSmoothExc, 0.02f, 0.2f, -65.0f, 8.0f);
 
+	int gSmoothInh = sim.createGroup("smoothInh", imgSmallDim, INHIBITORY_NEURON);
+	sim.setNeuronParameters(gSmoothInh, 0.02f, 0.2f, -65.0f, 8.0f);
+
+	int gEdges = sim.createGroup("edges", imgSmallDim, EXCITATORY_NEURON);
+	sim.setNeuronParameters(gEdges, 0.02f, 0.2f, -65.0f, 8.0f);
+
+
+	sim.connect(gIn, gSmoothExc, "gaussian", RangeWeight(10.0f), 1.0f,
+		RangeDelay(1), RadiusRF(0.5,0.5,-1));
+
+	sim.connect(gIn, gSmoothInh, "gaussian", RangeWeight(5.0f), 1.0f,
+		RangeDelay(1), RadiusRF(3,3,-1));
+
+	sim.connect(gSmoothExc, gEdges, "one-to-one", RangeWeight(16.0f), 1.0f,
+		RangeDelay(1));
+	sim.connect(gSmoothInh, gEdges, "one-to-one", RangeWeight(100.0f), 1.0f,
+		RangeDelay(1));
 
 
 	sim.setConductances(false);
 
+
 	// ---------------- SETUP STATE -------------------
 	sim.setupNetwork();
 
-	sim.setSpikeMonitor(gInDOG, "DEFAULT");
-	// sim.setSpikeMonitor(gSmooth, "DEFAULT");
-	sim.setSpikeMonitor(gDOG, "DEFAULT");
-	sim.setSpikeMonitor(gDOGi, "DEFAULT");
+	sim.setSpikeMonitor(gIn, "DEFAULT");
+	sim.setSpikeMonitor(gSmoothExc, "DEFAULT");
+	sim.setSpikeMonitor(gSmoothInh, "DEFAULT");
+	sim.setSpikeMonitor(gEdges, "DEFAULT");
 
 
 	// ---------------- RUN STATE -------------------
 	for (int i=0; i<stim.getLength(); i++) {
-		// PoissonRate* rates = stim.readFrame(50.0f, 0.0f);
-		// sim.setSpikeRate(gInDOG, rates);
-		constISI.updateISI(stim.readFrame(), 50.0f, 0.0f);
-
+		constISI.updateISI(stim.readFrameChar(), 50.0f, 0.0f);
  		sim.runNetwork(1,0); // run the network
  	}
 
