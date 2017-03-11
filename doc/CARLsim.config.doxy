@@ -799,6 +799,7 @@ IMAGE_PATH             = source/user_guide \
                          source/tutorial/2_random_spnet/doc \
                          source/tutorial/3_plasticity/doc \
                          source/tutorial/4_image_processing/doc \
+                         source/tutorial/4_image_processing/input \
                          source/tutorial/5_simple_weight_tuner/doc \
                          source/tutorial/6_pti/doc
 
