@@ -328,6 +328,20 @@ Instead, we want to pass the right pointer (<tt>rateV1.getRatePtrGPU()</tt> if t
 PoissonRate object was allocated on the GPU), and indicate that this is a pointer to
 device memory (using <tt>onGPU</tt> set to true).
 
+After putting it all together, the run state code should look like this:
+
+\code
+// ---------------- RUN STATE -------------------
+for (int i=0; i<stim.getLength(); i++) {
+  frame = stim.readFrameChar();
+
+  me.calcV1complex(frame, onGPU?rateV1.getRatePtrGPU():rateV1.getRatePtrCPU(),
+    speed, onGPU);
+
+  sim.runNetwork(frameDurMs/1000, frameDurMs%1000);
+}
+\endcode
+
 And that's it!
 
 
