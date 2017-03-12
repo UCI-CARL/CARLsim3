@@ -61,7 +61,7 @@
 			</tab>
       			<tab type="usergroup" visible="yes" title="11. Regression Suite" url="@ref ch11_regression_suite">
 		        	<tab type="user" visible="no" title="11.1 Installing Google Test" url="@ref ch11s1_installation"/>
-        			<tab type="user" visible="no" title="11.2 Running Google Test" url="@ref ch11s1_running"/>
+        			<tab type="user" visible="no" title="11.2 Running Google Test" url="@ref ch11s2_running"/>
         			<tab type="user" visible="no" title="11.3 Contributing New Tests" url="@ref ch11s3_contributing"/>
        				<tab type="user" visible="no" title="11.4 Code Coverage" url="@ref ch11s4_coverage"/>
       			</tab>
@@ -98,7 +98,7 @@
 			<tab type="usergroup" visible="yes" title="5. Motion Energy" url="@ref tut5_motion_energy">
 				<tab type="user" visible="no" title="5.1 The MotionEnergy package" url="@ref tut5s1_me"/>
 				<tab type="user" visible="no" title="5.2 Stimuli" url="@ref tut5s2_stimuli"/>
-				<tab type="user" visible="no" title="5.3 Network" url="@ref tut5s2_network"/>
+				<tab type="user" visible="no" title="5.3 Network" url="@ref tut5s3_network"/>
 			</tab>
 			<tab type="usergroup" visible="yes" title="6. Simple Weight Tuner" url="@ref tut6_simple_weight_tuner">
 				<tab type="user" visible="no" title="6.1 Problem" url="@ref tut6s1_problem"/>
