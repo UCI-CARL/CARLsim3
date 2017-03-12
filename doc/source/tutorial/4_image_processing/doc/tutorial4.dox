@@ -167,14 +167,14 @@ sim.setNeuronParameters(gSmooth, 0.02f, 0.2f, -65.0f, 8.0f);
 The Gaussian blur is simply implemented by a Gaussian connection.
 The trick is to use the ::RadiusRF struct to define the Gaussian kernel.
 For image processing, we want a Gaussian kernel in x and y dimensions, such as
-a 5x5 kernel. This is equivalent to ::RadiusRF(5, 5, 0).
+a 5x5 kernel. This is equivalent to RadiusRF(5, 5, 0).
 Here, the zero specifies that the smoothing will be performed separately for
 every channel (third dimension).
 If we wanted to smooth over the third dimension (e.g., a Gaussian voxel),
-we would choose ::RadiusRF(5, 5, 5).
+we would choose RadiusRF(5, 5, 5).
 
 However, what we really want is to sum or average over all three color channels
-if the image is RGB. We do this by specifying ::RadiusRF(5, 5, -1):
+if the image is RGB. We do this by specifying RadiusRF(5, 5, -1):
 \code
 sim.connect(gIn, gSmooth, "gaussian", RangeWeight(2.0f), 1.0f,
 	RangeDelay(1), RadiusRF(5,5,-1));
@@ -254,7 +254,7 @@ Go back to the <tt>scripts</tt> folder in MATLAB, and run:
 We can extend the above example by implementing an edge detector using
 a difference of Gaussians (DOG) operation.
 For this, we will first convolve the image with a small Gaussian kernel
-::RadiusRF(0.5, 0.5, -1), which is basically a "one-to-one" connection.
+RadiusRF(0.5, 0.5, -1), which is basically a "one-to-one" connection.
 From the output of this operation, we will then
 subtract a blurred version of the image.
 The result will be an edge map.

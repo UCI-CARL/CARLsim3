@@ -164,7 +164,7 @@ one of the termination criteria is reached.
 \note The connection to tune and the neuron group for which a target firing rate are found do not have to be associated
 with each other.
 \see \ref ch10_ecj
-\see \ref tut4_simple_weight_tuner
+\see \ref tut6_simple_weight_tuner
 \since v3.0
 
 

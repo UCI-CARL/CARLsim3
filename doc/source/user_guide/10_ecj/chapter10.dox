@@ -112,7 +112,7 @@ encourage CARLsim users to make use of the ECJ tutorials and the fantastic manua
 the <a href="http://cs.gmu.edu/~eclab/projects/ecj/">ECJ website</a>.
 
 In general, to use the CARLsim-ECJ PTI, users will create an SNN modeled after the tutorial program found
-in \ref tut5_pti.  This program is responsible for reading a collection of parameters, instantiating a number of neural
+in \ref tut7_pti.  This program is responsible for reading a collection of parameters, instantiating a number of neural
  networks, executing them, and returning information about the behavior of each parameterized network (typically a 
 scalar fitness value).
 
@@ -243,7 +243,7 @@ outputStream << fitness[i] << endl;
 }
 \endcode
 
-\see \ref tut5_pti
+\see \ref tut7_pti
 
 \since v3.0
 
