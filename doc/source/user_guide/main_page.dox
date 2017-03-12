@@ -16,7 +16,8 @@ Richert et al., 2011).
 The functionality of the simulator has been greatly expanded by the addition of a number of features
 that enable and simplify the creation, tuning, and simulation of complex networks with spatial structure.
 
-All software is available on the
+CARLsim 3 is available on GitHub: <a href="https://github.com/UCI-CARL/CARLsim3">github.com/UCI-CARL/CARLsim3</a>.
+More information can also be found on the 
 <a href="http://www.socsci.uci.edu/~jkrichma/CARLsim/index.html" target="_blank"><b>CARL Website</b></a>.
 
 New features include:
