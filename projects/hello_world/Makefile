@@ -42,7 +42,7 @@ proj_src_dir   := src
 # Include configuration file
 #------------------------------------------------------------------------------
 
-# NOTE: If your CARLsim4 installation does not reside in the default path, make
+# NOTE: If your CARLsim3 installation does not reside in the default path, make
 # sure the environment variable CARLSIM3_INSTALL_DIR is set.
 ifneq ($(CARLSIM3_INSTALL_DIR),)
 	CARLSIM3_INC_DIR  := $(CARLSIM3_INSTALL_DIR)/inc
