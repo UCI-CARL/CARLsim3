@@ -15,7 +15,7 @@
 
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
-GTEST_DIR = /opt/gtest
+GTEST_DIR = ../../../external/googletest/
 
 # Our local, project-specific compilation of Google Test
 GTEST_LIB_DIR = lib
@@ -24,7 +24,8 @@ GTEST_LIB_DIR = lib
 USER_DIR = $(GTEST_DIR)/samples
 
 # pti test code.
-pti_dir = ../../src/CARLsim-app/pti
+pti_dir = ../src
+pti_inc_dir = ../inc
 
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
@@ -49,7 +50,7 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 # location of .cpp files
 vpath %.cpp $(pti_dir)
 # location of .h files
-vpath %.h $(pti_dir)
+vpath %.h $(pti_inc_dir)
 
 all:
 
