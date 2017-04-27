@@ -1,17 +1,18 @@
 ##----------------------------------------------------------------------------##
 ##
-##   CARLsim3 Project Makefile
+##   CARLsim3 CARLsim-ECJ PTI interface Makefile
 ##   -------------------------
 ##
-##   Authors:   Michael Beyeler <mbeyeler@uci.edu>
+##   Authors:   Eric Scott <escott8@gmu.edu>
 ##              Kristofor Carlson <kdcarlso@uci.edu>
+##		Michael Beyeler <mbeyeler@uci.edu>
 ##
 ##   Institute: Cognitive Anteater Robotics Lab (CARL)
 ##              Department of Cognitive Sciences
 ##              University of California, Irvine
 ##              Irvine, CA, 92697-5100, USA
 ##
-##   Version:   03/04/2017
+##   Version:   04/27/2017
 ##
 ##----------------------------------------------------------------------------##
 

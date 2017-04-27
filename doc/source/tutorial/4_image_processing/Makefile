@@ -43,7 +43,7 @@ proj_src_dir   := .
 # Include configuration file
 #------------------------------------------------------------------------------
 
-# NOTE: If your CARLsim4 installation does not reside in the default path, make
+# NOTE: If your CARLsim3 installation does not reside in the default path, make
 # sure the environment variable CARLSIM3_INSTALL_DIR is set.
 ifneq ($(CARLSIM3_INSTALL_DIR),)
 	CARLSIM3_INC_DIR  := $(CARLSIM3_INSTALL_DIR)/inc
@@ -93,9 +93,9 @@ distclean:
 	$(RM) $(distclean_files)
 
 help:
-	$(info CARLsim4 Test Suite options:)
+	$(info CARLsim3 tutorial options:)
 	$(info )
-	$(info make               Compiles test suite
+	$(info make               Compiles tutorial code
 	$(info make clean         Cleans out all object files)
 	$(info make distclean     Cleans out all object and output files)
 	$(info make help          Brings up this message)

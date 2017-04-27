@@ -104,9 +104,9 @@ distclean:
 	$(RM) $(distclean_files)
 
 help:
-	$(info CARLsim4 Test Suite options:)
+	$(info CARLsim3 example options:)
 	$(info )
-	$(info make               Compiles test suite
+	$(info make               Compiles model
 	$(info make clean         Cleans out all object files)
 	$(info make distclean     Cleans out all object and output files)
 	$(info make help          Brings up this message)

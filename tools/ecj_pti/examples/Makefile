@@ -1,9 +1,10 @@
 ##----------------------------------------------------------------------------##
 ##
-##   CARLsim3 Project Makefile
+##   CARLsim3 CARLsim-ECJ PTI interface examples Makefile
 ##   -------------------------
 ##
-##   Authors:   Michael Beyeler <mbeyeler@uci.edu>
+##   Authors:   Eric Scott <escott8@gmu.edu>
+##		Michael Beyeler <mbeyeler@uci.edu>
 ##              Kristofor Carlson <kdcarlso@uci.edu>
 ##
 ##   Institute: Cognitive Anteater Robotics Lab (CARL)
@@ -67,8 +68,8 @@ clean:
 	$(RM) $(clean_files)
 
 help:
-	$(info CARLsim-ECJ Makefile options:)
+	$(info CARLsim-ECJ PTI examples Makefile options:)
 	$(info )
-	$(info make	       Compiles $(lib_name) and CARLsim-ECJ.jar)
+	$(info make	       Compiles all examples)
 	$(info make clean	 Cleans out all compiled files)
 	$(info make help	  Brings up this message)
