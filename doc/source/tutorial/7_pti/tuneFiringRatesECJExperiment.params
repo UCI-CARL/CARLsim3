@@ -55,7 +55,7 @@ quit-on-run-complete = true
 eval.problem.objective.idealFitnessValue = 0.333
 eval.problem =                          ecjapp.eval.problem.CommandProblem
 eval.problem.objective =                ecjapp.eval.problem.objective.StringToDoubleObjective
-eval.problem.simulationCommand =        $carlsim_tuneFiringRatesECJ
+eval.problem.simulationCommand =        $tuneFiringRatesECJ
 
 # Output statistics options
 # =========================

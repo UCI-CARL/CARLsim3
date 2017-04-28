@@ -24,6 +24,8 @@
 # Name of the binary file to be created.
 # NOTE: There must be a corresponding .cpp file named main_$(proj_target).cpp!
 proj_target    := tuneFiringRatesECJ
+launcher_target := launchCARLsimECJ.sh
+ecj_param_file := tuneFiringRatesECJExperiment.params
 
 # Directory where all include files reside. The Makefile will automatically
 # detect and include all .h files within that directory.
@@ -53,6 +55,9 @@ endif
 # include compile flags etc.
 include $(CARLSIM3_INC_DIR)/configure.mk
 
+pti_lib_path := $(ECJ_PTI_DIR)/lib/
+pti_lib := -lCARLsimPTI
+pti_inc_path := $(ECJ_PTI_DIR)/inc/
 
 #------------------------------------------------------------------------------
 # Build local variables
@@ -76,7 +81,7 @@ obj_files  := $(obj_cpp) $(obj_cu)
 endif
 
 # handled by clean and distclean
-clean_files := $(obj_files) $(proj_target)
+clean_files := $(obj_files) $(proj_target) $(launcher_target)
 distclean_files := $(clean_files) results/* *.dot *.dat *.csv *.log
 
 
@@ -85,17 +90,22 @@ distclean_files := $(clean_files) results/* *.dot *.dat *.csv *.log
 #------------------------------------------------------------------------------
 
 .PHONY: $(proj_target) clean distclean help
-default: $(proj_target)
-
+default: $(proj_target) $(launcher_target)
 
 $(proj_target): $(main_src_file) $(inc_files) $(obj_files)
-	$(NVCC) $(CARLSIM3_FLG) $(obj_files) $< -o $@ $(CARLSIM3_LIB)
+	$(NVCC) $(CARLSIM3_FLG) -I$(pti_inc_path) -L$(pti_lib_path) $(obj_files) $< -o $@ $(CARLSIM3_LIB) $(pti_lib)
+
+# create executable bash script for user to run
+$(launcher_target): $(proj_target)
+	@echo "#!/bin/bash" > $(launcher_target)
+	@echo "java -cp \"$(ECJ_JAR):$(ECJ_PTI_DIR)/lib/CARLsim-ECJ.jar\" ecjapp.CARLsimEC -file ./$(ecj_param_file)" >> $(launcher_target)
+	@chmod u+x $(launcher_target)
 
 $(proj_src_dir)/%-cpp.o: $(proj_src_dir)/%.cpp $(inc_files)
-	$(CXX) -c $(CXXINCFL) $(CXXFL) $< -o $@
+	$(CXX) -c $(CXXINCFL) $(CXXFL) -I$(pti_inc_path) $< -o $@
 
 $(proj_src_dir)/%-cu.o: $(proj_src_dir)/%.cu $(inc_files)
-	$(NVCC) -c $(NVCCINCFL) $(SIMINCFL) $(NVCCFL) $< -o $@
+	$(NVCC) -c $(NVCCINCFL) $(SIMINCFL) $(NVCCFL) -I$(pti_inc_path) $< -o $@
 
 clean:
 	$(RM) $(clean_files)
