@@ -25,7 +25,7 @@
 # NOTE: There must be a corresponding .cpp file named main_$(proj_target).cpp!
 proj_target    := tuneFiringRatesECJ
 launcher_target := launchCARLsimECJ.sh
-ecj_param_file := tuneFiringRatesECJExperiment.params
+ecj_param_file := src/tuneFiringRatesECJExperiment.params
 
 # Directory where all include files reside. The Makefile will automatically
 # detect and include all .h files within that directory.
