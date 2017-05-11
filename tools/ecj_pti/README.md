@@ -14,26 +14,32 @@ in our [User Guide](https://uci-carl.github.io/CARLsim3/ch10_ecj.html).
 Mac OS X and Linux are the only supported platforms at this time.
 
 In brief:
--# Make sure you have a C++ compiler, a recent Java SDK (7 or higher), and Ant 1.8 or higher installed.
--# Install CARLsim3.  Instructions are found in the CARLsim3 README file, or 
+
+1. Make sure you have a C++ compiler, a recent Java SDK (7 or higher), and Ant 1.8 or higher installed.
+
+2. Install CARLsim3.  Instructions are found in the CARLsim3 README file, or 
 the [User's Guide](https://uci-carl.github.io/CARLsim3/ch1_getting_started.html).
  - If you installed %CARLsim into a non-default location, make sure your <tt>CARLSIM3_INSTALL_DIR</tt> 
 environment variable points to the root directory of the %CARLsim installation.
--# Ensure that the Jar file for ECJ version 23 or higher is installed.
+
+3. Ensure that the Jar file for ECJ version 23 or higher is installed.
   - You can download the latest stable release of ECJ from https://cs.gmu.edu/~eclab/projects/ecj/
   - By default, CARLsim-ECJ assumes that ECJ will be installed to <tt>/opt/ecj/jar/ecj.23.jar</tt>. 
 If the path to your ECJ installation is different, you'll want to customize the <tt>ECJ_DIR</tt> 
 environment variable of your CARLsim3 <tt>configure.mk</tt> file (this can be found in your 
 CARLsim3 installation's include directory).
--# Consider your options: By default, the CARLsim-ECJ PTI library lives in 
+
+4. Consider your options: By default, the CARLsim-ECJ PTI library lives in 
 <tt>/opt/CARL/carlsim_ecj_pti/</tt>.  You can override this by customizing the <tt>ECJ_PTI_DIR</tt> 
 variable in your <tt>configure.mk</tt>.
--# Make and install:
+
+5. Make and install:
 ```bash
  $ make
  $ sudo make install
 ```
--# If you have already installed `gtest` in the CARLsim3 source tree, you can run the unit tests for 
+
+6. If you have already installed `gtest` in the CARLsim3 source tree, you can run the unit tests for 
 CARLsim-ECJ PTI's C++ components like so:
 ```bash
  $ cd test
