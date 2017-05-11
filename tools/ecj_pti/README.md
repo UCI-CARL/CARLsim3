@@ -1,64 +1,53 @@
-README for CARLsim-ECJ Project
--------------------------------------------------------------------------------
+# CARLsim-ECJ Parameter Tuning Interface (PTI)
 
-Here are some notes for the CARLsim-ECJ Project.
+The CARLsim-ECJ PTI is a small library that allows you to use the ECJ evolutionary computation 
+toolkit to tune the parameter of SNN models built with CARLsim3.
 
-### SOURCE CODE DIRECTORY DESCRIPTION
-
-<pre>
-  Main
-directory
-    ├── AUTHORS
-    ├── C++.gitignore
-    ├── README.md
-    ├── src
-    │   └── ecjapp
-    │       ├── CARLsimEC.java
-    │       ├── eval
-    │       │   ├── problem
-    │       │   │   ├── CARLsimController.java
-    │       │   │   ├── CARLsimProblem.java
-    │       │   │   ├── PopulationToFile.java
-    │       │   │   └── RemoteLoginInfo.java
-    │       │   ├── SimpleGroupedEvaluator.java
-    │       │   └── SimpleGroupedProblemForm.java
-    │       └── util
-    │           ├── Misc.java
-    │           └── Option.java
-    └── test
-    	├── CARLsim-app
-    	│   └── Makefile
-    	└── ecjapp
-            ├── doubles
-            │   ├── TestIndividual.java
-            │   ├── TestSimpleGroupedProblem.java
-            │   └── TestSimpleProblem.java
-            ├── eval
-            │   └── SimpleGroupedEvaluatorTest.java
-            ├── PopulationToFileTest.java
-            └── util
-            	└── MiscTest.java
-</pre>
+This is an optionally auxiliary library.  It is not installed by default with CARLsim3, but you 
+must have CARLsim3 install in order to use the PTI.
 
 
-* Main directory - contains the Makefile, documentation files, and other
-directories.
+## Installation
 
-* src - contains source code for both the ECJ component (found in ecjapp)
-and the CARLsim component.
+Detailed instructions for installing the CARLsim-ECJ PTI on can be found 
+in our [User Guide](https://uci-carl.github.io/CARLsim3/ch10_ecj.html).  
+Mac OS X and Linux are the only supported platforms at this time.
 
-* test - contains testing code for both the ECJ and CARLsim components.
-The CARLsim testing framework code is found in test/CARLsim-app while
-the ECJ testing framework code is found in test/ecjapp.
+In brief:
+-# Make sure you have a C++ compiler, a recent Java SDK (7 or higher), and Ant 1.8 or higher installed.
+-# Install CARLsim3.  Instructions are found in the CARLsim3 README file, or 
+the [User's Guide](https://uci-carl.github.io/CARLsim3/ch1_getting_started.html).
+ - If you installed %CARLsim into a non-default location, make sure your <tt>CARLSIM3_INSTALL_DIR</tt> 
+environment variable points to the root directory of the %CARLsim installation.
+-# Ensure that the Jar file for ECJ version 23 or higher is installed.
+  - You can download the latest stable release of ECJ from https://cs.gmu.edu/~eclab/projects/ecj/
+  - By default, CARLsim-ECJ assumes that ECJ will be installed to <tt>/opt/ecj/jar/ecj.23.jar</tt>. 
+If the path to your ECJ installation is different, you'll want to customize the <tt>ECJ_DIR</tt> 
+environment variable of your CARLsim3 <tt>configure.mk</tt> file (this can be found in your 
+CARLsim3 installation's include directory).
+-# Consider your options: By default, the CARLsim-ECJ PTI library lives in 
+<tt>/opt/CARL/carlsim_ecj_pti/</tt>.  You can override this by customizing the <tt>ECJ_PTI_DIR</tt> 
+variable in your <tt>configure.mk</tt>.
+-# Make and install:
+```bash
+ $ make
+ $ sudo make install
+```
+-# If you have already installed `gtest` in the CARLsim3 source tree, you can run the unit tests for 
+CARLsim-ECJ PTI's C++ components like so:
+```bash
+ $ cd test
+ $ make
+ $ ./pti_test
+```
 
-### Using the CARLsim testing framework
+## Using the PTI
 
-CARLsim uses the googletest framework v1.7 for testing. For more information
-on googltest please visit the website at https://code.google.com/p/googletest/.
-For a quick primer, visit: https://code.google.com/p/googletest/wiki/Primer.
+A discussion of how to use CARLsim3 with ECJ can be found in the 
+[PTI tutorial](https://uci-carl.github.io/CARLsim3/tut7_pti.html), and a complete 
+description of the features we've added to ECJ is found in the 
+[User's Guide](https://uci-carl.github.io/CARLsim3/ch10_ecj.html).
 
-To use the googletest framework, you must first download googletests and
-point to the googletest directory. One must link to the correct library (either
-gtest.a or gtest_main.a) and include the correct headers during compilation.
-Please see the test/CARLsim-app/Makefile for examples of how to compile your
-tests.
+For any other questions on buildind and using evolutionary algorithms with ECJ,
+we refer you https://cs.gmu.edu/~eclab/projects/ecj/, and especially to the 
+excellent [ECJ Manual](https://cs.gmu.edu/~eclab/projects/ecj/docs/manual/manual.pdf).
