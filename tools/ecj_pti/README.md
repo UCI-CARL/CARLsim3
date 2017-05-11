@@ -4,7 +4,7 @@ The CARLsim-ECJ PTI is a small library that allows you to use the ECJ evolutiona
 toolkit to tune the parameter of SNN models built with CARLsim3.
 
 This is an optionally auxiliary library.  It is not installed by default with CARLsim3, but you 
-must have CARLsim3 install in order to use the PTI.
+must have CARLsim3 installed in order to use the PTI.
 
 
 ## Installation
