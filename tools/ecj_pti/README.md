@@ -19,8 +19,8 @@ In brief:
 
 2. Install CARLsim3.  Instructions are found in the CARLsim3 README file, or 
 the [User's Guide](https://uci-carl.github.io/CARLsim3/ch1_getting_started.html).
-   - If you installed %CARLsim into a non-default location, make sure your <tt>CARLSIM3_INSTALL_DIR</tt> 
-environment variable points to the root directory of the %CARLsim installation.
+   - If you installed CARLsim into a non-default location, make sure your <tt>CARLSIM3_INSTALL_DIR</tt> 
+environment variable points to the root directory of the CARLsim installation.
 
 3. Ensure that the Jar file for ECJ version 23 or higher is installed.
     - You can download the latest stable release of ECJ from https://cs.gmu.edu/~eclab/projects/ecj/
