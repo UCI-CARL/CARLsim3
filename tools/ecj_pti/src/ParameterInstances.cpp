@@ -31,7 +31,7 @@ namespace CARLsim_PTI {
                 // Determine which subPopulation this individual belongs to
                 if (firstColumnIsSubPopulation) {
                     std::string subPop = strLine.substr(0, strLine.find(','));
-                    subPopulations.push_back(stoi(subPop));
+                    subPopulations.push_back(atoi(subPop.c_str()));
                 }
                 else
                     subPopulations.push_back(0);

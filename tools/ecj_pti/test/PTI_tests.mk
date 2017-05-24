@@ -8,7 +8,7 @@ output_files += $(patsubst %.o,%.gcno,$(pti_objs))
 
 gtest_deps = $(GTEST_LIB_DIR)/libgtest.a $(GTEST_LIB_DIR)/libgtest_main.a \
 	$(GTEST_LIB_DIR)/libgtest_custom_main.a
-local_objs := LoggerTest.o ParameterInstancesTest.o PTITest.o
+local_objs := ParameterInstancesTest.o PTITest.o
 
 pti_test: $(local_objs) $(pti_objs) $(gtest_deps)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread -L$(GTEST_LIB_DIR) \
@@ -16,7 +16,7 @@ pti_test: $(local_objs) $(pti_objs) $(gtest_deps)
 
 # recipe to build individual test component .cpp files
 %.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(pti_dir) -c $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(pti_inc_dir) -c $< -o $@
 
 $(GTEST_LIB_DIR)/libgtest_custom_main.a: $(GTEST_LIB_DIR)/gtest-all.o \
 	$(GTEST_LIB_DIR)/gtest_custom_main.o

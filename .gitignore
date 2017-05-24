@@ -22,3 +22,6 @@
 *~
 *.desktop
 *.desktop.lock
+/tools/ecj_pti/src/java/nbproject/private/
+/tools/ecj_pti/src/java/dist/
+/tools/ecj_pti/src/java/build/

@@ -49,7 +49,7 @@ namespace CARLsim_PTI {
 				float inhError[indiNum];
 				float fitness[indiNum];
 				/** construct a CARLsim network on the heap. */
-				CARLsim* const network = new CARLsim("tuneFiringRatesECJ", GPU_MODE, SILENT);
+				CARLsim* const network = new CARLsim("tuneFiringRatesECJ", CPU_MODE, SILENT);
 
 				for(unsigned int i = 0; i < parameters.getNumInstances(); i++) {
 					/** Decode a genome*/

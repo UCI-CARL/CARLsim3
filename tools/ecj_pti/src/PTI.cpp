@@ -48,7 +48,7 @@ namespace CARLsim_PTI {
         static bool getFlagArgument(const char * const flag, const int argc, const char * const argv[]) {
             assert(flag != NULL);
             assert(argc >= 0);
-            assert(argv != NULL);
+            assert(!(argc > 0 && argv == NULL));
             for (int i = 0; i < argc; i++) {
                 if (0 == strcmp(flag, argv[i]))
                     return true;
