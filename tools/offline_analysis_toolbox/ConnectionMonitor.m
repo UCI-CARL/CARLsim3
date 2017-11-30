@@ -389,7 +389,8 @@ classdef ConnectionMonitor < handle
 			% reset abort flag, set up callback for key press events
 			if obj.plotInteractiveMode
 				obj.plotAbortPlotting = false;
-				set(gcf,'KeyPressFcn',@obj.pauseOnKeyPressCallback)
+				% set(gcf,'KeyPressFcn',@obj.pauseOnKeyPressCallback)
+				set(gcf,'KeyPressFcn',@(~,eventData) obj.pauseOnKeyPressCallback(-1, eventData))
 			end
 			
 			% load data and reshape for plotting
