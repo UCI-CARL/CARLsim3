@@ -372,8 +372,9 @@ classdef NetworkMonitor < handle
             
             % reset abort flag, set up callback for key press events
             obj.plotAbortPlotting = false;
-            set(gcf,'KeyPressFcn',@obj.ntwMonOnKeyPressCallback)
-            
+            % set(gcf,'KeyPressFcn',@obj.ntwMonOnKeyPressCallback)
+            set(gcf, 'KeyPressFcn', @(~, eventData) obj.ntwMonOnKeyPressCallback(-1, eventData))
+
             % display frames in specified axes
             grpNames = obj.groupNames;
             set(gcf,'color',obj.plotBgColor);
@@ -982,11 +983,11 @@ classdef NetworkMonitor < handle
                             'with right arrow key, step backward with ' ...
                             'left arrow key.']);
                     end
-                case 'leftarrow'
+                case {'leftarrow', 'left'}
                     if obj.plotStepFrames
                         obj.plotStepFramesBW = true;
                     end
-                case 'rightarrow'
+                case {'rightarrow', 'right'}
                     if obj.plotStepFrames
                         obj.plotStepFramesFW = true;
                     end
