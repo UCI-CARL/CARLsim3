@@ -115,7 +115,14 @@ NVCCFL          += -D__CUDA$(NVCC_MAJOR_NUM)__
 # CUDA code generation flags
 GENCODE_SM20       := -gencode arch=compute_20,code=sm_20
 GENCODE_SM30       := -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=\"sm_35,compute_35\"
-NVCCFL          += $(GENCODE_SM20) $(GENCODE_SM30)
+
+# cuda 9 doesn't support compute20
+ifeq ($(NVCC_MAJOR_NUM),9)
+	NVCCFL          += $(GENCODE_SM30)
+else
+	NVCCFL          += $(GENCODE_SM20) $(GENCODE_SM30)
+endif
+
 NVCCFL          += -Wno-deprecated-gpu-targets
 
 # OS-specific build flags
