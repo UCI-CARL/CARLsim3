@@ -397,10 +397,9 @@ classdef ConnectionMonitor < handle
 			obj.loadDataForPlotting(plotType);
 			
 			% display frame in specified axes
-			% use a while loop instead of a for loop so that we can
-			% implement stepping backward
+			% use a infinite while loop so plot doesn't close until user wants
+			% it to be closed
 			idx = 1;
-			% while idx <= numel(frames)+1
 			while true
 				if obj.plotInteractiveMode && obj.plotAbortPlotting
 					% user pressed button to quit plotting
@@ -409,21 +408,12 @@ classdef ConnectionMonitor < handle
 					return
 				end
 				
-				if idx <= numel(frames)
-					% plot the frame
-					obj.plotFrame(frames(idx), plotType, neurons, obj.plotDispFrameNr);
-					drawnow 
-				end
+				% plot the frame
+				obj.plotFrame(frames(idx), plotType, neurons, obj.plotDispFrameNr);
+				drawnow 
 				
 				% in interactive mode, key press events are active
 				if obj.plotInteractiveMode
-					% if idx==numel(frames)+1
-					% 	try
-					% 		waitforbuttonpress;
-					% 	catch
-					% 	end
-					% 	idx = idx + 1; % needed to exit
-				
 					if obj.plotStepFrames
 						% stepping mode: wait for user input
 						while ~obj.plotAbortPlotting ...
