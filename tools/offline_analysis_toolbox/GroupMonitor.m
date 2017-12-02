@@ -298,7 +298,7 @@ classdef GroupMonitor < handle
             % reset abort flag, set up callback for key press events
             if obj.plotInteractiveMode
                 obj.plotAbortPlotting = false;
-                set(gcf,'KeyPressFcn',@obj.pauseOnKeyPressCallback)
+                set(gcf,'KeyPressFcn',@(~,eventData) obj.pauseOnKeyPressCallback(-1, eventData))
             end
             
             % load data and reshape for plotting if necessary
@@ -1024,7 +1024,7 @@ classdef GroupMonitor < handle
 			% disable backtracing for warnings and errors
 			warning off backtrace
         end
-        
+
         function pauseOnKeyPressCallback(obj,~,eventData)
             % Callback function to pause plotting
             switch eventData.Key
@@ -1041,11 +1041,11 @@ classdef GroupMonitor < handle
                             'with right arrow key, step backward with ' ...
                             'left arrow key.']);
                     end
-                case 'leftarrow'
+                case {'leftarrow', 'left'}
                     if obj.plotStepFrames
                         obj.plotStepFramesBW = true;
                     end
-                case 'rightarrow'
+                case {'rightarrow', 'right'}
                     if obj.plotStepFrames
                         obj.plotStepFramesFW = true;
                     end

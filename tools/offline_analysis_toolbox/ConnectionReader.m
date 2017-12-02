@@ -335,7 +335,7 @@ classdef ConnectionReader < handle
             end
             
             % read isPlastic
-            obj.isPlastic = fread(obj.fileId, 1, 'bool');
+            obj.isPlastic = fread(obj.fileId, 1, 'int8');
 
             % read minWt and maxWt
             obj.minWt = fread(obj.fileId, 1, 'float32');
