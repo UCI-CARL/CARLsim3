@@ -30,7 +30,7 @@ proj_src_dir   := src
 
 # Name of the library file to be created.
 lib_name := libCARLsimPTI.a
-jar_target := $(proj_src_dir)/java/dist/CARLSim-ECJ.jar
+jar_target := $(proj_src_dir)/java/dist/CARLsim-ECJ.jar
 
 
 ################################################################################
