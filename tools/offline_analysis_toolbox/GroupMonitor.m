@@ -308,56 +308,57 @@ classdef GroupMonitor < handle
             % use a while loop instead of a for loop so that we can
             % implement stepping backward
             idx = 1;
-			while idx <= numel(frames)
-				if obj.plotInteractiveMode && obj.plotAbortPlotting
-					% user pressed button to quit plotting
-					close;
-					return;
-				end
-				
-				% plot the frame
-				obj.plotFrame(frames(idx), plotType, binWindowMs, ...
-					obj.plotDispFrameNr);
-				drawnow
-				
-				% in interactive mode, key press events are active
-				if obj.plotInteractiveMode
-					if idx>=numel(frames)
-						waitforbuttonpress;
-						close;
-						return;
-					else
-						if obj.plotStepFrames
-							% stepping mode: wait for user input
-							while ~obj.plotAbortPlotting ...
-									&& ~obj.plotStepFramesFW ...
-									&& ~obj.plotStepFramesBW
-								pause(0.1)
-							end
-							if obj.plotStepFramesBW
-								% step one frame backward
-								idx = max(1, idx-1);
-							else
-								% step one frame forward
-								idx = idx + 1;
-							end
-							obj.plotStepFramesBW = false;
-							obj.plotStepFramesFW = false;
-						else
-							% wait according to frames per second, then
-							% step forward
-							pause(1.0/obj.plotFPS)
-							idx = idx + 1;
-						end
-					end
-				else
-					% wait according to frames per second, then
-					% step forward
-					pause(1.0/obj.plotFPS)
-					idx = idx + 1;
-				end
-			end
-		end
+            while true
+                if obj.plotInteractiveMode && obj.plotAbortPlotting
+                    % user pressed button to quit plotting
+                    obj.plotAbortPlotting = false;
+                    close;
+                    return
+                end
+                
+                % plot the frame
+                obj.plotFrame(frames(idx), plotType, binWindowMs, ...
+                    obj.plotDispFrameNr);
+                drawnow
+                                
+                % in interactive mode, key press events are active
+                if obj.plotInteractiveMode
+                    if obj.plotStepFrames
+                        % stepping mode: wait for user input
+                        while ~obj.plotAbortPlotting ...
+                                && ~obj.plotStepFramesFW ...
+                                && ~obj.plotStepFramesBW ...
+                                && obj.plotStepFrames
+                            pause(0.1)
+                        end
+                        if obj.plotStepFramesBW
+                            % step one frame backward
+                            idx = max(1, idx-1);
+                        else
+                            % step one frame forward
+                            idx = min(numel(frames), idx + 1);
+                        end
+                        obj.plotStepFramesBW = false;
+                        obj.plotStepFramesFW = false;
+                    else
+                        % wait according to frames per second, then
+                        % step forward
+                        pause(1.0/obj.plotFPS)
+                        idx = min(numel(frames), idx + 1);
+                    end
+                else
+                    % wait according to frames per second, then
+                    % step forward
+                    pause(1.0/obj.plotFPS)
+                    if idx <= numel(frames)
+                        idx = idx + 1;
+                    else
+                        break;
+                    end
+                end
+            end
+            if obj.plotInteractiveMode,close all;end
+        end
         
         function recordMovie(obj, fileName, plotType, frames, binWindowMs, fps, winSize)
             % GM.recordMovie(fileName, frames, frameDur, fps, winSize)
